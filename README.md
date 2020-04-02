@@ -1,7 +1,7 @@
 # user-theme-x
 Load custom gnome-shell.css to override user theme.
 
-*Note* The extension is conflicted with [user-theme], whose [uuid] hard-coded in gnome-tweaks.
+*Note* The extension is conflicted with [user-theme], whose [uuid] is hard-coded in gnome-tweaks.
 
 ## Usage:
 1. copy `user-theme@gnome-shell-extensions.gcampax.github.com` to `~/.local/share/gnome-shell/extensions/`;
