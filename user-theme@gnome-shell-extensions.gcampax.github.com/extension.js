@@ -7,7 +7,11 @@ const { Gio, GLib, St } = imports.gi;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Main = imports.ui.main;
 
+const Me = ExtensionUtils.getCurrentExtension();
+const Util = Me.imports.util;
+
 const SETTINGS_KEY = 'name';
+const ENABLE_USER_STYLESHEET = 'stylesheet';
 
 class ThemeManager {
     constructor() {
@@ -15,7 +19,7 @@ class ThemeManager {
     }
 
     enable() {
-        this._changedId = this._settings.connect(`changed::${SETTINGS_KEY}`, this._changeTheme.bind(this));
+        this._changedId = this._settings.connect('changed', this._changeTheme.bind(this));
         this._changeTheme();
     }
 
@@ -34,13 +38,8 @@ class ThemeManager {
         let themeName = this._settings.get_string(SETTINGS_KEY);
 
         if (themeName) {
-            let stylesheetPaths = [
-                [GLib.get_home_dir(), '.themes'],
-                [GLib.get_user_data_dir(), 'themes'],
-                ...GLib.get_system_data_dirs().map(dir => [dir, 'themes']),
-            ].map(themeDir => GLib.build_filenamev([
-                ...themeDir, themeName, 'gnome-shell', 'gnome-shell.css',
-            ]));
+            const stylesheetPaths = Util.getThemeDirs()
+                .map(dir => `${dir}/${themeName}/gnome-shell/gnome-shell.css`);
 
             stylesheet = stylesheetPaths.find(path => {
                 let file = Gio.file_new_for_path(path);
@@ -53,7 +52,7 @@ class ThemeManager {
         else
             global.log('loading default theme (Adwaita)');
         Main.setThemeStylesheet(stylesheet);
-        this._loadTheme();
+        this._settings.get_boolean(ENABLE_USER_STYLESHEET) ? this._loadTheme() : Main.loadTheme();
     }
 
     _loadTheme() {
@@ -61,7 +60,7 @@ class ThemeManager {
         let myStylesheet = myStylesheetPath ? Gio.file_new_for_path(myStylesheetPath) : null;
 
         let themeContext = St.ThemeContext.get_for_stage(global.stage);
-        let oldTheme = themeContext.get_theme();
+        let privousTheme = themeContext.get_theme();
 
         let theme = new St.Theme({
             application_stylesheet : myStylesheet,
@@ -72,8 +71,8 @@ class ThemeManager {
         if (theme.default_stylesheet === null)
             throw new Error("No valid stylesheet found for '%s'".format(Main.sessionMode.stylesheetName));
 
-        if (oldTheme) {
-            let customStylesheets = oldTheme.get_custom_stylesheets();
+        if (privousTheme) {
+            let customStylesheets = privousTheme.get_custom_stylesheets();
             for (let i = 0; i < customStylesheets.length; i++)
                 theme.load_stylesheet(customStylesheets[i]);
         }
