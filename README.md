@@ -1,5 +1,5 @@
 # user-theme-x
-Load custom gnome-shell.css to override user theme.
+Load custom stylesheet to override user theme.
 
 *Note* The extension is conflicted with [user-theme], ~~whose [uuid] hard-coded in gnome-tweaks,~~ but it seems to be an independent extension now.
 
