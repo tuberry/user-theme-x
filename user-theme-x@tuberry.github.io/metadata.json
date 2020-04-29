@@ -1,0 +1,16 @@
+{
+  "description": "Customizable user-theme with user stylesheet and night theme/icon autoswitch support",
+  "extension-id": "user-theme-x",
+  "gettext-domain": "user-theme-x",
+  "name": "User Themes X",
+  "original-authors": [
+    "john.stowers@gmail.com"
+  ],
+  "settings-schema": "org.gnome.shell.extensions.user-theme",
+  "shell-version": [
+    "3.36"
+  ],
+  "url": "https://github.com/tuberry/user-theme-x",
+  "uuid": "user-theme-x@tuberry.github.io",
+  "version": 1
+}

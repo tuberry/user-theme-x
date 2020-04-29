@@ -1,0 +1,39 @@
+<schemalist gettext-domain="gnome-shell-extensions">
+  <schema id="org.gnome.shell.extensions.user-theme" path="/org/gnome/shell/extensions/user-theme/">
+    <key name="name" type="s">
+      <default>""</default>
+      <summary>Theme name</summary>
+      <description>The name of the theme, to be loaded from ~/.themes/name/gnome-shell</description>
+    </key>
+    <key name="stylesheet" type="b">
+      <default>false</default>
+      <summary>user stylesheet</summary>
+      <description>Load user stylesheet from $XDG_CONFIG/gnome-shell/gnome-shell.css or not</description>
+    </key>
+    <key name="night" type="b">
+      <default>false</default>
+      <summary>night theme switch</summary>
+      <description>Auto switch gtk, shell and icon theme when Night Light is on and off</description>
+    </key>
+    <key name="theme" type="s">
+      <default>""</default>
+      <summary>gtk theme</summary>
+      <description>The gtk theme when Night Light is off</description>
+    </key>
+    <key name="theme-night" type="s">
+      <default>""</default>
+      <summary>gtk night theme</summary>
+      <description>The gtk theme when Night Light is on</description>
+    </key>
+    <key name="icons" type="s">
+      <default>""</default>
+      <summary>icon set name</summary>
+      <description>The icon set when Night Light is off</description>
+    </key>
+    <key name="icons-night" type="s">
+      <default>""</default>
+      <summary>icon set night name</summary>
+      <description>The icon set when Night Light is on</description>
+    </key>
+  </schema>
+</schemalist>
