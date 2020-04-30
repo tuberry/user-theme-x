@@ -2,6 +2,7 @@
 // by tuberry@github
 
 const { Gio, GObject } = imports.gi;
+const fileUtils = imports.misc.fileUtils;
 const Main = imports.ui.main;
 
 var Fields = {
@@ -35,7 +36,8 @@ class NightThemeSwitch extends GObject.Object {
     }
 
     _onNightLightChanged() {
-        if(ngsetting.get_boolean(Fields.NIGHTLIGHT)) {
+        if(!this._proxy || !ngsetting.get_boolean(Fields.NIGHTLIGHT)) return;
+        if(this._proxy.NightLightActive) {
             let theme = this._theme.indexOf(tgsetting.get_string(Fields.THEME));
             if(theme > -1 && this._theme_night[theme]) tgsetting.set_string(Fields.THEME, this._theme_night[theme]);
             let icons = this._icons.indexOf(tgsetting.get_string(Fields.ICONS));
@@ -52,7 +54,15 @@ class NightThemeSwitch extends GObject.Object {
         }
     }
 
+    _connectDBus() {
+        const DBusProxy = Gio.DBusProxy.makeProxyWrapper(fileUtils.loadInterfaceXML('org.gnome.SettingsDaemon.Color'));
+        this._proxy = new DBusProxy(Gio.DBus.session, 'org.gnome.SettingsDaemon.Color', '/org/gnome/SettingsDaemon/Color')
+        if(!this._proxy) throw new Error('Failed to create DBus proxy');
+        this._proxyId = this._proxy.connect('g-properties-changed', this._onNightLightChanged.bind(this));
+    }
+
     _loadSettings() {
+        this._connectDBus();
         for(let x in Tweaks)
             eval(`this.%s = sgsetting.get_string('%s') ? sgsetting.get_string('%s').split('#') : []`.format(x, Tweaks[x], Tweaks[x]));
         this._onNightLightChanged();
@@ -71,6 +81,8 @@ class NightThemeSwitch extends GObject.Object {
             ngsetting.disconnect(this._nightId), this._nightId = 0;
         if(this._themeChangedId)
             tgsetting.disconnect(this._themeChangedId), this._themeChangedId = 0;
+        if(this._proxyId)
+            this._proxy.disconnect(this._proxyId), this._proxyId = 0, this._proxy = null;
         for(let x in Tweaks) {
             eval(`if(this.%sId) sgsetting.disconnect(this.%sId), this.%sId = 0;`.format(x, x, x));
             eval(`this.%s = null`.format(x));

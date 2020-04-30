@@ -13,27 +13,27 @@
     <key name="night" type="b">
       <default>false</default>
       <summary>night theme switch</summary>
-      <description>Auto switch gtk, shell and icon theme when Night Light is on and off</description>
+      <description>Auto switch gtk, shell and icon theme when Night Light is active and inactive</description>
     </key>
     <key name="theme" type="s">
       <default>""</default>
       <summary>gtk theme</summary>
-      <description>The gtk theme when Night Light is off</description>
+      <description>The gtk theme when Night Light is inactive</description>
     </key>
     <key name="theme-night" type="s">
       <default>""</default>
       <summary>gtk night theme</summary>
-      <description>The gtk theme when Night Light is on</description>
+      <description>The gtk theme when Night Light is active</description>
     </key>
     <key name="icons" type="s">
       <default>""</default>
       <summary>icon set name</summary>
-      <description>The icon set when Night Light is off</description>
+      <description>The icon set when Night Light is inactive</description>
     </key>
     <key name="icons-night" type="s">
       <default>""</default>
       <summary>icon set night name</summary>
-      <description>The icon set when Night Light is on</description>
+      <description>The icon set when Night Light is active</description>
     </key>
   </schema>
 </schemalist>
