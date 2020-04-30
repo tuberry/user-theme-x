@@ -25,7 +25,7 @@ var Tweaks = {
     _theme_night: 'theme-night',
 };
 
-const NightThemeSwitch = GObject.registerClass(
+var NightThemeSwitch = GObject.registerClass(
 class NightThemeSwitch extends GObject.Object {
     _init() {
         super._init();
@@ -38,19 +38,33 @@ class NightThemeSwitch extends GObject.Object {
     _onNightLightChanged() {
         if(!this._proxy || !ngsetting.get_boolean(Fields.NIGHTLIGHT)) return;
         if(this._proxy.NightLightActive) {
-            let theme = this._theme.indexOf(tgsetting.get_string(Fields.THEME));
-            if(theme > -1 && this._theme_night[theme]) tgsetting.set_string(Fields.THEME, this._theme_night[theme]);
             let icons = this._icons.indexOf(tgsetting.get_string(Fields.ICONS));
             if(icons > -1 && this._icons_night[icons]) tgsetting.set_string(Fields.ICONS, this._icons_night[icons]);
-            let shell = sgsetting.get_string(Fields.SHELL);
-            if(shell && theme > -1 && this._theme_night[theme]) sgsetting.set_string(Fields.SHELL, this._theme_night[theme]);
+            let theme = tgsetting.get_string(Fields.THEME);
+            let index = this._theme.indexOf(theme);
+            if(index < 0) {
+                if(this._theme_night.includes(theme))
+                    sgsetting.set_string(Fields.SHELL, theme.includes('Adwaita') ? '' : theme);
+            } else {
+                if(this._theme_night[index]) {
+                    tgsetting.set_string(Fields.THEME, this._theme_night[index]);
+                    sgsetting.set_string(Fields.SHELL, this._theme_night[index].includes('Adwaita') ? '' : this._theme_night[index]);
+                }
+            }
         } else {
-            let theme = this._theme_night.indexOf(tgsetting.get_string(Fields.THEME));
-            if(theme > -1 && this._theme[theme]) tgsetting.set_string(Fields.THEME, this._theme[theme]);
             let icons = this._icons_night.indexOf(tgsetting.get_string(Fields.ICONS));
             if(icons > -1 && this._icons[icons]) tgsetting.set_string(Fields.ICONS, this._icons[icons]);
-            let shell = sgsetting.get_string(Fields.SHELL);
-            if(shell && theme > -1 && this._theme[theme]) sgsetting.set_string(Fields.SHELL, this._theme[theme]);
+            let theme = tgsetting.get_string(Fields.THEME);
+            let index = this._theme_night.indexOf(theme);
+            if(index < 0) {
+                if(this._theme.includes(theme))
+                    sgsetting.set_string(Fields.SHELL, theme.includes('Adwaita') ? '' : theme);
+            } else {
+                if(this._theme[index]) {
+                    tgsetting.set_string(Fields.THEME, this._theme[index]);
+                    sgsetting.set_string(Fields.SHELL, this._theme[index].includes('Adwaita') ? '' : this._theme[index]);
+                }
+            }
         }
     }
 

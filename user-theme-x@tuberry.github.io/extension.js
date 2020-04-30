@@ -22,12 +22,14 @@ class ThemeManager {
 
     enable() {
         this._changeTheme();
-        this._changedId = this._settings.connect('changed', this._changeTheme.bind(this));
+        this._changedId = this._settings.connect(`changed::${SETTINGS_KEY}`, this._changeTheme.bind(this));
+        this._styleChangedId = this._settings.connect(`changed::${STYLESHEET_KEY}`, this._changeTheme.bind(this));
         this._enableNight();
     }
 
     disable() {
-        this._disableNight()
+        this._disableNight();
+        if(this._styleChangedId) this._settings.disconnect(this._styleChangedId), this._styleChangedId = 0;
         if (this._changedId) {
             this._settings.disconnect(this._changedId);
             this._changedId = 0;
