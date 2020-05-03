@@ -43,6 +43,7 @@ class UserThemePrefsWidget extends Gtk.ScrolledWindow {
         box.add(frame);
 
         this._list = new Gtk.ListBox({
+            selection_mode: Gtk.SelectionMode.NONE,
             halign: Gtk.Align.CENTER,
             valign: Gtk.Align.START,
             hexpand: true,
