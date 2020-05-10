@@ -36,18 +36,10 @@ Set the size to 0 to *hide* the arrow in panel menu.
 }
 ```
 #### for Light Dict users
-Users of [Light Dict] may want to change the font, scrollable panel and etc:
+Users of [Light Dict] may want to change the font of panel:
 ```css
 .light-dict-content {
     font-size: 13pt;
-}
-
-.light-dict-scroll {
-    height: 600px;
-}
-
-.light-dict-button-icon {
-    icon-size: 28px;
 }
 ```
 ### Night theme auto switch

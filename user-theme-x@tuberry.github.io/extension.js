@@ -21,10 +21,10 @@ class ThemeManager {
     }
 
     enable() {
+        this._enableNight();
         this._changeTheme();
         this._changedId = this._settings.connect(`changed::${SETTINGS_KEY}`, this._changeTheme.bind(this));
         this._styleChangedId = this._settings.connect(`changed::${STYLESHEET_KEY}`, this._changeTheme.bind(this));
-        this._enableNight();
     }
 
     disable() {
@@ -81,14 +81,20 @@ class ThemeManager {
     }
 
     _loadTheme() {
-        let myStylesheetPath = GLib.build_filenamev([GLib.get_user_config_dir(), 'gnome-shell', 'gnome-shell.css']);
-        let myStylesheet = myStylesheetPath ? Gio.file_new_for_path(myStylesheetPath) : null;
+        let userStylesheet;
+        if(this._night._active && this._night._proxy.NightLightActive) {
+            userStylesheet = Gio.file_new_for_path(GLib.build_filenamev([GLib.get_user_config_dir(), 'gnome-shell', 'gnome-shell-dark.css']));
+            if(!userStylesheet.query_exists(null))
+                userStylesheet = Gio.file_new_for_path(GLib.build_filenamev([GLib.get_user_config_dir(), 'gnome-shell', 'gnome-shell.css']));
+        } else {
+            userStylesheet = Gio.file_new_for_path(GLib.build_filenamev([GLib.get_user_config_dir(), 'gnome-shell', 'gnome-shell.css']));
+        }
 
         let themeContext = St.ThemeContext.get_for_stage(global.stage);
         let privousTheme = themeContext.get_theme();
 
         let theme = new St.Theme({
-            application_stylesheet : myStylesheet,
+            application_stylesheet : userStylesheet.query_exists(null) ? userStylesheet : null,
             theme_stylesheet :  Main.getThemeStylesheet(),
             default_stylesheet : Main._getDefaultStylesheet(),
         });

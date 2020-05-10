@@ -88,6 +88,7 @@ class NightThemeSwitch extends GObject.Object {
         for(let x in Tweaks)
             eval(`this.%sId = sgsetting.connect('changed::%s', () => { this.%s = sgsetting.get_string('%s') ? sgsetting.get_string('%s').split('#') : [];});`.format(x, Tweaks[x], x, Tweaks[x], Tweaks[x]));
         this._themeChangedId = tgsetting.connect(`changed::${Fields.THEME}`, this._onNightLightChanged.bind(this));
+        this._iconsChangedId = tgsetting.connect(`changed::${Fields.ICONS}`, this._onNightLightChanged.bind(this));
     }
 
     disable() {
@@ -95,6 +96,8 @@ class NightThemeSwitch extends GObject.Object {
             ngsetting.disconnect(this._nightId), this._nightId = 0;
         if(this._themeChangedId)
             tgsetting.disconnect(this._themeChangedId), this._themeChangedId = 0;
+        if(this._iconsChangedId)
+            tgsetting.disconnect(this._iconsChangedId), this._iconsChangedId = 0;
         if(this._proxyId)
             this._proxy.disconnect(this._proxyId), this._proxyId = 0, this._proxy = null;
         for(let x in Tweaks) {
