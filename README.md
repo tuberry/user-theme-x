@@ -43,12 +43,11 @@ Users of [Light Dict] may want to change the font of panel:
 }
 ```
 ### Night theme auto switch
-Fill the blanks according to your themes in consistent one-to-one match. The gtk/shell/icons theme will be toggled automatically when Night Light is active and inactive.
+Fill the blanks according to your themes in consistent one-to-one match. The gtk/shell/icons theme will be toggled automatically when Night Light is active and inactive. Also `~/.config/gnome-shell/gnome-shell-dark.css` is supported.
 
 ![Screenshot](https://user-images.githubusercontent.com/17917040/80617887-38626280-8a75-11ea-8bcb-85566cd426e9.png)
 
 ## Acknowledgements
-
 [night-theme-switcher](https://extensions.gnome.org/extension/2236/night-theme-switcher/): the DBus proxy of Night Light.
 
 ## Note
