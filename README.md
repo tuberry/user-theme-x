@@ -12,7 +12,6 @@ Or manually:
 git clone https://github.com/tuberry/user-theme-x.git
 cp -rf ./user-theme-x/'user-theme-x@tuberry.github.io' ~/.local/share/gnome-shell/extensions/
 ```
-then restart gnome shell and enable it in Extensions or gnome-tweaks.
 
 ## Features
 ### User stylesheet
@@ -43,7 +42,7 @@ Users of [Light Dict] may want to change the font of panel:
 }
 ```
 ### Night theme auto switch
-Fill the blanks according to your themes in consistent one-to-one match. The gtk/shell/icons theme will be toggled automatically when Night Light is active and inactive. Also `~/.config/gnome-shell/gnome-shell-dark.css` is supported.
+Fill the blanks according to your themes in consistent one-to-one match. The gtk/shell/icons theme will be toggled automatically when Night Light is active and inactive. Also user stylesheet (`~/.config/gnome-shell/gnome-shell-dark.css`) switch is supported.
 
 ![Screenshot](https://user-images.githubusercontent.com/17917040/80617887-38626280-8a75-11ea-8bcb-85566cd426e9.png)
 
