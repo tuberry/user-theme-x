@@ -18,12 +18,12 @@ const NIGHTTHEME_KEY = 'night';
 class ThemeManager {
     constructor() {
         this._settings = ExtensionUtils.getSettings();
-        this._fileMonitor = Gio.file_new_for_path(GLib.build_filenamev([GLib.get_user_config_dir(), 'gnome-shell'])).monitor_directory(Gio.FileMonitorFlags.NONE, null);
     }
 
     enable() {
         this._enableNight();
         this._changeTheme();
+        this._fileMonitor = Gio.file_new_for_path(GLib.build_filenamev([GLib.get_user_config_dir(), 'gnome-shell'])).monitor_directory(Gio.FileMonitorFlags.NONE, null);
         this._fileChangedId = this._fileMonitor.connect('changed', this._changeTheme.bind(this));
         this._styleChangedId = this._settings.connect(`changed::${STYLESHEET_KEY}`, this._changeTheme.bind(this));
         this._settingChangedId = this._settings.connect(`changed::${SETTINGS_KEY}`, this._changeTheme.bind(this));
