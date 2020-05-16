@@ -1,7 +1,9 @@
 # user-theme-x
 Customizable user-theme with user stylesheet and night theme/icon autoswitch support.
+> Do not go gentle into that Dark side. <br>
+[![license]](/LICENSE)
 
-![user-theme-x](https://user-images.githubusercontent.com/17917040/80664068-5311f700-8ac8-11ea-9c8c-b228edb8a0ea.gif)
+</br>
 
 ## Installation
 [<img src="https://raw.githubusercontent.com/andyholmes/gnome-shell-extensions-badge/master/get-it-on-ego.svg?sanitize=true" alt="Get it on GNOME Extensions" height="100" align="middle">][EGO]
@@ -14,12 +16,15 @@ cp -rf ./user-theme-x/'user-theme-x@tuberry.github.io' ~/.local/share/gnome-shel
 ```
 
 ## Features
+![user-theme-x](https://user-images.githubusercontent.com/17917040/80664068-5311f700-8ac8-11ea-9c8c-b228edb8a0ea.gif)
 ### User stylesheet
 Load user stylesheet form `~/.config/gnome-shell/gnome-shell.css`, which should be created by yourself.
-
+```bash
+mkdir -p ~/.config/gnome-shell && touch ~/.config/gnome-shell/gnome-shell.css
+```
 Here are 3 examples:
 #### panel font size
-I prefer bigger font in applications but that's a little larger for panel.
+Change the font size of top panel.
 ```css
 stage {
     font-size: 13pt;
@@ -57,3 +62,4 @@ Fill the blanks according to your themes in consistent one-to-one match. The gtk
 [Light Dict]:https://github.com/tuberry/light-dict
 [user-theme]:https://extensions.gnome.org/extension/19/user-themes/
 [uuid]:https://gitlab.gnome.org/GNOME/gnome-shell-extensions/-/merge_requests/110
+[license]:https://img.shields.io/badge/license-LGPLv3-lightgreen.svg
