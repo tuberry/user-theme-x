@@ -15,6 +15,11 @@
       <summary>night theme switch</summary>
       <description>Auto switch gtk, shell and icon theme when Night Light is active and inactive</description>
     </key>
+    <key name="day-or-night" type="b">
+      <default>false</default>
+      <summary>day or night</summary>
+      <description>Indicate Night Light is active or inactive</description>
+    </key>
     <key name="theme" type="s">
       <default>""</default>
       <summary>gtk theme</summary>

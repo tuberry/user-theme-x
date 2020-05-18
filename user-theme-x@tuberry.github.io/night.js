@@ -3,22 +3,23 @@
 
 const { Gio, GObject } = imports.gi;
 const fileUtils = imports.misc.fileUtils;
-const Main = imports.ui.main;
 
-var Fields = {
-    SHELL:        'name',
-    THEME:        'gtk-theme',
-    ICONS:        'icon-theme',
-    NIGHTLIGHT:   'night-light-enabled',
-    THEMESCHEMA:  'org.gnome.desktop.interface',
-    NIGHTSCHEMA:  'org.gnome.settings-daemon.plugins.color',
+const Fields = {
+    SHELL:       'name',
+    THEME:       'gtk-theme',
+    ICONS:       'icon-theme',
+    DAYORNIGHT:  'day-or-night',
+    NIGHTLIGHT:  'night-light-enabled',
+    NIGHTCOLOR:  'org.gnome.SettingsDaemon.Color',
+    THEMESCHEMA: 'org.gnome.desktop.interface',
+    NIGHTSCHEMA: 'org.gnome.settings-daemon.plugins.color',
 };
 
 const tgsetting = new Gio.Settings({ schema: Fields.THEMESCHEMA });
 const ngsetting = new Gio.Settings({ schema: Fields.NIGHTSCHEMA });
 const sgsetting = imports.misc.extensionUtils.getSettings();
 
-var Tweaks = {
+const Tweaks = {
     _icons:       'icons',
     _theme:       'theme',
     _icons_night: 'icons-night',
@@ -29,22 +30,18 @@ var NightThemeSwitch = GObject.registerClass(
 class NightThemeSwitch extends GObject.Object {
     _init() {
         super._init();
-        this._icons = [];
-        this._icons_night = [];
-        this._theme = [];
-        this._theme_night = [];
     }
 
     _onNightLightChanged() {
         if(!this._proxy || !ngsetting.get_boolean(Fields.NIGHTLIGHT)) return;
+        sgsetting.set_boolean(Fields.DAYORNIGHT, this._proxy.NightLightActive);
         if(this._proxy.NightLightActive) {
             let icons = this._icons.indexOf(tgsetting.get_string(Fields.ICONS));
             if(icons > -1 && this._icons_night[icons]) tgsetting.set_string(Fields.ICONS, this._icons_night[icons]);
             let theme = tgsetting.get_string(Fields.THEME);
             let index = this._theme.indexOf(theme);
             if(index < 0) {
-                if(this._theme_night.includes(theme))
-                    sgsetting.set_string(Fields.SHELL, theme.includes('Adwaita') ? '' : theme);
+                if(this._theme_night.includes(theme)) sgsetting.set_string(Fields.SHELL, theme.includes('Adwaita') ? '' : theme);
             } else {
                 if(this._theme_night[index]) {
                     tgsetting.set_string(Fields.THEME, this._theme_night[index]);
@@ -57,8 +54,7 @@ class NightThemeSwitch extends GObject.Object {
             let theme = tgsetting.get_string(Fields.THEME);
             let index = this._theme_night.indexOf(theme);
             if(index < 0) {
-                if(this._theme.includes(theme))
-                    sgsetting.set_string(Fields.SHELL, theme.includes('Adwaita') ? '' : theme);
+                if(this._theme.includes(theme)) sgsetting.set_string(Fields.SHELL, theme.includes('Adwaita') ? '' : theme);
             } else {
                 if(this._theme[index]) {
                     tgsetting.set_string(Fields.THEME, this._theme[index]);
@@ -68,42 +64,39 @@ class NightThemeSwitch extends GObject.Object {
         }
     }
 
-    _connectDBus() {
-        const DBusProxy = Gio.DBusProxy.makeProxyWrapper(fileUtils.loadInterfaceXML('org.gnome.SettingsDaemon.Color'));
-        this._proxy = new DBusProxy(Gio.DBus.session, 'org.gnome.SettingsDaemon.Color', '/org/gnome/SettingsDaemon/Color')
-        if(!this._proxy) throw new Error('Failed to create DBus proxy');
-        this._proxyId = this._proxy.connect('g-properties-changed', this._onNightLightChanged.bind(this));
-    }
-
     _loadSettings() {
-        this._connectDBus();
-        for(let x in Tweaks)
+        const DBusProxy = Gio.DBusProxy.makeProxyWrapper(fileUtils.loadInterfaceXML(Fields.NIGHTCOLOR));
+        this._proxy = new DBusProxy(Gio.DBus.session, Fields.NIGHTCOLOR, '/org/gnome/SettingsDaemon/Color');
+        if(!this._proxy) throw new Error('Failed to create DBus proxy');
+        for(let x in Tweaks) {
             eval(`this.%s = sgsetting.get_string('%s') ? sgsetting.get_string('%s').split('#') : []`.format(x, Tweaks[x], Tweaks[x]));
-        this._onNightLightChanged();
+            eval(`this.%sId = sgsetting.connect('changed::%s', () => { this.%s = sgsetting.get_string('%s') ? sgsetting.get_string('%s').split('#') : [];});`.format(x, Tweaks[x], x, Tweaks[x], Tweaks[x]));
+        }
     }
 
     enable() {
         this._loadSettings();
-        this._nightId = ngsetting.connect(`changed::${Fields.NIGHTLIGHT}`, this._onNightLightChanged.bind(this));
-        for(let x in Tweaks)
-            eval(`this.%sId = sgsetting.connect('changed::%s', () => { this.%s = sgsetting.get_string('%s') ? sgsetting.get_string('%s').split('#') : [];});`.format(x, Tweaks[x], x, Tweaks[x], Tweaks[x]));
+        this._onNightLightChanged();
+        this._proxyChangedId = this._proxy.connect('g-properties-changed', this._onNightLightChanged.bind(this));
         this._themeChangedId = tgsetting.connect(`changed::${Fields.THEME}`, this._onNightLightChanged.bind(this));
         this._iconsChangedId = tgsetting.connect(`changed::${Fields.ICONS}`, this._onNightLightChanged.bind(this));
+        this._nightLightOnId = ngsetting.connect(`changed::${Fields.NIGHTLIGHT}`, this._onNightLightChanged.bind(this));
     }
 
     disable() {
-        if(this._nightId)
-            ngsetting.disconnect(this._nightId), this._nightId = 0;
+        if(this._nightLightOnId)
+            ngsetting.disconnect(this._nightLightOnId), this._nightLightOnId = 0;
         if(this._themeChangedId)
             tgsetting.disconnect(this._themeChangedId), this._themeChangedId = 0;
         if(this._iconsChangedId)
             tgsetting.disconnect(this._iconsChangedId), this._iconsChangedId = 0;
-        if(this._proxyId)
-            this._proxy.disconnect(this._proxyId), this._proxyId = 0, this._proxy = null;
+        if(this._proxyChangedId)
+            this._proxy.disconnect(this._proxyChangedId), this._proxyChangedId = 0;
         for(let x in Tweaks) {
             eval(`if(this.%sId) sgsetting.disconnect(this.%sId), this.%sId = 0;`.format(x, x, x));
             eval(`this.%s = null`.format(x));
         }
+        this._proxy = null;
     }
 });
 
