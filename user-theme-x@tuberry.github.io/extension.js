@@ -63,28 +63,22 @@ class ThemeManager {
     }
 
     _enable() {
-        Style._active = this._settings.get_boolean(STYLESHEET_KEY);
-        if(Style._active) {
-            Style.enable();
-            this._fileChangedId = Style.connect('file-changed', this._changeTheme.bind(this));
-        }
+        if(this._settings.get_boolean(STYLESHEET_KEY)) Style.enable();
+        this._fileChangedId = Style.connect('file-changed', this._changeTheme.bind(this));
         this._styleChangedId = this._settings.connect(`changed::${STYLESHEET_KEY}`, () => {
-            Style._active = this._settings.get_boolean(STYLESHEET_KEY);
-            Style._active ? Style.enable() : Style.disable();
+            this._settings.get_boolean(STYLESHEET_KEY) ? Style.enable() : Style.disable();
             this._changeTheme();
         });
 
-        Night._active = this._settings.get_boolean(NIGHTTHEME_KEY);
-        if(Night._active) Night.enable();
+        if(this._settings.get_boolean(NIGHTTHEME_KEY)) Night.enable();
         this._nightChangedId = this._settings.connect(`changed::${NIGHTTHEME_KEY}`, () => {
-            Night._active = this._settings.get_boolean(NIGHTTHEME_KEY);
-            Night._active ? Night.enable() : Night.disable();
+            this._settings.get_boolean(NIGHTTHEME_KEY) ? Night.enable() : Night.disable();
         });
     }
 
     _disable() {
-        if(Night._active) Night.disable();
-        if(Night._active) Style.disable();
+        if(this._settings.get_boolean(NIGHTTHEME_KEY)) Night.disable();
+        if(this._settings.get_boolean(STYLESHEET_KEY)) Style.disable();
         if(this._fileChangedId) Style.disconnect(this._fileChangedId), this._fileChangedId = 0;
         if(this._styleChangedId) this._settings.disconnect(this._styleChangedId), this._styleChangedId = 0;
         if(this._nightChangedId) this._settings.disconnect(this._nightChangedId), this._nightChangedId = 0;
