@@ -289,13 +289,17 @@ class ThemeTweaks extends Gtk.Box {
         this._field_night.connect("notify::active", widget => {
             this._field_icons.set_sensitive(widget.active);
             this._field_theme.set_sensitive(widget.active);
+            this._field_cursor.set_sensitive(widget.active)
             this._field_icons_night.set_sensitive(widget.active);
             this._field_theme_night.set_sensitive(widget.active);
+            this._field_cursor_night.set_sensitive(widget.active)
         });
         this._field_icons.set_sensitive(this._field_night.active);
         this._field_theme.set_sensitive(this._field_night.active);
+        this._field_cursor.set_sensitive(this._field_night.active)
         this._field_icons_night.set_sensitive(this._field_night.active);
         this._field_theme_night.set_sensitive(this._field_night.active);
+        this._field_cursor_night.set_sensitive(this._field_night.active);
     }
 
     _entryMaker(x, y) {
