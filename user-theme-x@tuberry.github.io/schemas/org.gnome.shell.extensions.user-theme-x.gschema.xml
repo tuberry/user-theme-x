@@ -15,30 +15,35 @@
       <summary>night theme switch</summary>
       <description>Auto switch gtk, shell and icon theme when Night Light is active and inactive</description>
     </key>
-    <key name="day-or-night" type="b">
-      <default>false</default>
-      <summary>day or night</summary>
-      <description>Indicate Night Light is active or inactive</description>
-    </key>
     <key name="theme" type="s">
       <default>""</default>
-      <summary>gtk theme</summary>
-      <description>The gtk theme when Night Light is inactive</description>
+      <summary>gtk/shell theme</summary>
+      <description>The gtk/shell theme when Night Light is inactive</description>
     </key>
     <key name="theme-night" type="s">
       <default>""</default>
-      <summary>gtk night theme</summary>
-      <description>The gtk theme when Night Light is active</description>
+      <summary>gtk/shell night theme</summary>
+      <description>The gtk/shell theme when Night Light is active</description>
     </key>
     <key name="icons" type="s">
       <default>""</default>
-      <summary>icon set name</summary>
-      <description>The icon set when Night Light is inactive</description>
+      <summary>icon theme name</summary>
+      <description>The icon theme when Night Light is inactive</description>
     </key>
     <key name="icons-night" type="s">
       <default>""</default>
-      <summary>icon set night name</summary>
-      <description>The icon set when Night Light is active</description>
+      <summary>icon theme night name</summary>
+      <description>The icon theme when Night Light is active</description>
+    </key>
+    <key name="cursor" type="s">
+      <default>""</default>
+      <summary>cursor theme name</summary>
+      <description>The cursor theme when Night Light is inactive</description>
+    </key>
+    <key name="cursor-night" type="s">
+      <default>""</default>
+      <summary>cursor theme night name</summary>
+      <description>The cursor theme when Night Light is active</description>
     </key>
   </schema>
 </schemalist>

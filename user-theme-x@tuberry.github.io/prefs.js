@@ -222,31 +222,37 @@ class ThemeTweaks extends Gtk.Box {
     _initFields() {
         this._settings = ExtensionUtils.getSettings();
         this.Fields = {
-            ICONS: 'icons',
-            NIGHT: 'night',
-            THEME: 'theme',
-            STYLE: 'stylesheet',
-            ICONSNIGHT: 'icons-night',
-            THEMENIGHT: 'theme-night',
+            ICONS:       'icons',
+            NIGHT:       'night',
+            THEME:       'theme',
+            CURSOR:      'cursor',
+            STYLE:       'stylesheet',
+            ICONSNIGHT:  'icons-night',
+            THEMENIGHT:  'theme-night',
+            CURSORNIGHT: 'cursor-night',
         }
     }
 
     _buildWidgets() {
-        this._field_icons       = this._entryMaker('Papirus', _('Icon set'));
-        this._field_theme       = this._entryMaker('Adwaita#Materia', _('GTK theme'));
-        this._field_icons_night = this._entryMaker('Papirus-Dark', _('Dark icon set'));
-        this._field_theme_night = this._entryMaker('Adwaita-dark#Materia-dark', _('GTK dark theme'));
-        this._field_night       = new Gtk.CheckButton({ active: this._settings.get_boolean(this.Fields.NIGHT) });
-        this._field_style       = new Gtk.CheckButton({ active: this._settings.get_boolean(this.Fields.STYLE) });
+        this._field_cursor       = this._entryMaker('', _('Cursor theme'));
+        this._field_cursor_night = this._entryMaker('', _('Cursor dark theme'));
+        this._field_icons        = this._entryMaker('Papirus', _('Icon theme'));
+        this._field_icons_night  = this._entryMaker('Papirus-Dark', _('Icon dark theme'));
+        this._field_theme        = this._entryMaker('Adwaita#Materia', _('GTK/Shell theme'));
+        this._field_theme_night  = this._entryMaker('Adwaita-dark#Materia-dark', _('GTK/Shell dark theme'));
+        this._field_night        = new Gtk.CheckButton({ active: this._settings.get_boolean(this.Fields.NIGHT) });
+        this._field_style        = new Gtk.CheckButton({ active: this._settings.get_boolean(this.Fields.STYLE) });
     }
 
     _bindValues() {
-        this._settings.bind(this.Fields.ICONSNIGHT, this._field_icons_night, 'text',   Gio.SettingsBindFlags.DEFAULT);
-        this._settings.bind(this.Fields.ICONS,      this._field_icons,       'text',   Gio.SettingsBindFlags.DEFAULT);
-        this._settings.bind(this.Fields.NIGHT,      this._field_night,       'active', Gio.SettingsBindFlags.DEFAULT);
-        this._settings.bind(this.Fields.STYLE,      this._field_style,       'active', Gio.SettingsBindFlags.DEFAULT);
-        this._settings.bind(this.Fields.THEMENIGHT, this._field_theme_night, 'text',   Gio.SettingsBindFlags.DEFAULT);
-        this._settings.bind(this.Fields.THEME,      this._field_theme,       'text',   Gio.SettingsBindFlags.DEFAULT);
+        this._settings.bind(this.Fields.CURSORNIGHT, this._field_cursor_night, 'text',   Gio.SettingsBindFlags.DEFAULT);
+        this._settings.bind(this.Fields.CURSOR,      this._field_cursor,       'text',   Gio.SettingsBindFlags.DEFAULT);
+        this._settings.bind(this.Fields.ICONSNIGHT,  this._field_icons_night,  'text',   Gio.SettingsBindFlags.DEFAULT);
+        this._settings.bind(this.Fields.ICONS,       this._field_icons,        'text',   Gio.SettingsBindFlags.DEFAULT);
+        this._settings.bind(this.Fields.NIGHT,       this._field_night,        'active', Gio.SettingsBindFlags.DEFAULT);
+        this._settings.bind(this.Fields.STYLE,       this._field_style,        'active', Gio.SettingsBindFlags.DEFAULT);
+        this._settings.bind(this.Fields.THEMENIGHT,  this._field_theme_night,  'text',   Gio.SettingsBindFlags.DEFAULT);
+        this._settings.bind(this.Fields.THEME,       this._field_theme,        'text',   Gio.SettingsBindFlags.DEFAULT);
     }
 
     _buildUI() {
@@ -273,10 +279,10 @@ class ThemeTweaks extends Gtk.Box {
 
         this._grid.attach(this._labelMaker(this._field_style, _('Load user stylesheet from <small>~/.config/gnome-shell/gnome-shell.css</small>')), 0, count++, 1, 1);
         this._grid.attach(this._labelMaker(this._field_night, _('Enable night theme auto switch')), 0, count++, 1, 1);
-        this._grid.attach(this._field_theme,       0, count++, 1, 1);
-        this._grid.attach(this._field_theme_night, 0, count++, 1, 1);
-        this._grid.attach(this._field_icons,       0, count++, 1, 1);
-        this._grid.attach(this._field_icons_night, 0, count++, 1, 1);
+        this._grid.attach(this._field_theme,        0, count++, 1, 1);
+        this._grid.attach(this._field_theme_night,  0, count++, 1, 1);
+        this._grid.attach(this._hboxMaker(this._field_icons, this._field_cursor), 0, count++, 1, 1);
+        this._grid.attach(this._hboxMaker(this._field_icons_night, this._field_cursor_night), 0, count++, 1, 1);
     }
 
     _syncStatus() {
@@ -301,6 +307,13 @@ class ThemeTweaks extends Gtk.Box {
             secondary_icon_activatable: true,
             secondary_icon_name: "dialog-information-symbolic",
         });
+    }
+
+    _hboxMaker(x, y) {
+        let hbox = new Gtk.Box({ spacing: 10 });
+        hbox.pack_start(x, true, true, 0);
+        hbox.pack_end(y, true, true, 0);
+        return hbox;
     }
 
     _labelMaker(x, y) {

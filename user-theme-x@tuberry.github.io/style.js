@@ -1,8 +1,9 @@
 // vim:fdm=syntax
 // by tuberry@github
 
-const { Gio, GLib, GObject, St } = imports.gi;
 const Main = imports.ui.main;
+const { Gio, GLib, GObject, St } = imports.gi;
+const LightProxy = Main.panel.statusArea['aggregateMenu']._nightLight._proxy;
 
 const gsetting = imports.misc.extensionUtils.getSettings();
 const newFile = x => Gio.file_new_for_path(GLib.build_filenamev([GLib.get_user_config_dir()].concat(x)));
@@ -10,7 +11,6 @@ const newFile = x => Gio.file_new_for_path(GLib.build_filenamev([GLib.get_user_c
 const Fields = {
     NIGHT: 'night',
     STYLE: 'stylesheet',
-    DAYORNIGHT: 'day-or-night',
 }
 
 var UserStylesheet = GObject.registerClass({
@@ -58,7 +58,7 @@ var UserStylesheet = GObject.registerClass({
 
     _loadTheme() {
         let userStylesheet;
-        if(gsetting.get_boolean(Fields.NIGHT) && gsetting.get_boolean(Fields.DAYORNIGHT)) {
+        if(gsetting.get_boolean(Fields.NIGHT) && LightProxy.NightLightActive) {
             userStylesheet = newFile(['gnome-shell', 'gnome-shell-dark.css']);
             if(!userStylesheet.query_exists(null)) userStylesheet = newFile(['gnome-shell', 'gnome-shell.css']);
         } else {
