@@ -1,5 +1,5 @@
 # user-theme-x
-Customizable user-theme with user stylesheet and night theme/icon autoswitch support.
+Customizable user-theme with user stylesheet and night themes autoswitch support.
 > Do not go gentle into that Dark side. <br>
 [![license]](/LICENSE)
 
@@ -47,15 +47,12 @@ Users of [Light Dict] may want to change the font of panel:
 }
 ```
 ### Night theme auto switch
-Fill the blanks according to your themes in consistent one-to-one match. The gtk/shell/icons theme will be toggled automatically when Night Light is active and inactive. Also user stylesheet (`~/.config/gnome-shell/gnome-shell-dark.css`) switch is supported.
+Fill the blanks according to your themes in consistent one-to-one match. The themes will be toggled automatically when Night Light is active and inactive. Also user stylesheet (`~/.config/gnome-shell/gnome-shell-dark.css`) is supported.
 
 ![Screenshot](https://user-images.githubusercontent.com/17917040/80617887-38626280-8a75-11ea-8bcb-85566cd426e9.png)
 
-## Acknowledgements
-[night-theme-switcher](https://extensions.gnome.org/extension/2236/night-theme-switcher/): the DBus proxy of Night Light.
-
 ## Note
-1. The extension is based on and compatible with [user-theme]. In other word, this extension has full support for user-theme except changing shell theme with gnome-tweaks because user-theme's [uuid] is hardcoded in gnome-tweaks. If you really need to change shell theme that way, please install both of them.
+1. The extension is forked from and compatible with [user-theme]. In other word, this extension has full support for user-theme except changing shell theme with gnome-tweaks because of [uuid]. If you really need to change shell theme that way, please install both of them.
 2. If there is something wrong with gnome shell theme after updating, don't forget to disable the user-stylesheet to exclude the influence of your code snippets, also it's a good habbit to add comments for them.
 
 [EGO]:https://extensions.gnome.org/extension/3019/user-themes-x/
