@@ -23,37 +23,16 @@ var UserStylesheet = GObject.registerClass({
     }
 
     enable() {
+        this._originalLoadTheme = Main.loadTheme;
         Main.loadTheme = () => this._loadTheme();
         this._fileMonitor = newFile(['gnome-shell']).monitor_directory(Gio.FileMonitorFlags.NONE, null);
         this._fileChangedId = this._fileMonitor.connect('changed', () => { this.emit('file-changed'); });
     }
 
     disable() {
-        Main.loadTheme = () => this._originalLoadTheme();
+        Main.loadTheme = this._originalLoadTheme;
         if(this._fileChangedId) this._fileMonitor.disconnect(this._fileChangedId), this._fileChangedId = 0;
         this._fileMonitor = null;
-    }
-
-    _originalLoadTheme() {
-        let themeContext = St.ThemeContext.get_for_stage(global.stage);
-        let previousTheme = themeContext.get_theme();
-
-        let theme = new St.Theme({
-            application_stylesheet: Main._cssStylesheet,
-            default_stylesheet: Main._defaultCssStylesheet,
-        });
-
-        if (theme.default_stylesheet == null)
-            throw new Error("No valid stylesheet found for '%s'".format(Main.sessionMode.stylesheetName));
-
-        if (previousTheme) {
-            let customStylesheets = previousTheme.get_custom_stylesheets();
-
-            for (let i = 0; i < customStylesheets.length; i++)
-                theme.load_stylesheet(customStylesheets[i]);
-        }
-
-        themeContext.set_theme(theme);
     }
 
     _loadTheme() {
