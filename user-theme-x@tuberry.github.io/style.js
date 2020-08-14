@@ -47,16 +47,16 @@ var UserStylesheet = GObject.registerClass({
             userStylesheet = newFile(['gnome-shell', 'gnome-shell.css']);
         }
         let theme = new St.Theme({
-            application_stylesheet : userStylesheet.query_exists(null) ? userStylesheet : null,
             theme_stylesheet :  Main.getThemeStylesheet(),
             default_stylesheet : Main._getDefaultStylesheet(),
+            application_stylesheet : userStylesheet.query_exists(null) ? userStylesheet : null,
         });
 
         if(theme.default_stylesheet === null)
             throw new Error("No valid stylesheet found for '%s'".format(Main.sessionMode.stylesheetName));
 
         if(previousTheme)
-            previousTheme.get_custom_stylesheets().forEach(x => { if(x) theme.load_stylesheet(x); });
+            previousTheme.get_custom_stylesheets().forEach(x => { if(x && x instanceof Gio.File) theme.load_stylesheet(x); });
 
         themeContext.set_theme(theme);
     }
