@@ -52,7 +52,7 @@ Fill the blanks according to your themes in consistent one-to-one match. The the
 ![Screenshot](https://user-images.githubusercontent.com/17917040/80617887-38626280-8a75-11ea-8bcb-85566cd426e9.png)
 
 ## Note
-1. The extension is forked from and compatible with [user-theme]. In other word, this extension has full support for user-theme except changing shell theme with gnome-tweaks because of [uuid]. If you really need to change shell theme that way, please install both of them.
+1. The extension is forked from and compatible with [user-theme]. In other word, this extension has full support for user-theme except changing shell theme with gnome-tweaks because of [uuid]. If you really need to change shell theme that way, please install both of them or change the uuid.
 2. If there is something wrong with gnome shell theme after updating, don't forget to disable the user-stylesheet to exclude the influence of your code snippets, also it's a good habbit to add comments for them.
 
 [EGO]:https://extensions.gnome.org/extension/3019/user-themes-x/

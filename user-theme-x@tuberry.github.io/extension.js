@@ -32,8 +32,13 @@ class ThemeManager {
         this._disable();
         if(this._settingChangedId) this._settings.disconnect(this._settingChangedId), this._settingChangedId = 0;
 
-        Main.setThemeStylesheet(null);
-        Main.loadTheme();
+        try {
+            Main.setThemeStylesheet(null);
+            Main.loadTheme();
+        } catch(e) {
+            // ignore upstream issue sometimes after screen locking
+            // Argument 'file' (type interface) may not be null loadTheme@resource:///org/gnome/shell/ui/main.js:428:19
+        }
     }
 
     _changeTheme() {
