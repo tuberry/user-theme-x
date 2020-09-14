@@ -37,26 +37,35 @@ var UserStylesheet = GObject.registerClass({
 
     _loadTheme() {
         let themeContext = St.ThemeContext.get_for_stage(global.stage);
-        let previousTheme = themeContext.get_theme();
 
-        let userStylesheet;
+        let userStylesheet = null;
         if(gsetting.get_boolean(Fields.NIGHT) && LightProxy.NightLightActive) {
             userStylesheet = newFile(['gnome-shell', 'gnome-shell-dark.css']);
             if(!userStylesheet.query_exists(null)) userStylesheet = newFile(['gnome-shell', 'gnome-shell.css']);
         } else {
             userStylesheet = newFile(['gnome-shell', 'gnome-shell.css']);
         }
-        let theme = new St.Theme({
-            theme_stylesheet :  Main.getThemeStylesheet(),
-            default_stylesheet : Main._getDefaultStylesheet(),
-            application_stylesheet : userStylesheet.query_exists(null) ? userStylesheet : null,
-        });
+
+        let theme;
+        if(userStylesheet.query_exists(null))
+            theme = new St.Theme({
+                application_stylesheet: userStylesheet,
+                theme_stylesheet:  Main.getThemeStylesheet(),
+                default_stylesheet: Main._getDefaultStylesheet(),
+            });
+        else
+            theme = new St.Theme({
+                theme_stylesheet:  Main.getThemeStylesheet(),
+                default_stylesheet: Main._getDefaultStylesheet(),
+            });
+
 
         if(theme.default_stylesheet === null)
             throw new Error("No valid stylesheet found for '%s'".format(Main.sessionMode.stylesheetName));
 
+        let previousTheme = themeContext.get_theme();
         if(previousTheme)
-            previousTheme.get_custom_stylesheets().forEach(x => { if(x && x instanceof Gio.File) theme.load_stylesheet(x); });
+            previousTheme.get_custom_stylesheets().forEach(x => { theme.load_stylesheet(x); });
 
         themeContext.set_theme(theme);
     }
