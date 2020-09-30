@@ -71,15 +71,15 @@ class NightThemeSwitch extends GObject.Object {
 
     enable() {
         for(let x in Tweaks) {
-            eval(`this.%s = sgsetting.get_string('%s') ? sgsetting.get_string('%s').split('#') : []`.format(x, Tweaks[x], Tweaks[x]));
-            eval(`this.%sId = sgsetting.connect('changed::%s', () => { this.%s = sgsetting.get_string('%s') ? sgsetting.get_string('%s').split('#') : [];});`.format(x, Tweaks[x], x, Tweaks[x], Tweaks[x]));
+            eval("this.%s = sgsetting.get_string('%s') ? sgsetting.get_string('%s').split('#') : []".format(x, Tweaks[x], Tweaks[x]));
+            eval("this.%sId = sgsetting.connect('changed::%s', () => { this.%s = sgsetting.get_string('%s') ? sgsetting.get_string('%s').split('#') : [];});".format(x, Tweaks[x], x, Tweaks[x], Tweaks[x]));
         }
         this._onLightChanged();
         this._proxyChangedId  = LightProxy.connect('g-properties-changed', this._onLightChanged.bind(this));
-        this._themeChangedId  = tgsetting.connect(`changed::${Fields.THEME}`, this._onLightChanged.bind(this));
-        this._iconsChangedId  = tgsetting.connect(`changed::${Fields.ICONS}`, this._onLightChanged.bind(this));
-        this._nightLightOnId  = ngsetting.connect(`changed::${Fields.NIGHTLIGHT}`, this._onLightChanged.bind(this));
-        this._cursorChangedId = tgsetting.connect(`changed::${Fields.CURSOR}`, this._onLightChanged.bind(this));
+        this._themeChangedId  = tgsetting.connect('changed::' + Fields.THEME, this._onLightChanged.bind(this));
+        this._iconsChangedId  = tgsetting.connect('changed::' + Fields.ICONS, this._onLightChanged.bind(this));
+        this._nightLightOnId  = ngsetting.connect('changed::' + Fields.NIGHTLIGHT, this._onLightChanged.bind(this));
+        this._cursorChangedId = tgsetting.connect('changed::' + Fields.CURSOR, this._onLightChanged.bind(this));
     }
 
     disable() {
@@ -94,8 +94,8 @@ class NightThemeSwitch extends GObject.Object {
         if(this._proxyChangedId)
             LightProxy.disconnect(this._proxyChangedId), this._proxyChangedId = 0;
         for(let x in Tweaks) {
-            eval(`if(this.%sId) sgsetting.disconnect(this.%sId), this.%sId = 0;`.format(x, x, x));
-            eval(`this.%s = null`.format(x));
+            eval("if(this.%sId) sgsetting.disconnect(this.%sId), this.%sId = 0;".format(x, x, x));
+            eval("this.%s = null".format(x));
         }
     }
 });

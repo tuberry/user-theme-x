@@ -12,7 +12,7 @@ Or manually:
 
 ```bash
 git clone https://github.com/tuberry/user-theme-x.git
-cp -rf ./user-theme-x/'user-theme-x@tuberry.github.io' ~/.local/share/gnome-shell/extensions/
+cd user-theme-x && make install
 ```
 
 ## Features
