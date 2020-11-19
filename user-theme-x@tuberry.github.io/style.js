@@ -9,8 +9,8 @@ const gsetting = imports.misc.extensionUtils.getSettings();
 const newFile = x => Gio.file_new_for_path(GLib.build_filenamev([GLib.get_user_config_dir()].concat(x)));
 
 const Fields = {
-    NIGHT: 'night',
-    STYLE: 'stylesheet',
+    NIGHT: 'night-x',
+    STYLE: 'stylesheet-x',
 }
 
 var UserStylesheet = GObject.registerClass({

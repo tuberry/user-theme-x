@@ -16,13 +16,13 @@ cd user-theme-x && make install
 ```
 
 ## Features
-![user-theme-x](https://user-images.githubusercontent.com/17917040/80664068-5311f700-8ac8-11ea-9c8c-b228edb8a0ea.gif)
+![image](https://user-images.githubusercontent.com/17917040/99734013-10177f80-2afd-11eb-9d63-2a1ba8831793.png)
 ### User stylesheet
 Load user stylesheet form `~/.config/gnome-shell/gnome-shell.css`, which should be created by yourself.
 ```bash
 mkdir -p ~/.config/gnome-shell && touch ~/.config/gnome-shell/gnome-shell.css
 ```
-Here are 3 examples:
+Here are 2 examples:
 #### panel font size
 Change the font size of top panel.
 ```css
@@ -39,20 +39,12 @@ Set the size to 0 to *hide* the arrow in panel menu.
     height: 0;
 }
 ```
-#### for Light Dict users
-Users of [Light Dict] may want to change the font of panel:
-```css
-.light-dict-content {
-    font-size: 13pt;
-}
-```
-### Night theme auto switch
-Fill the blanks according to your themes in consistent one-to-one match. The themes will be toggled automatically when Night Light is active and inactive. Also user stylesheet (`~/.config/gnome-shell/gnome-shell-dark.css`) is supported.
 
-![Screenshot](https://user-images.githubusercontent.com/17917040/80617887-38626280-8a75-11ea-8bcb-85566cd426e9.png)
+### Night theme auto switch
+The themes will be toggled automatically when Night Light is active and inactive.
 
 ## Note
-1. The extension is forked from and compatible with [user-theme]. In other word, this extension has full support for user-theme except changing shell theme with gnome-tweaks because of [uuid]. If you really need to change shell theme that way, please install both of them or change the uuid.
+1. The extension is forked from and compatible with [user-theme]. In other word, this extension has full support for user-theme except changing shell theme with gnome-tweaks because of [uuid].
 2. If there is something wrong with gnome shell theme after updating, don't forget to disable the user-stylesheet to exclude the influence of your code snippets, also it's a good habbit to add comments for them.
 
 [EGO]:https://extensions.gnome.org/extension/3019/user-themes-x/

@@ -11,8 +11,8 @@ const Me = ExtensionUtils.getCurrentExtension();
 const Util = Me.imports.util;
 
 const SETTINGS_KEY = 'name';
-const NIGHTTHEME_KEY = 'night';
-const STYLESHEET_KEY = 'stylesheet';
+const NIGHTTHEME_KEY = 'night-x';
+const STYLESHEET_KEY = 'stylesheet-x';
 
 const Style = new Me.imports.style.UserStylesheet();
 const Night = new Me.imports.night.NightThemeSwitch();

@@ -222,51 +222,67 @@ class ThemeTweaks extends Gtk.Box {
     _initFields() {
         this._settings = ExtensionUtils.getSettings();
         this.Fields = {
-            ICONS:       'icons',
-            NIGHT:       'night',
-            THEME:       'theme',
-            CURSOR:      'cursor',
-            STYLE:       'stylesheet',
-            ICONSNIGHT:  'icons-night',
-            THEMENIGHT:  'theme-night',
-            CURSORNIGHT: 'cursor-night',
+            XGTK:         'gtk-x',
+            XICONS:       'icons-x',
+            XNIGHT:       'night-x',
+            XSHELL:       'shell-x',
+            XCURSOR:      'cursor-x',
+            XGTKNIGHT:    'gtk-night-x',
+            XSTYLE:       'stylesheet-x',
+            XICONSNIGHT:  'icons-night-x',
+            XSHELLNIGHT:  'shell-night-x',
+            XCURSORNIGHT: 'cursor-night-x',
         }
     }
 
     _buildWidgets() {
-        this._field_cursor       = this._entryMaker('', _('Cursor theme'));
-        this._field_cursor_night = this._entryMaker('', _('Cursor dark theme'));
-        this._field_icons        = this._entryMaker('Papirus', _('Icon theme'));
-        this._field_icons_night  = this._entryMaker('Papirus-Dark', _('Icon dark theme'));
-        this._field_theme        = this._entryMaker('Adwaita#Materia', _('GTK/Shell theme'));
-        this._field_theme_night  = this._entryMaker('Adwaita-dark#Materia-dark', _('GTK/Shell dark theme'));
-        this._field_night        = new Gtk.CheckButton({ active: this._settings.get_boolean(this.Fields.NIGHT) });
-        this._field_style        = new Gtk.CheckButton({ active: this._settings.get_boolean(this.Fields.STYLE) });
+        this._field_cursor       = this._comboMaker(Util.getCursorThemes());
+        this._field_cursor_night = this._comboMaker(Util.getCursorThemes());
+        this._field_icons        = this._comboMaker(Util.getIconThemes());
+        this._field_icons_night  = this._comboMaker(Util.getIconThemes());
+        this._field_gtk          = this._comboMaker(Util.getGtkThemes());
+        this._field_gtk_night    = this._comboMaker(Util.getGtkThemes());
+        this._field_shell        = this._comboMaker(Util.getShellThemes());
+        this._field_shell_night  = this._comboMaker(Util.getShellThemes());
+        this._field_night        = new Gtk.CheckButton({ active: this._settings.get_boolean(this.Fields.XNIGHT), label: "Autoswitch:" });
+        this._field_style        = new Gtk.CheckButton({ active: this._settings.get_boolean(this.Fields.XSTYLE), label: "Load user stylesheet '~/.config/gnome-shell/gnome-shell{,-dark}.css'" });
     }
 
     _bindValues() {
-        this._settings.bind(this.Fields.CURSORNIGHT, this._field_cursor_night, 'text',   Gio.SettingsBindFlags.DEFAULT);
-        this._settings.bind(this.Fields.CURSOR,      this._field_cursor,       'text',   Gio.SettingsBindFlags.DEFAULT);
-        this._settings.bind(this.Fields.ICONSNIGHT,  this._field_icons_night,  'text',   Gio.SettingsBindFlags.DEFAULT);
-        this._settings.bind(this.Fields.ICONS,       this._field_icons,        'text',   Gio.SettingsBindFlags.DEFAULT);
-        this._settings.bind(this.Fields.NIGHT,       this._field_night,        'active', Gio.SettingsBindFlags.DEFAULT);
-        this._settings.bind(this.Fields.STYLE,       this._field_style,        'active', Gio.SettingsBindFlags.DEFAULT);
-        this._settings.bind(this.Fields.THEMENIGHT,  this._field_theme_night,  'text',   Gio.SettingsBindFlags.DEFAULT);
-        this._settings.bind(this.Fields.THEME,       this._field_theme,        'text',   Gio.SettingsBindFlags.DEFAULT);
+        this._settings.bind(this.Fields.XNIGHT,       this._field_night,        'active',    Gio.SettingsBindFlags.DEFAULT);
+        this._settings.bind(this.Fields.XSTYLE,       this._field_style,        'active',    Gio.SettingsBindFlags.DEFAULT);
+        this._settings.bind(this.Fields.XCURSORNIGHT, this._field_cursor_night, 'active-id', Gio.SettingsBindFlags.DEFAULT);
+        this._settings.bind(this.Fields.XCURSOR,      this._field_cursor,       'active-id', Gio.SettingsBindFlags.DEFAULT);
+        this._settings.bind(this.Fields.XICONSNIGHT,  this._field_icons_night,  'active-id', Gio.SettingsBindFlags.DEFAULT);
+        this._settings.bind(this.Fields.XICONS,       this._field_icons,        'active-id', Gio.SettingsBindFlags.DEFAULT);
+        this._settings.bind(this.Fields.XSHELLNIGHT,  this._field_shell_night,  'active-id', Gio.SettingsBindFlags.DEFAULT);
+        this._settings.bind(this.Fields.XSHELL,       this._field_shell,        'active-id', Gio.SettingsBindFlags.DEFAULT);
+        this._settings.bind(this.Fields.XGTKNIGHT,    this._field_gtk_night,    'active-id', Gio.SettingsBindFlags.DEFAULT);
+        this._settings.bind(this.Fields.XGTK,         this._field_gtk,          'active-id', Gio.SettingsBindFlags.DEFAULT);
     }
 
     _buildUI() {
+        let frame = this._listFrameMaker(_('Tweaks'), 0);
+        frame._add(this._field_style);
+        frame._add(this._field_night, this._labelMaker('Day', true), this._labelMaker('Night', true));
+        frame._add(this._labelMaker('Gtk theme :'),   this._field_gtk,    this._field_gtk_night);
+        frame._add(this._labelMaker('Shell theme :'), this._field_shell,  this._field_shell_night);
+        frame._add(this._labelMaker('Icon theme :'),  this._field_icons,  this._field_icons_night);
+        frame._add(this._labelMaker('Cursor theme :'),this._field_cursor, this._field_cursor_night);
+    }
+
+    _listFrameMaker(lbl, margin_top) {
         let frame = new Gtk.Frame({
             label_yalign: 1,
         });
         frame.set_label_widget(new Gtk.Label({
             use_markup: true,
-            margin_top: 30,
-            label: "<b><big>" + _('Tweaks') + "</big></b>",
+            margin_top: margin_top,
+            label: "<b><big>" + lbl + "</big></b>",
         }));
         this.add(frame);
 
-        this._grid = new Gtk.Grid({
+        frame.grid = new Gtk.Grid({
             margin: 10,
             hexpand: true,
             row_spacing: 12,
@@ -274,62 +290,66 @@ class ThemeTweaks extends Gtk.Box {
             row_homogeneous: false,
             column_homogeneous: false,
         });
-        frame.add(this._grid);
-        let count = 0;
 
-        this._grid.attach(this._labelMaker(this._field_style, _('Load user stylesheet from <small>~/.config/gnome-shell/gnome-shell.css</small>')), 0, count++, 1, 1);
-        this._grid.attach(this._labelMaker(this._field_night, _('Enable night theme auto switch')), 0, count++, 1, 1);
-        this._grid.attach(this._field_theme,        0, count++, 1, 1);
-        this._grid.attach(this._field_theme_night,  0, count++, 1, 1);
-        this._grid.attach(this._hboxMaker(this._field_icons, this._field_cursor), 0, count++, 1, 1);
-        this._grid.attach(this._hboxMaker(this._field_icons_night, this._field_cursor_night), 0, count++, 1, 1);
+        frame.grid._row = 0;
+        frame.add(frame.grid);
+        frame._add = (x, y, z) => {
+            let r = frame.grid._row;
+            if(z) {
+                frame.grid.attach(x, 0, r, 1, 1);
+                frame.grid.attach(y, 1, r, 1, 1);
+                frame.grid.attach(z, 2, r, 1, 1);
+            } else if(y) {
+                frame.grid.attach(x, 0, r, 2, 1);
+                frame.grid.attach(y, 2, r, 1, 1);
+            } else {
+                frame.grid.attach(x, 0, r, 3, 1);
+            }
+            frame.grid._row++;
+        }
+        return frame;
     }
 
     _syncStatus() {
         this._field_night.connect("notify::active", widget => {
+            this._field_gtk.set_sensitive(widget.active);
             this._field_icons.set_sensitive(widget.active);
-            this._field_theme.set_sensitive(widget.active);
+            this._field_shell.set_sensitive(widget.active);
             this._field_cursor.set_sensitive(widget.active)
+            this._field_gtk_night.set_sensitive(widget.active);
             this._field_icons_night.set_sensitive(widget.active);
-            this._field_theme_night.set_sensitive(widget.active);
+            this._field_shell_night.set_sensitive(widget.active);
             this._field_cursor_night.set_sensitive(widget.active)
         });
         this._field_icons.set_sensitive(this._field_night.active);
-        this._field_theme.set_sensitive(this._field_night.active);
+        this._field_gtk.set_sensitive(this._field_night.active);
+        this._field_shell.set_sensitive(this._field_night.active);
         this._field_cursor.set_sensitive(this._field_night.active)
+        this._field_gtk_night.set_sensitive(this._field_night.active);
         this._field_icons_night.set_sensitive(this._field_night.active);
-        this._field_theme_night.set_sensitive(this._field_night.active);
+        this._field_shell_night.set_sensitive(this._field_night.active);
         this._field_cursor_night.set_sensitive(this._field_night.active);
     }
 
-    _entryMaker(x, y) {
-        return new Gtk.Entry({
-            hexpand: true,
-            placeholder_text: x,
-            secondary_icon_sensitive: true,
-            secondary_icon_tooltip_text: y,
-            secondary_icon_activatable: true,
-            secondary_icon_name: "dialog-information-symbolic",
-        });
-    }
-
-    _hboxMaker(x, y) {
-        let hbox = new Gtk.Box({ spacing: 10 });
-        hbox.pack_start(x, true, true, 0);
-        hbox.pack_end(y, true, true, 0);
-        return hbox;
+    _comboMaker(ops) {
+        let l = new Gtk.ListStore();
+        l.set_column_types([GObject.TYPE_STRING]);
+        ops.forEach(op => l.set(l.append(), [0], [op]));
+        let c = new Gtk.ComboBox({ model: l });
+        let r = new Gtk.CellRendererText();
+        c.pack_start(r, false);
+        c.add_attribute(r, "text", 0);
+        c.set_id_column(0);
+        return c;
     }
 
     _labelMaker(x, y) {
-        let hbox = new Gtk.Box();
-        hbox.pack_start(x, false, false, 0);
-        hbox.pack_start(new Gtk.Label({
-            label: y,
+        return new Gtk.Label({
+            label: x,
             hexpand: true,
             margin_left: 10,
             use_markup: true,
-            halign: Gtk.Align.START,
-        }), true, true, 4);
-        return hbox;
+            halign: y ? Gtk.Align.START : Gtk.Align.END,
+        });
     }
 });
