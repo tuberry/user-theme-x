@@ -15,9 +15,9 @@ const System = {
     NIGHTSCHEMA:  'org.gnome.settings-daemon.plugins.color',
 };
 
-const sgsetting = imports.misc.extensionUtils.getSettings();
-const tgsetting = new Gio.Settings({ schema: System.THEMESCHEMA });
-const ngsetting = new Gio.Settings({ schema: System.NIGHTSCHEMA });
+const sgsettings = imports.misc.extensionUtils.getSettings();
+const tgsettings = new Gio.Settings({ schema: System.THEMESCHEMA });
+const ngsettings = new Gio.Settings({ schema: System.NIGHTSCHEMA });
 const Type = { theme: 0, icons: 1, cursor: 2 };
 
 const Fields = {
@@ -38,106 +38,106 @@ class NightThemeSwitch extends GObject.Object {
     }
 
     get _isNight() {
-        if(!LightProxy || !ngsetting.get_boolean(System.NIGHTLIGHT))
+        if(!LightProxy || !ngsettings.get_boolean(System.NIGHTLIGHT))
             return false;
         return LightProxy.NightLightActive;
     }
 
     _onLightChanged() {
         if(this._isNight) {
-            tgsetting.set_string(System.THEME, sgsetting.get_string(Fields.GTKNIGHT));
-            sgsetting.set_string(System.SHELL, sgsetting.get_string(Fields.SHELLNIGHT));
-            tgsetting.set_string(System.ICONS, sgsetting.get_string(Fields.ICONSNIGHT));
-            tgsetting.set_string(System.CURSOR, sgsetting.get_string(Fields.CURSORNIGHT));
+            tgsettings.set_string(System.THEME, sgsettings.get_string(Fields.GTKNIGHT));
+            sgsettings.set_string(System.SHELL, sgsettings.get_string(Fields.SHELLNIGHT));
+            tgsettings.set_string(System.ICONS, sgsettings.get_string(Fields.ICONSNIGHT));
+            tgsettings.set_string(System.CURSOR, sgsettings.get_string(Fields.CURSORNIGHT));
         } else {
-            tgsetting.set_string(System.THEME, sgsetting.get_string(Fields.GTK));
-            sgsetting.set_string(System.SHELL, sgsetting.get_string(Fields.SHELL));
-            tgsetting.set_string(System.ICONS, sgsetting.get_string(Fields.ICONS));
-            tgsetting.set_string(System.CURSOR, sgsetting.get_string(Fields.CURSOR));
+            tgsettings.set_string(System.THEME, sgsettings.get_string(Fields.GTK));
+            sgsettings.set_string(System.SHELL, sgsettings.get_string(Fields.SHELL));
+            tgsettings.set_string(System.ICONS, sgsettings.get_string(Fields.ICONS));
+            tgsettings.set_string(System.CURSOR, sgsettings.get_string(Fields.CURSOR));
         }
     }
 
     enable() {
         this._onLightChanged();
         this._proxyChangedId  = LightProxy.connect('g-properties-changed', this._onLightChanged.bind(this));
-        this._nightLightOnId  = ngsetting.connect('changed::' + System.NIGHTLIGHT, this._onLightChanged.bind(this));
+        this._nightLightOnId  = ngsettings.connect('changed::' + System.NIGHTLIGHT, this._onLightChanged.bind(this));
 
         this._eww();
     }
 
     _eww() { // sync values: 4 sys <=> 8 user
-        this._shellChangedId  = sgsetting.connect('changed::' + System.SHELL, () => {
+        this._shellChangedId  = sgsettings.connect('changed::' + System.SHELL, () => {
             let key = this._isNight ? Fields.SHELLNIGHT : Fields.SHELL;
-            if(sgsetting.get_string(key) != sgsetting.get_string(System.SHELL))
-                sgsetting.set_string(key, sgsetting.get_string(System.SHELL));
+            if(sgsettings.get_string(key) != sgsettings.get_string(System.SHELL))
+                sgsettings.set_string(key, sgsettings.get_string(System.SHELL));
         });
-        this._themeChangedId  = tgsetting.connect('changed::' + System.THEME, () => {
+        this._themeChangedId  = tgsettings.connect('changed::' + System.THEME, () => {
             let key = this._isNight ? Fields.GTKNIGHT : Fields.GTK;
-            if(sgsetting.get_string(key) != tgsetting.get_string(System.THEME))
-                sgsetting.set_string(key, tgsetting.get_string(System.THEME));
+            if(sgsettings.get_string(key) != tgsettings.get_string(System.THEME))
+                sgsettings.set_string(key, tgsettings.get_string(System.THEME));
         });
-        this._iconsChangedId  = tgsetting.connect('changed::' + System.ICONS, () => {
+        this._iconsChangedId  = tgsettings.connect('changed::' + System.ICONS, () => {
             let key = this._isNight ? Fields.ICONSNIGHT : Fields.ICONS;
-            if(sgsetting.get_string(key) != tgsetting.get_string(System.ICONS))
-                sgsetting.set_string(key, tgsetting.get_string(System.ICONS));
+            if(sgsettings.get_string(key) != tgsettings.get_string(System.ICONS))
+                sgsettings.set_string(key, tgsettings.get_string(System.ICONS));
         });
-        this._cursorChangedId = tgsetting.connect('changed::' + System.CURSOR, () => {
+        this._cursorChangedId = tgsettings.connect('changed::' + System.CURSOR, () => {
             let key = this._isNight ? Fields.CURSORNIGHT : Fields.CURSOR;
-            if(sgsetting.get_string(key) != tgsetting.get_string(System.CURSOR))
-                sgsetting.set_string(key, tgsetting.get_string(System.CURSOR));
+            if(sgsettings.get_string(key) != tgsettings.get_string(System.CURSOR))
+                sgsettings.set_string(key, tgsettings.get_string(System.CURSOR));
         });
 
-        this._gtkID = sgsetting.connect('changed::' + Fields.GTK, () => {
+        this._gtkID = sgsettings.connect('changed::' + Fields.GTK, () => {
             if(this._isNight) return;
-            if(tgsetting.get_string(System.THEME) != sgsetting.get_string(Fields.GTK))
-                tgsetting.set_string(System.THEME, sgsetting.get_string(Fields.GTK));
+            if(tgsettings.get_string(System.THEME) != sgsettings.get_string(Fields.GTK))
+                tgsettings.set_string(System.THEME, sgsettings.get_string(Fields.GTK));
         });
-        this._shellID = sgsetting.connect('changed::' + Fields.SHELL, () => {
+        this._shellID = sgsettings.connect('changed::' + Fields.SHELL, () => {
             if(this._isNight) return;
-            if(sgsetting.get_string(System.SHELL) != sgsetting.get_string(Fields.SHELL))
-                sgsetting.set_string(System.SHELL, sgsetting.get_string(Fields.SHELL))
+            if(sgsettings.get_string(System.SHELL) != sgsettings.get_string(Fields.SHELL))
+                sgsettings.set_string(System.SHELL, sgsettings.get_string(Fields.SHELL))
         });
-        this._iconsID = sgsetting.connect('changed::' + Fields.ICONS, () => {
+        this._iconsID = sgsettings.connect('changed::' + Fields.ICONS, () => {
             if(this._isNight) return;
-            if(tgsetting.get_string(System.ICONS) != sgsetting.get_string(Fields.ICONS))
-                tgsetting.set_string(System.ICONS, sgsetting.get_string(Fields.ICONS))
+            if(tgsettings.get_string(System.ICONS) != sgsettings.get_string(Fields.ICONS))
+                tgsettings.set_string(System.ICONS, sgsettings.get_string(Fields.ICONS))
         });
-        this._cursorID = sgsetting.connect('changed::' + Fields.CURSOR, () => {
+        this._cursorID = sgsettings.connect('changed::' + Fields.CURSOR, () => {
             if(this._isNight) return;
-            if(tgsetting.get_string(System.CURSOR) != sgsetting.get_string(Fields.CURSOR))
-                tgsetting.set_string(System.CURSOR, sgsetting.get_string(Fields.CURSOR))
+            if(tgsettings.get_string(System.CURSOR) != sgsettings.get_string(Fields.CURSOR))
+                tgsettings.set_string(System.CURSOR, sgsettings.get_string(Fields.CURSOR))
         });
-        this._gtkNID = sgsetting.connect('changed::' + Fields.GTKNIGHT, () => {
+        this._gtkNID = sgsettings.connect('changed::' + Fields.GTKNIGHT, () => {
             if(!this._isNight) return;
-            if(tgsetting.get_string(System.THEME) != sgsetting.get_string(Fields.GTKNIGHT))
-                tgsetting.set_string(System.THEME, sgsetting.get_string(Fields.GTKNIGHT));
+            if(tgsettings.get_string(System.THEME) != sgsettings.get_string(Fields.GTKNIGHT))
+                tgsettings.set_string(System.THEME, sgsettings.get_string(Fields.GTKNIGHT));
         });
-        this._shellNID = sgsetting.connect('changed::' + Fields.SHELLNIGHT, () => {
+        this._shellNID = sgsettings.connect('changed::' + Fields.SHELLNIGHT, () => {
             if(!this._isNight) return;
-            if(sgsetting.get_string(System.SHELL) != sgsetting.get_string(Fields.SHELLNIGHT))
-                sgsetting.set_string(System.SHELL, sgsetting.get_string(Fields.SHELLNIGHT));
+            if(sgsettings.get_string(System.SHELL) != sgsettings.get_string(Fields.SHELLNIGHT))
+                sgsettings.set_string(System.SHELL, sgsettings.get_string(Fields.SHELLNIGHT));
         });
-        this._iconsNID = sgsetting.connect('changed::' + Fields.ICONSNIGHT, () => {
+        this._iconsNID = sgsettings.connect('changed::' + Fields.ICONSNIGHT, () => {
             if(!this._isNight) return;
-            if(tgsetting.get_string(System.ICONS) != sgsetting.get_string(Fields.ICONSNIGHT))
-                tgsetting.set_string(System.ICONS, sgsetting.get_string(Fields.ICONSNIGHT));
+            if(tgsettings.get_string(System.ICONS) != sgsettings.get_string(Fields.ICONSNIGHT))
+                tgsettings.set_string(System.ICONS, sgsettings.get_string(Fields.ICONSNIGHT));
         });
-        this._cursorNID = sgsetting.connect('changed::' + Fields.CURSORNIGHT, () => {
+        this._cursorNID = sgsettings.connect('changed::' + Fields.CURSORNIGHT, () => {
             if(!this._isNight) return;
-            if(tgsetting.get_string(System.CURSOR) != sgsetting.get_string(Fields.CURSORNIGHT))
-                tgsetting.set_string(System.CURSOR, sgsetting.get_string(Fields.CURSORNIGHT));
+            if(tgsettings.get_string(System.CURSOR) != sgsettings.get_string(Fields.CURSORNIGHT))
+                tgsettings.set_string(System.CURSOR, sgsettings.get_string(Fields.CURSORNIGHT));
         });
     }
 
     disable() {
         if(this._nightLightOnId)
-            ngsetting.disconnect(this._nightLightOnId), this._nightLightOnId = 0;
+            ngsettings.disconnect(this._nightLightOnId), this._nightLightOnId = 0;
         if(this._themeChangedId)
-            tgsetting.disconnect(this._themeChangedId), this._themeChangedId = 0;
+            tgsettings.disconnect(this._themeChangedId), this._themeChangedId = 0;
         if(this._iconsChangedId)
-            tgsetting.disconnect(this._iconsChangedId), this._iconsChangedId = 0;
+            tgsettings.disconnect(this._iconsChangedId), this._iconsChangedId = 0;
         if(this._cursorChangedId)
-            tgsetting.disconnect(this._cursorChangedId), this._cursorChangedId = 0;
+            tgsettings.disconnect(this._cursorChangedId), this._cursorChangedId = 0;
         if(this._proxyChangedId)
             LightProxy.disconnect(this._proxyChangedId), this._proxyChangedId = 0;
         for(let x in this)

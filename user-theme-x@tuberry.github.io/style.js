@@ -5,7 +5,7 @@ const Main = imports.ui.main;
 const { Gio, GLib, GObject, St } = imports.gi;
 const LightProxy = Main.panel.statusArea['aggregateMenu']._nightLight._proxy;
 
-const gsetting = imports.misc.extensionUtils.getSettings();
+const gsettings = imports.misc.extensionUtils.getSettings();
 const newFile = x => Gio.file_new_for_path(GLib.build_filenamev([GLib.get_user_config_dir()].concat(x)));
 
 const Fields = {
@@ -39,7 +39,7 @@ var UserStylesheet = GObject.registerClass({
         let themeContext = St.ThemeContext.get_for_stage(global.stage);
 
         let userStylesheet = null;
-        if(gsetting.get_boolean(Fields.NIGHT) && LightProxy.NightLightActive) {
+        if(gsettings.get_boolean(Fields.NIGHT) && LightProxy.NightLightActive) {
             userStylesheet = newFile(['gnome-shell', 'gnome-shell-dark.css']);
             if(!userStylesheet.query_exists(null)) userStylesheet = newFile(['gnome-shell', 'gnome-shell.css']);
         } else {
