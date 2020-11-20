@@ -66,11 +66,6 @@ class NightThemeSwitch extends GObject.Object {
     }
 
     _eww() { // sync values: 4 sys <=> 8 user
-        this._shellChangedId  = sgsettings.connect('changed::' + System.SHELL, () => {
-            let key = this._isNight ? Fields.SHELLNIGHT : Fields.SHELL;
-            if(sgsettings.get_string(key) != sgsettings.get_string(System.SHELL))
-                sgsettings.set_string(key, sgsettings.get_string(System.SHELL));
-        });
         this._themeChangedId  = tgsettings.connect('changed::' + System.THEME, () => {
             let key = this._isNight ? Fields.GTKNIGHT : Fields.GTK;
             if(sgsettings.get_string(key) != tgsettings.get_string(System.THEME))
@@ -85,6 +80,11 @@ class NightThemeSwitch extends GObject.Object {
             let key = this._isNight ? Fields.CURSORNIGHT : Fields.CURSOR;
             if(sgsettings.get_string(key) != tgsettings.get_string(System.CURSOR))
                 sgsettings.set_string(key, tgsettings.get_string(System.CURSOR));
+        });
+        this._shellChangedID  = sgsettings.connect('changed::' + System.SHELL, () => {
+            let key = this._isNight ? Fields.SHELLNIGHT : Fields.SHELL;
+            if(sgsettings.get_string(key) != sgsettings.get_string(System.SHELL))
+                sgsettings.set_string(key, sgsettings.get_string(System.SHELL));
         });
 
         this._gtkID = sgsettings.connect('changed::' + Fields.GTK, () => {
