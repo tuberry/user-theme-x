@@ -45,87 +45,67 @@ class NightThemeSwitch extends GObject.Object {
 
     _onLightChanged() {
         if(this._isNight) {
-            tgsettings.set_string(System.THEME, sgsettings.get_string(Fields.GTKNIGHT));
-            sgsettings.set_string(System.SHELL, sgsettings.get_string(Fields.SHELLNIGHT));
-            tgsettings.set_string(System.ICONS, sgsettings.get_string(Fields.ICONSNIGHT));
-            tgsettings.set_string(System.CURSOR, sgsettings.get_string(Fields.CURSORNIGHT));
+            this._sync(tgsettings, System.THEME, sgsettings, Fields.GTKNIGHT);
+            this._sync(sgsettings, System.SHELL, sgsettings, Fields.SHELLNIGHT);
+            this._sync(tgsettings, System.ICONS, sgsettings, Fields.ICONSNIGHT);
+            this._sync(tgsettings, System.CURSOR, sgsettings, Fields.CURSORNIGHT);
         } else {
-            tgsettings.set_string(System.THEME, sgsettings.get_string(Fields.GTK));
-            sgsettings.set_string(System.SHELL, sgsettings.get_string(Fields.SHELL));
-            tgsettings.set_string(System.ICONS, sgsettings.get_string(Fields.ICONS));
-            tgsettings.set_string(System.CURSOR, sgsettings.get_string(Fields.CURSOR));
+            this._sync(tgsettings, System.THEME, sgsettings, Fields.GTK);
+            this._sync(sgsettings, System.SHELL, sgsettings, Fields.SHELL);
+            this._sync(tgsettings, System.ICONS, sgsettings, Fields.ICONS);
+            this._sync(tgsettings, System.CURSOR, sgsettings, Fields.CURSOR);
         }
+    }
+
+    _sync(scm_a, key_a, scm_b, key_b) {
+        if(scm_a.get_string(key_a) != scm_b.get_string(key_b))
+            scm_a.set_string(key_a, scm_b.get_string(key_b));
     }
 
     enable() {
         this._onLightChanged();
         this._proxyChangedId  = LightProxy.connect('g-properties-changed', this._onLightChanged.bind(this));
         this._nightLightOnId  = ngsettings.connect('changed::' + System.NIGHTLIGHT, this._onLightChanged.bind(this));
-
-        this._eww();
+        this._syncValues();
     }
 
-    _eww() { // sync values: 4 sys <=> 8 user
+    _syncValues() { // sync values: 4 sys <=> 8 user
         this._themeChangedId  = tgsettings.connect('changed::' + System.THEME, () => {
-            let key = this._isNight ? Fields.GTKNIGHT : Fields.GTK;
-            if(sgsettings.get_string(key) != tgsettings.get_string(System.THEME))
-                sgsettings.set_string(key, tgsettings.get_string(System.THEME));
+            this._sync(sgsettings, this._isNight ? Fields.GTKNIGHT : Fields.GTK, tgsettings, System.THEME);
         });
         this._iconsChangedId  = tgsettings.connect('changed::' + System.ICONS, () => {
-            let key = this._isNight ? Fields.ICONSNIGHT : Fields.ICONS;
-            if(sgsettings.get_string(key) != tgsettings.get_string(System.ICONS))
-                sgsettings.set_string(key, tgsettings.get_string(System.ICONS));
+            this._sync(sgsettings, this._isNight ? Fields.ICONSNIGHT : Fields.ICONS, tgsettings, System.ICONS);
         });
         this._cursorChangedId = tgsettings.connect('changed::' + System.CURSOR, () => {
-            let key = this._isNight ? Fields.CURSORNIGHT : Fields.CURSOR;
-            if(sgsettings.get_string(key) != tgsettings.get_string(System.CURSOR))
-                sgsettings.set_string(key, tgsettings.get_string(System.CURSOR));
+            this._sync(sgsettings, this._isNight ? Fields.CURSORNIGHT : Fields.CURSOR, tgsettings, System.CURSOR);
         });
         this._shellChangedID  = sgsettings.connect('changed::' + System.SHELL, () => {
-            let key = this._isNight ? Fields.SHELLNIGHT : Fields.SHELL;
-            if(sgsettings.get_string(key) != sgsettings.get_string(System.SHELL))
-                sgsettings.set_string(key, sgsettings.get_string(System.SHELL));
+            this._sync(sgsettings, this._isNight ? Fields.SHELLNIGHT : Fields.SHELL, sgsettings, System.SHELL);
         });
 
         this._gtkID = sgsettings.connect('changed::' + Fields.GTK, () => {
-            if(this._isNight) return;
-            if(tgsettings.get_string(System.THEME) != sgsettings.get_string(Fields.GTK))
-                tgsettings.set_string(System.THEME, sgsettings.get_string(Fields.GTK));
+            if(!this._isNight) this._sync(tgsettings, System.THEME, sgsettings, Fields.GTK);
         });
         this._shellID = sgsettings.connect('changed::' + Fields.SHELL, () => {
-            if(this._isNight) return;
-            if(sgsettings.get_string(System.SHELL) != sgsettings.get_string(Fields.SHELL))
-                sgsettings.set_string(System.SHELL, sgsettings.get_string(Fields.SHELL))
+            if(!this._isNight) this._sync(sgsettings, System.SHELL, sgsettings, Fields.SHELL);
         });
         this._iconsID = sgsettings.connect('changed::' + Fields.ICONS, () => {
-            if(this._isNight) return;
-            if(tgsettings.get_string(System.ICONS) != sgsettings.get_string(Fields.ICONS))
-                tgsettings.set_string(System.ICONS, sgsettings.get_string(Fields.ICONS))
+            if(!this._isNight) this._sync(tgsettings, System.ICONS, sgsettings, Fields.ICONS);
         });
         this._cursorID = sgsettings.connect('changed::' + Fields.CURSOR, () => {
-            if(this._isNight) return;
-            if(tgsettings.get_string(System.CURSOR) != sgsettings.get_string(Fields.CURSOR))
-                tgsettings.set_string(System.CURSOR, sgsettings.get_string(Fields.CURSOR))
+            if(!this._isNight) this._sync(tgsettings, System.CURSOR, sgsettings, Fields.CURSOR);
         });
         this._gtkNID = sgsettings.connect('changed::' + Fields.GTKNIGHT, () => {
-            if(!this._isNight) return;
-            if(tgsettings.get_string(System.THEME) != sgsettings.get_string(Fields.GTKNIGHT))
-                tgsettings.set_string(System.THEME, sgsettings.get_string(Fields.GTKNIGHT));
+            if(this._isNight) this._sync(tgsettings, System.THEME, sgsettings, Fields.GTKNIGHT);
         });
         this._shellNID = sgsettings.connect('changed::' + Fields.SHELLNIGHT, () => {
-            if(!this._isNight) return;
-            if(sgsettings.get_string(System.SHELL) != sgsettings.get_string(Fields.SHELLNIGHT))
-                sgsettings.set_string(System.SHELL, sgsettings.get_string(Fields.SHELLNIGHT));
+            if(this._isNight) this._sync(sgsettings, System.SHELL, sgsettings, Fields.SHELLNIGHT);
         });
         this._iconsNID = sgsettings.connect('changed::' + Fields.ICONSNIGHT, () => {
-            if(!this._isNight) return;
-            if(tgsettings.get_string(System.ICONS) != sgsettings.get_string(Fields.ICONSNIGHT))
-                tgsettings.set_string(System.ICONS, sgsettings.get_string(Fields.ICONSNIGHT));
+            if(this._isNight) this._sync(tgsettings, System.ICONS, sgsettings, Fields.ICONSNIGHT);
         });
         this._cursorNID = sgsettings.connect('changed::' + Fields.CURSORNIGHT, () => {
-            if(!this._isNight) return;
-            if(tgsettings.get_string(System.CURSOR) != sgsettings.get_string(Fields.CURSORNIGHT))
-                tgsettings.set_string(System.CURSOR, sgsettings.get_string(Fields.CURSORNIGHT));
+            if(this._isNight) this._sync(tgsettings, System.CURSOR, sgsettings, Fields.CURSORNIGHT);
         });
     }
 

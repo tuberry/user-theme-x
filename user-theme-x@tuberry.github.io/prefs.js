@@ -244,8 +244,8 @@ class ThemeTweaks extends Gtk.Box {
         this._field_gtk_night    = this._comboMaker(Util.getGtkThemes());
         this._field_shell        = this._comboMaker(Util.getShellThemes());
         this._field_shell_night  = this._comboMaker(Util.getShellThemes());
-        this._field_night        = new Gtk.CheckButton({ active: this._settings.get_boolean(this.Fields.XNIGHT), label: "Autoswitch:" });
-        this._field_style        = new Gtk.CheckButton({ active: this._settings.get_boolean(this.Fields.XSTYLE), label: "Load user stylesheet '~/.config/gnome-shell/gnome-shell{,-dark}.css'" });
+        this._field_night        = new Gtk.CheckButton({ label: "Autoswitch :" });
+        this._field_style        = new Gtk.CheckButton({ label: "Load user stylesheet '~/.config/gnome-shell/gnome-shell{,-dark}.css'" });
     }
 
     _bindValues() {
@@ -267,7 +267,7 @@ class ThemeTweaks extends Gtk.Box {
         frame._add(this._field_night, this._labelMaker('Day', true), this._labelMaker('Night', true));
         frame._add(this._labelMaker('Gtk theme :'),   this._field_gtk,    this._field_gtk_night);
         frame._add(this._labelMaker('Shell theme :'), this._field_shell,  this._field_shell_night);
-        frame._add(this._labelMaker('Icon theme :'),  this._field_icons,  this._field_icons_night);
+        frame._add(this._labelMaker('Icons theme :'),  this._field_icons,  this._field_icons_night);
         frame._add(this._labelMaker('Cursor theme :'),this._field_cursor, this._field_cursor_night);
     }
 
@@ -315,16 +315,16 @@ class ThemeTweaks extends Gtk.Box {
             this._field_gtk.set_sensitive(widget.active);
             this._field_icons.set_sensitive(widget.active);
             this._field_shell.set_sensitive(widget.active);
-            this._field_cursor.set_sensitive(widget.active)
+            this._field_cursor.set_sensitive(widget.active);
             this._field_gtk_night.set_sensitive(widget.active);
             this._field_icons_night.set_sensitive(widget.active);
             this._field_shell_night.set_sensitive(widget.active);
             this._field_cursor_night.set_sensitive(widget.active)
         });
-        this._field_icons.set_sensitive(this._field_night.active);
         this._field_gtk.set_sensitive(this._field_night.active);
+        this._field_icons.set_sensitive(this._field_night.active);
         this._field_shell.set_sensitive(this._field_night.active);
-        this._field_cursor.set_sensitive(this._field_night.active)
+        this._field_cursor.set_sensitive(this._field_night.active);
         this._field_gtk_night.set_sensitive(this._field_night.active);
         this._field_icons_night.set_sensitive(this._field_night.active);
         this._field_shell_night.set_sensitive(this._field_night.active);
@@ -347,7 +347,6 @@ class ThemeTweaks extends Gtk.Box {
         return new Gtk.Label({
             label: x,
             hexpand: true,
-            margin_left: 10,
             use_markup: true,
             halign: y ? Gtk.Align.START : Gtk.Align.END,
         });
