@@ -38,7 +38,6 @@ var UserStylesheet = GObject.registerClass({
     disable() {
         Main.loadTheme = this._originalLoadTheme;
         if(this._fileChangedId) this._fileMonitor.disconnect(this._fileChangedId), this._fileChangedId = 0;
-        this._fileMonitor.destroy();
         this._fileMonitor = null;
     }
 
