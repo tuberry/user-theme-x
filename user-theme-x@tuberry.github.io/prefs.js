@@ -348,7 +348,7 @@ class ThemeTweaks extends Gtk.Box {
             label: x,
             hexpand: true,
             use_markup: true,
-            halign: y ? Gtk.Align.START : Gtk.Align.END,
+            halign: y ? Gtk.Align.CENTER : Gtk.Align.END,
         });
     }
 });

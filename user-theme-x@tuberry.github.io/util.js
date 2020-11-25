@@ -71,6 +71,30 @@ function getGtkThemes() {
     return [...themes].sort();
 }
 
+function getModeThemes() {
+    let themes = new Set();
+    getModeThemeDirs().forEach(path => {
+        let dir = Gio.File.new_for_path(path);
+        if (dir.query_file_type(Gio.FileQueryInfoFlags.NONE, null) !== Gio.FileType.DIRECTORY)
+            return;
+        let enumertor = dir.enumerate_children('', Gio.FileQueryInfoFlags.NONE, null);
+        while (true) {
+            let fileInfo = enumertor.next_file(null);
+            if (fileInfo === null)
+                break;
+            let resourceFile = enumertor.get_child(fileInfo);
+            if (resourceFile === null)
+                break;
+            let filename = resourceFile.get_basename();
+            if(!filename.endsWith('.css'))
+                continue;
+            themes.add(filename.slice(0, -4));
+        }
+        enumertor.close(null);
+    });
+    return themes;
+}
+
 function getShellThemes() {
     let themes = new Set();
     getInstalled('themes').forEach(theme => {
@@ -78,6 +102,8 @@ function getShellThemes() {
         if (themeFile.query_exists(null))
             themes.add(theme.get('name'));
     });
+    getModeThemes().forEach(theme => themes.add(theme));
+    themes.add('Default');
     return [...themes].sort();
 }
 

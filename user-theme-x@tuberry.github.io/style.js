@@ -3,6 +3,7 @@
 
 const Main = imports.ui.main;
 const { Gio, GLib, GObject, St } = imports.gi;
+
 const LightProxy = Main.panel.statusArea['aggregateMenu']._nightLight._proxy;
 
 const gsettings = imports.misc.extensionUtils.getSettings();
@@ -50,7 +51,8 @@ var UserStylesheet = GObject.registerClass({
 
         let day = newFile(['gnome-shell', 'gnome-shell.css']);
         let night = newFile(['gnome-shell', 'gnome-shell-dark.css']);
-        let isNight = gsettings.get_boolean(Fields.NIGHT) && LightProxy.NightLightActive;
+        let isNight = LightProxy.NightLightActive && gsettings.get_boolean(Fields.NIGHT);
+
         if(night.query_exists(null) && isNight) {
             newTheme.load_stylesheet(night);
         } else if(day.query_exists(null)) {

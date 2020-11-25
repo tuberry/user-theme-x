@@ -3,6 +3,7 @@
 
 const Main = imports.ui.main;
 const { Gio, GObject } = imports.gi;
+
 const LightProxy = Main.panel.statusArea['aggregateMenu']._nightLight._proxy;
 
 const System = {
@@ -38,9 +39,7 @@ class NightThemeSwitch extends GObject.Object {
     }
 
     get _isNight() {
-        if(!LightProxy || !ngsettings.get_boolean(System.NIGHTLIGHT))
-            return false;
-        return LightProxy.NightLightActive;
+        return ngsettings.get_boolean(System.NIGHTLIGHT) && LightProxy.NightLightActive;
     }
 
     _onLightChanged() {

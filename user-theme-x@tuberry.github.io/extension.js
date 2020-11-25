@@ -74,7 +74,6 @@ class ThemeManager {
             this._settings.get_boolean(STYLESHEET_KEY) ? Style.enable() : Style.disable();
             this._changeTheme();
         });
-
         if(this._settings.get_boolean(NIGHTTHEME_KEY)) Night.enable();
         this._nightChangedId = this._settings.connect(`changed::${NIGHTTHEME_KEY}`, () => {
             this._settings.get_boolean(NIGHTTHEME_KEY) ? Night.enable() : Night.disable();
