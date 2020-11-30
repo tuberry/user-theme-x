@@ -44,11 +44,10 @@ Set the size to 0 to *hide* the arrow in panel menu.
 The themes will be toggled automatically when Night Light is active and inactive.
 
 ## Note
-1. The extension is forked from and compatible with [user-theme]. In other word, this extension has full support for user-theme except changing shell theme with gnome-tweaks because of [uuid].
-2. If there is something wrong with gnome shell theme after updating, don't forget to disable the user-stylesheet to exclude the influence of your code snippets, also it's a good habbit to add comments for them.
+1. The extension is forked from and compatible with [user-theme].
+2. If there is something wrong, try to disable the user-stylesheet to exclude the influence of your code snippets.
 
 [EGO]:https://extensions.gnome.org/extension/3019/user-themes-x/
-[Light Dict]:https://github.com/tuberry/light-dict
 [user-theme]:https://extensions.gnome.org/extension/19/user-themes/
 [uuid]:https://gitlab.gnome.org/GNOME/gnome-shell-extensions/-/merge_requests/110
 [license]:https://img.shields.io/badge/license-LGPLv3-lightgreen.svg

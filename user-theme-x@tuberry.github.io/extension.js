@@ -11,11 +11,6 @@ const Me = ExtensionUtils.getCurrentExtension();
 const Util = Me.imports.util;
 
 const SETTINGS_KEY = 'name';
-const NIGHTTHEME_KEY = 'night-x';
-const STYLESHEET_KEY = 'stylesheet-x';
-
-const Style = new Me.imports.style.UserStylesheet();
-const Night = new Me.imports.night.NightThemeSwitch();
 
 class ThemeManager {
     constructor() {
@@ -23,13 +18,14 @@ class ThemeManager {
     }
 
     enable() {
-        this._enable();
+        this._tweaks = new Me.imports.tweaks.ThemeTweaks();
         this._changeTheme();
         this._settingChangedId = this._settings.connect(`changed::${SETTINGS_KEY}`, this._changeTheme.bind(this));
     }
 
     disable() {
-        this._disable();
+        this._tweaks.destroy();
+        this._tweaks = null;
         if(this._settingChangedId) this._settings.disconnect(this._settingChangedId), this._settingChangedId = 0;
 
         try {
@@ -65,27 +61,6 @@ class ThemeManager {
 
         Main.setThemeStylesheet(stylesheet);
         Main.loadTheme();
-    }
-
-    _enable() {
-        if(this._settings.get_boolean(STYLESHEET_KEY)) Style.enable();
-        this._fileChangedId = Style.connect('file-changed', this._changeTheme.bind(this));
-        this._styleChangedId = this._settings.connect(`changed::${STYLESHEET_KEY}`, () => {
-            this._settings.get_boolean(STYLESHEET_KEY) ? Style.enable() : Style.disable();
-            this._changeTheme();
-        });
-        if(this._settings.get_boolean(NIGHTTHEME_KEY)) Night.enable();
-        this._nightChangedId = this._settings.connect(`changed::${NIGHTTHEME_KEY}`, () => {
-            this._settings.get_boolean(NIGHTTHEME_KEY) ? Night.enable() : Night.disable();
-        });
-    }
-
-    _disable() {
-        if(this._settings.get_boolean(NIGHTTHEME_KEY)) Night.disable();
-        if(this._settings.get_boolean(STYLESHEET_KEY)) Style.disable();
-        if(this._fileChangedId) Style.disconnect(this._fileChangedId), this._fileChangedId = 0;
-        if(this._styleChangedId) this._settings.disconnect(this._styleChangedId), this._styleChangedId = 0;
-        if(this._nightChangedId) this._settings.disconnect(this._nightChangedId), this._nightChangedId = 0;
     }
 }
 
