@@ -336,7 +336,7 @@ class ThemeTweaks extends Gtk.Box {
         l.set_column_types([GObject.TYPE_STRING]);
         ops.forEach(op => l.set(l.append(), [0], [op]));
         let c = new Gtk.ComboBox({ model: l });
-        let r = new Gtk.CellRendererText();
+        let r = new Gtk.CellRendererText({ editable: true, placeholder_text: 'Default' });
         c.pack_start(r, false);
         c.add_attribute(r, "text", 0);
         c.set_id_column(0);

@@ -7,13 +7,13 @@ const { loadInterfaceXML } = imports.misc.fileUtils;
 const LightProxy = Main.panel.statusArea['aggregateMenu']._nightLight._proxy;
 
 const System = {
-    SHELL:        'name',
-    THEME:        'gtk-theme',
-    ICONS:        'icon-theme',
-    CURSOR:       'cursor-theme',
-    NIGHTLIGHT:   'night-light-enabled',
-    THEMESCHEMA:  'org.gnome.desktop.interface',
-    NIGHTSCHEMA:  'org.gnome.settings-daemon.plugins.color',
+    SHELL:       'name',
+    THEME:       'gtk-theme',
+    ICONS:       'icon-theme',
+    CURSOR:      'cursor-theme',
+    NIGHTLIGHT:  'night-light-enabled',
+    THEMESCHEMA: 'org.gnome.desktop.interface',
+    NIGHTSCHEMA: 'org.gnome.settings-daemon.plugins.color',
 };
 
 const sgsettings = imports.misc.extensionUtils.getSettings();
@@ -71,8 +71,8 @@ const loadTheme = () => {
 
 var ThemeTweaks = GObject.registerClass({
     Properties: {
-        'night':  GObject.param_spec_boolean('night', '', '', false, GObject.ParamFlags.WRITABLE),
-        'style':  GObject.param_spec_boolean('style', '', '', false, GObject.ParamFlags.WRITABLE),
+        'night': GObject.param_spec_boolean('night', '', '', false, GObject.ParamFlags.WRITABLE),
+        'style': GObject.param_spec_boolean('style', '', '', false, GObject.ParamFlags.WRITABLE),
     },
 }, class ThemeTweaks extends GObject.Object {
     _init() {
@@ -96,14 +96,14 @@ var ThemeTweaks = GObject.registerClass({
 
     _syncTheme() {
         if(this._isNight) {
-            sync(tgsettings, System.THEME, sgsettings, Fields.GTKNIGHT);
-            sync(sgsettings, System.SHELL, sgsettings, Fields.SHELLNIGHT);
-            sync(tgsettings, System.ICONS, sgsettings, Fields.ICONSNIGHT);
+            sync(tgsettings, System.THEME,  sgsettings, Fields.GTKNIGHT);
+            sync(sgsettings, System.SHELL,  sgsettings, Fields.SHELLNIGHT);
+            sync(tgsettings, System.ICONS,  sgsettings, Fields.ICONSNIGHT);
             sync(tgsettings, System.CURSOR, sgsettings, Fields.CURSORNIGHT);
         } else {
-            sync(tgsettings, System.THEME, sgsettings, Fields.GTK);
-            sync(sgsettings, System.SHELL, sgsettings, Fields.SHELL);
-            sync(tgsettings, System.ICONS, sgsettings, Fields.ICONS);
+            sync(tgsettings, System.THEME,  sgsettings, Fields.GTK);
+            sync(sgsettings, System.SHELL,  sgsettings, Fields.SHELL);
+            sync(tgsettings, System.ICONS,  sgsettings, Fields.ICONS);
             sync(tgsettings, System.CURSOR, sgsettings, Fields.CURSOR);
         }
     }

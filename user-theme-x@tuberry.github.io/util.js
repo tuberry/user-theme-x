@@ -103,7 +103,7 @@ function getShellThemes() {
             themes.add(theme.get('name'));
     });
     getModeThemes().forEach(theme => themes.add(theme));
-    themes.add('Default');
+    themes.add('');
     return [...themes].sort();
 }
 
