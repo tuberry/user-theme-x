@@ -40,39 +40,10 @@ const Fields = {
     CURSORNIGHT: 'cursor-night-x',
 };
 
-const loadTheme = () => {
-    let themeContext = St.ThemeContext.get_for_stage(global.stage);
-    let newTheme = new St.Theme({
-        application_stylesheet: Main.getThemeStylesheet(),
-        default_stylesheet: Main._getDefaultStylesheet(),
-    });
-
-    let day = newFile(['gnome-shell', 'gnome-shell.css']);
-    let night = newFile(['gnome-shell', 'gnome-shell-dark.css']);
-    let isNight = LightProxy.NightLightActive && sgsettings.get_boolean(Fields.NIGHT);
-
-    if(night.query_exists(null) && isNight) {
-        newTheme.load_stylesheet(night);
-    } else if(day.query_exists(null)) {
-        newTheme.load_stylesheet(day);
-    } else {
-        global.log('Could not find user stylesheet "~/.config/gnome-shell/gnome-shell{,-dark}.css"');
-    }
-
-    if(newTheme.default_stylesheet === null)
-        throw new Error("No valid stylesheet found for '%s'".format(Main.sessionMode.stylesheetName));
-
-    let previousTheme = themeContext.get_theme();
-    if(previousTheme)
-        previousTheme.get_custom_stylesheets().forEach(x => { if(!x.equal(day) && !x.equal(night)) newTheme.load_stylesheet(x); });
-
-    themeContext.set_theme(newTheme);
-}
-
 var ThemeTweaks = GObject.registerClass({
     Properties: {
-        'night': GObject.param_spec_boolean('night', '', '', false, GObject.ParamFlags.WRITABLE),
-        'style': GObject.param_spec_boolean('style', '', '', false, GObject.ParamFlags.WRITABLE),
+        'night': GObject.param_spec_boolean('night', 'night', 'night', false, GObject.ParamFlags.WRITABLE),
+        'style': GObject.param_spec_boolean('style', 'style', 'style', false, GObject.ParamFlags.WRITABLE),
     },
 }, class ThemeTweaks extends GObject.Object {
     _init() {
