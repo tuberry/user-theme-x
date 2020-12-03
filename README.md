@@ -18,7 +18,7 @@ cd user-theme-x && make install
 ## Features
 ![image](https://user-images.githubusercontent.com/17917040/99734013-10177f80-2afd-11eb-9d63-2a1ba8831793.png)
 ### User stylesheet
-Load user stylesheet form `~/.config/gnome-shell/gnome-shell.css`, which should be created by yourself.
+Load user stylesheet `~/.config/gnome-shell/gnome-shell{,-dark}.css`.
 ```bash
 mkdir -p ~/.config/gnome-shell && touch ~/.config/gnome-shell/gnome-shell.css
 ```
@@ -41,7 +41,7 @@ Set the size to 0 to *hide* the arrow in panel menu.
 ```
 
 ### Night theme auto switch
-The themes will be toggled automatically when Night Light is active and inactive.
+The themes will be toggled automatically when Night Light is active or inactive.
 
 ## Note
 1. The extension is forked from and compatible with [user-theme].

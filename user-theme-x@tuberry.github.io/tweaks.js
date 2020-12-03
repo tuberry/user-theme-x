@@ -1,5 +1,6 @@
 // vim:fdm=syntax
 // by tuberry@github
+// exported ThemeTweaks
 
 const Main = imports.ui.main;
 const { Gio, GLib, GObject, St } = imports.gi;
@@ -62,7 +63,7 @@ var ThemeTweaks = GObject.registerClass({
 
     _onLightChanged() {
         this._loadStyle();
-        this._syncTheme()
+        this._syncTheme();
     }
 
     _syncTheme() {
@@ -95,6 +96,7 @@ var ThemeTweaks = GObject.registerClass({
             newTheme.load_stylesheet(day);
         } else {
             global.log('Could not find user stylesheet "~/.config/gnome-shell/gnome-shell{,-dark}.css"');
+            return;
         }
 
         if(newTheme.default_stylesheet === null)
@@ -182,7 +184,8 @@ var ThemeTweaks = GObject.registerClass({
             this._unloadStyle();
             if(this._fileChangedId)
                 this._fileMonitor.disconnect(this._fileChangedId), this._fileChangedId = 0;
-            this._fileMonitor = null;
+            this._fileMonitor.run_dispose();
+            delete this._fileMonitor;
         }
     }
 
@@ -193,6 +196,7 @@ var ThemeTweaks = GObject.registerClass({
             ngsettings.disconnect(this._nightLightOnId), this._nightLightOnId = 0;
         if(this._proxyChangedId)
             LightProxy.disconnect(this._proxyChangedId), this._proxyChangedId = 0;
+        this.run_dispose();
     }
 });
 

@@ -25,7 +25,7 @@ class ThemeManager {
 
     disable() {
         this._tweaks.destroy();
-        this._tweaks = null;
+        delete this._tweaks;
         if(this._settingChangedId) this._settings.disconnect(this._settingChangedId), this._settingChangedId = 0;
 
         try {
