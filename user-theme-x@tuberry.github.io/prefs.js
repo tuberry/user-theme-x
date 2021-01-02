@@ -4,7 +4,7 @@
 // we use async/await here to not block the mainloop, not to parallelize
 /* eslint-disable no-await-in-loop */
 
-const { Gio, GLib, GObject, Gtk, Pango } = imports.gi;
+const { Gio, GLib, GObject, Gtk } = imports.gi;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 
@@ -338,8 +338,6 @@ class ThemeTweaks extends Gtk.Box {
         let c = new Gtk.ComboBox({ model: l });
         let r = new Gtk.CellRendererText({
             editable: true,
-            // ellipsize_set: true,
-            // ellipsize: Pango.EllipsizeMode.MIDDLE,
             placeholder_text: 'Default'
         });
         c.pack_start(r, false);

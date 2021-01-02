@@ -4,7 +4,6 @@
 
 const Main = imports.ui.main;
 const { Gio, GLib, GObject, St } = imports.gi;
-const { loadInterfaceXML } = imports.misc.fileUtils;
 const LightProxy = Main.panel.statusArea['aggregateMenu']._nightLight._proxy;
 
 const System = {
@@ -21,7 +20,6 @@ const sgsettings = imports.misc.extensionUtils.getSettings();
 const tgsettings = new Gio.Settings({ schema: System.THEMESCHEMA });
 const ngsettings = new Gio.Settings({ schema: System.NIGHTSCHEMA });
 
-const Type = { theme: 0, icons: 1, cursor: 2 };
 const newFile = x => Gio.File.new_for_path(GLib.build_filenamev([GLib.get_user_config_dir()].concat(x)));
 const sync = (scm_a, key_a, scm_b, key_b) => {
     if(scm_a.get_string(key_a) != scm_b.get_string(key_b))
@@ -184,7 +182,6 @@ var ThemeTweaks = GObject.registerClass({
             this._unloadStyle();
             if(this._fileChangedId)
                 this._fileMonitor.disconnect(this._fileChangedId), this._fileChangedId = 0;
-            this._fileMonitor.run_dispose();
             delete this._fileMonitor;
         }
     }
@@ -196,7 +193,6 @@ var ThemeTweaks = GObject.registerClass({
             ngsettings.disconnect(this._nightLightOnId), this._nightLightOnId = 0;
         if(this._proxyChangedId)
             LightProxy.disconnect(this._proxyChangedId), this._proxyChangedId = 0;
-        this.run_dispose();
     }
 });
 
