@@ -93,7 +93,7 @@ var ThemeTweaks = GObject.registerClass({
         } else if(day.query_exists(null)) {
             newTheme.load_stylesheet(day);
         } else {
-            global.log('Could not find user stylesheet "~/.config/gnome-shell/gnome-shell{,-dark}.css"');
+            log('Could not find user stylesheet "~/.config/gnome-shell/gnome-shell{,-dark}.css"');
             return;
         }
 
