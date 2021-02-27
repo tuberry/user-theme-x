@@ -45,7 +45,7 @@ These themes will be toggled automatically when Night Light is active or inactiv
 ## Note
 
 1. The extension is forked from [user-theme].
-2. If there is something wrong, try to disable the user-stylesheet to exclude the influence of your code snippets.
+2. If there is something wrong, try to disable the user stylesheet.
 
 [EGO]:https://extensions.gnome.org/extension/3019/user-themes-x/
 [user-theme]:https://extensions.gnome.org/extension/19/user-themes/

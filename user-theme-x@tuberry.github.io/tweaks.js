@@ -60,8 +60,8 @@ var ThemeTweaks = GObject.registerClass({
     }
 
     _onLightChanged() {
-        this._loadStyle();
-        this._syncTheme();
+        if(this._style) this._loadStyle();
+        if(this._night) this._syncTheme();
     }
 
     _syncTheme() {
@@ -117,7 +117,9 @@ var ThemeTweaks = GObject.registerClass({
     }
 
     set night(night) {
+        this._night = night;
         if(night) { // sync values: 4 sys <=> 8 user
+            this._syncTheme();
             this._themeChangedId  = tgsettings.connect('changed::' + System.THEME, () => {
                 sync(sgsettings, this._isNight ? Fields.GTKNIGHT : Fields.GTK, tgsettings, System.THEME);
             });
@@ -165,10 +167,10 @@ var ThemeTweaks = GObject.registerClass({
             for(let x in this)
                 if(RegExp(/^_.+ID$/).test(x)) eval('if(this.%s) sgsettings.disconnect(this.%s), this.%s = 0;'.format(x, x, x));
         }
-        this._syncTheme();
     }
 
     set style(style) {
+        this._style = style;
         if(style) {
             this._loadStyle();
             this._emitCount = 0;
