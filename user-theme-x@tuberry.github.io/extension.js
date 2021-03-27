@@ -49,7 +49,7 @@ class ThemeManager {
                 .map(dir => `${dir}/${themeName}.css`));
 
             stylesheet = stylesheetPaths.find(path => {
-                let file = Gio.file_new_for_path(path);
+                let file = Gio.File.new_for_path(path);
                 return file.query_exists(null);
             });
         }

@@ -20,29 +20,19 @@ const sgsettings = imports.misc.extensionUtils.getSettings();
 const tgsettings = new Gio.Settings({ schema: System.THEMESCHEMA });
 const ngsettings = new Gio.Settings({ schema: System.NIGHTSCHEMA });
 
+const Me = imports.misc.extensionUtils.getCurrentExtension();
+const Fields = Me.imports.prefs.Fields;
+
 const newFile = x => Gio.File.new_for_path(GLib.build_filenamev([GLib.get_user_config_dir()].concat(x)));
 const sync = (scm_a, key_a, scm_b, key_b) => {
     if(scm_a.get_string(key_a) != scm_b.get_string(key_b))
         scm_a.set_string(key_a, scm_b.get_string(key_b));
 }
 
-const Fields = {
-    GTK:         'gtk-x',
-    ICONS:       'icons-x',
-    NIGHT:       'night-x',
-    SHELL:       'shell-x',
-    CURSOR:      'cursor-x',
-    GTKNIGHT:    'gtk-night-x',
-    STYLE:       'stylesheet-x',
-    ICONSNIGHT:  'icons-night-x',
-    SHELLNIGHT:  'shell-night-x',
-    CURSORNIGHT: 'cursor-night-x',
-};
-
 var ThemeTweaks = GObject.registerClass({
     Properties: {
-        'night': GObject.param_spec_boolean('night', 'night', 'night', false, GObject.ParamFlags.WRITABLE),
-        'style': GObject.param_spec_boolean('style', 'style', 'style', false, GObject.ParamFlags.WRITABLE),
+        'night': GObject.ParamSpec.boolean('night', 'night', 'night', GObject.ParamFlags.WRITABLE, false),
+        'style': GObject.ParamSpec.boolean('style', 'style', 'style', GObject.ParamFlags.WRITABLE, false),
     },
 }, class ThemeTweaks extends GObject.Object {
     _init() {
