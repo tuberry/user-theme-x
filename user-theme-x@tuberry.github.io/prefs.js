@@ -1,8 +1,8 @@
 // vim:fdm=syntax
-// by: tuberry
+// by: tuberry@github
+'use strict';
 
-
-const { Gio, GLib, GObject, Gtk } = imports.gi;
+const { Gio, GObject, Gtk } = imports.gi;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
@@ -35,27 +35,31 @@ function buildPrefsWidget() {
 const UserTHemeXPrefs = GObject.registerClass(
 class UserTHemeXPrefs extends Gtk.ScrolledWindow {
     _init() {
-        super._init({
-            hscrollbar_policy: Gtk.PolicyType.NEVER,
-        });
+        super._init({ hscrollbar_policy: Gtk.PolicyType.NEVER, });
 
-        this._buildUI();
+        this._buildWidgets();
         this._bindValues();
-        this.show_all();
+        this._buildUI();
+    }
+
+    _buildWidgets() {
+        let cursor = Util.getCursorThemes();
+        let icon   = Util.getIconThemes();
+        let gtk    = Util.getGtkThemes();
+        let shell  = Util.getShellThemes();
+        this._field_cursor       = this._comboMaker(cursor);
+        this._field_cursor_night = this._comboMaker(cursor);
+        this._field_icons        = this._comboMaker(icon);
+        this._field_icons_night  = this._comboMaker(icon);
+        this._field_gtk          = this._comboMaker(gtk);
+        this._field_gtk_night    = this._comboMaker(gtk);
+        this._field_shell        = this._comboMaker(shell);
+        this._field_shell_night  = this._comboMaker(shell);
+        this._field_night        = new Gtk.CheckButton({ label: _('Themes') });
+        this._field_style        = new UI.Check(_('Load user stylesheet “~/.config/gnome-shell/gnome-shell{,-dark}.css”'));
     }
 
     _buildUI() {
-        this._field_cursor       = this._comboMaker(Util.getCursorThemes());
-        this._field_cursor_night = this._comboMaker(Util.getCursorThemes());
-        this._field_icons        = this._comboMaker(Util.getIconThemes());
-        this._field_icons_night  = this._comboMaker(Util.getIconThemes());
-        this._field_gtk          = this._comboMaker(Util.getGtkThemes());
-        this._field_gtk_night    = this._comboMaker(Util.getGtkThemes());
-        this._field_shell        = this._comboMaker(Util.getShellThemes());
-        this._field_shell_night  = this._comboMaker(Util.getShellThemes());
-        this._field_night        = new UI.Check(_('Themes'));
-        this._field_style        = new UI.Check(_('Load user stylesheet “~/.config/gnome-shell/gnome-shell{,-dark}.css”'));
-
         let grid = this._listGridMaker();
         grid._add(this._field_style);
         grid._add(this._field_night, this._labelMaker(_('Day'), true), this._labelMaker(_('Night'), true));
@@ -63,7 +67,7 @@ class UserTHemeXPrefs extends Gtk.ScrolledWindow {
         grid._add(this._labelMaker(_('Shell')),  this._field_shell,  this._field_shell_night);
         grid._add(this._labelMaker(_('Icons')),  this._field_icons,  this._field_icons_night);
         grid._add(this._labelMaker(_('Cursor')), this._field_cursor, this._field_cursor_night);
-        this.add(new UI.Frame(grid));
+        this.set_child(new UI.Frame(grid));
     }
 
     _bindValues() {
@@ -134,6 +138,7 @@ class UserTHemeXPrefs extends Gtk.ScrolledWindow {
 
     _labelMaker(x, y) {
         let label = new UI.Label(x);
+        if(!y) label.set_hexpand(false);
         label.set_halign(y ? Gtk.Align.CENTER : Gtk.Align.END)
         return label;
     }

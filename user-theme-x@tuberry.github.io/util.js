@@ -1,6 +1,9 @@
-/* exported getThemeDirs getModeThemeDirs */
+// vim:fdm=syntax
+// by: tuberry@github
+'use strict';
 
 /* *
+ * exported getThemeDirs getModeThemeDirs
  * exported get{Gtk,Shell,Icons,Cursor}Themes
  * Refer to night-themes-switcher
  * https://gitlab.com/rmnvgr/nightthemeswitcher-gnome-shell-extension/-/blob/master/src/utils.js

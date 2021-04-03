@@ -28,13 +28,26 @@ Load user stylesheet `~/.config/gnome-shell/gnome-shell{,-dark}.css`.
 mkdir -p ~/.config/gnome-shell && touch ~/.config/gnome-shell/gnome-shell.css
 ```
 
-For example:
+For example, hide the dropdown arrow:
 
 ```css
-/* Set the size to 0 to *hide* the arrow in panel menu. */
+/* hide the dropdown arrow, not needed since GNOME 40 */
 #panel .panel-button .popup-menu-arrow {
     width: 0;
     height: 0;
+}
+```
+or [floating panel]:
+
+```css
+/* floating panel */
+#panelBox {
+  padding: 0.35em 0.9em;
+  background: transparent;
+}
+
+#panel {
+  border-radius: 0.9em;
 }
 ```
 
@@ -47,6 +60,7 @@ These themes will be toggled automatically when Night Light is active or inactiv
 1. The extension is forked from [user-theme].
 2. If there is something wrong, try to disable the user stylesheet.
 
+[floating panel]:https://www.reddit.com/r/gnome/comments/mfj1mw/i_noticed_there_isnt_really_help_on_how_to_make/
 [EGO]:https://extensions.gnome.org/extension/3019/user-themes-x/
 [user-theme]:https://extensions.gnome.org/extension/19/user-themes/
 [license]:https://img.shields.io/badge/license-LGPLv3-lightgreen.svg

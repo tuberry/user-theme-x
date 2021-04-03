@@ -1,6 +1,6 @@
 // vim:fdm=syntax
-// by tuberry@github
-// exported ThemeTweaks
+// by: tuberry@github
+'use strict';
 
 const Main = imports.ui.main;
 const { Gio, GLib, GObject, St } = imports.gi;
@@ -21,7 +21,7 @@ const tgsettings = new Gio.Settings({ schema: System.THEMESCHEMA });
 const ngsettings = new Gio.Settings({ schema: System.NIGHTSCHEMA });
 
 const Me = imports.misc.extensionUtils.getCurrentExtension();
-const Fields = Me.imports.prefs.Fields;
+const Fields = Me.imports.fields.Fields;
 
 const newFile = x => Gio.File.new_for_path(GLib.build_filenamev([GLib.get_user_config_dir()].concat(x)));
 const sync = (scm_a, key_a, scm_b, key_b) => {
