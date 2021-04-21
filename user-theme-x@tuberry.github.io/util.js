@@ -42,15 +42,15 @@ function getInstalled(type) {
             return;
         let enumertor = dir.enumerate_children('', Gio.FileQueryInfoFlags.NONE, null);
         while (true) {
-            let dirInfo = enumertor.next_file(null);
-            if (dirInfo === null)
+            let info = enumertor.next_file(null);
+            if (info === null)
                 break;
-            let resourceDir = enumertor.get_child(dirInfo);
-            if (resourceDir === null)
+            let file = enumertor.get_child(info);
+            if (file === null)
                 break;
             let resource = new Map([
-                ['name', resourceDir.get_basename()],
-                ['path', resourceDir.get_path()],
+                ['name', file.get_basename()],
+                ['path', file.get_path()],
             ]);
             installed.add(resource);
         }
@@ -65,8 +65,8 @@ function getGtkThemes() {
         let version = [0, Gtk.MINOR_VERSION].find(gtkVersion => {
             if (gtkVersion % 2)
                 gtkVersion += 1;
-            let cssFile = Gio.File.new_for_path(GLib.build_filenamev([theme.get('path'), `gtk-3.${gtkVersion}`, 'gtk.css']));
-            return cssFile.query_exists(null);
+            let css = Gio.File.new_for_path(GLib.build_filenamev([theme.get('path'), `gtk-3.${gtkVersion}`, 'gtk.css']));
+            return css.query_exists(null);
         });
         if (version !== undefined)
             themes.add(theme.get('name'));
@@ -82,13 +82,13 @@ function getModeThemes() {
             return;
         let enumertor = dir.enumerate_children('', Gio.FileQueryInfoFlags.NONE, null);
         while (true) {
-            let fileInfo = enumertor.next_file(null);
-            if (fileInfo === null)
+            let info = enumertor.next_file(null);
+            if (info === null)
                 break;
-            let resourceFile = enumertor.get_child(fileInfo);
-            if (resourceFile === null)
+            let file = enumertor.get_child(info);
+            if (file === null)
                 break;
-            let filename = resourceFile.get_basename();
+            let filename = file.get_basename();
             if(!filename.endsWith('.css'))
                 continue;
             themes.add(filename.slice(0, -4));
@@ -101,8 +101,8 @@ function getModeThemes() {
 function getShellThemes() {
     let themes = new Set();
     getInstalled('themes').forEach(theme => {
-        let themeFile = Gio.File.new_for_path(GLib.build_filenamev([theme.get('path'), 'gnome-shell', 'gnome-shell.css']));
-        if (themeFile.query_exists(null))
+        let file = Gio.File.new_for_path(GLib.build_filenamev([theme.get('path'), 'gnome-shell', 'gnome-shell.css']));
+        if (file.query_exists(null))
             themes.add(theme.get('name'));
     });
     getModeThemes().forEach(theme => themes.add(theme));
@@ -113,8 +113,8 @@ function getShellThemes() {
 function getIconThemes() {
     let themes = new Set();
     getInstalled('icons').forEach(theme => {
-        let themeFile = Gio.File.new_for_path(GLib.build_filenamev([theme.get('path'), 'index.theme']));
-        if (themeFile.query_exists(null))
+        let file = Gio.File.new_for_path(GLib.build_filenamev([theme.get('path'), 'icon-theme.cache']));
+        if (file.query_exists(null))
             themes.add(theme.get('name'));
     });
     themes.delete('default');
@@ -124,8 +124,8 @@ function getIconThemes() {
 function getCursorThemes() {
     let themes = new Set();
     getInstalled('icons').forEach(theme => {
-        let themeFile = Gio.File.new_for_path(GLib.build_filenamev([theme.get('path'), 'cursors']));
-        if (themeFile.query_exists(null))
+        let file = Gio.File.new_for_path(GLib.build_filenamev([theme.get('path'), 'cursors']));
+        if (file.query_exists(null))
             themes.add(theme.get('name'));
     });
     return [...themes].sort();
