@@ -1,5 +1,5 @@
 {
-  "description": "Customizable user-theme with user stylesheet and night theme autoswitch support",
+  "description": "Customizable user-theme with user stylesheet and night theme auto-switch support\n\nFor support, please report any issues via the homepage link below.",
   "extension-id": "user-theme-x",
   "gettext-domain": "user-theme-x",
   "name": "User Themes X",
