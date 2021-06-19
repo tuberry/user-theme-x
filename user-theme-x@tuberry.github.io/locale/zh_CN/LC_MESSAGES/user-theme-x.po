@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: User Theme X 21\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-27 14:33+0800\n"
+"POT-Creation-Date: 2021-06-18 17:35+0800\n"
 "PO-Revision-Date: 2021-03-23 11:11+0800\n"
 "Last-Translator: tuberry <orzun@foxmail.com>\n"
 "Language-Team: Chinese (Simplified) <orzun@foxmail.com>\n"
@@ -20,38 +20,38 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0\n"
 "X-Generator: Gtranslator 3.38.0\n"
 
-#: prefs.js:56
+#: prefs.js:58
 msgid "Themes"
 msgstr "主题"
 
-#: prefs.js:57
+#: prefs.js:59
 msgid "Load user stylesheet “~/.config/gnome-shell/gnome-shell{,-dark}.css”"
 msgstr "加载用户样式表“~/.config/gnome-shell/gnome-shell{,-dark}.css”"
 
-#: prefs.js:61
+#: prefs.js:65
 msgid "Day"
 msgstr "白天"
 
-#: prefs.js:61
+#: prefs.js:65
 msgid "Night"
 msgstr "夜晚"
 
-#: prefs.js:62
+#: prefs.js:66
 msgid "Gtk"
 msgstr "Gtk"
 
-#: prefs.js:63
+#: prefs.js:67
 msgid "Shell"
 msgstr "Shell"
 
-#: prefs.js:64
+#: prefs.js:68
 msgid "Icons"
 msgstr "图标"
 
-#: prefs.js:65
+#: prefs.js:69
 msgid "Cursor"
 msgstr "光标"
 
-#: prefs.js:108
+#: prefs.js:112
 msgid "Default"
 msgstr "默认"

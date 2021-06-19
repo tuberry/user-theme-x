@@ -14,6 +14,7 @@ Or manually:
 ```bash
 git clone https://github.com/tuberry/user-theme-x.git
 cd user-theme-x && make install
+# make mergepo # for translation
 ```
 
 ## Features
