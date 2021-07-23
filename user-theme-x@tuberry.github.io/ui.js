@@ -228,6 +228,44 @@ var Combo = GObject.registerClass({
     }
 });
 
+var Drop = GObject.registerClass({
+    GTypeName: 'Gjs_%s_UI_Drop'.format(Uuid),
+    Properties: {
+        'actives': GObject.ParamSpec.string('actives', 'actives', 'actives', GObject.ParamFlags.READWRITE, ''),
+        'active' : GObject.ParamSpec.uint('active', 'active', 'active', GObject.ParamFlags.READWRITE, 0, 10000, 0),
+    },
+}, class Drop extends Gtk.Box {
+    _init(opts, tip, hexpand, params) {
+        super._init(params);
+        this._opts = opts;
+        this._drop = Gtk.DropDown.new_from_strings(opts);
+        this._drop.connect('notify::selected', () => {
+            this.notify('active');
+            this.notify('actives');
+        });
+        // this._drop.set_enable_search(true);
+        if(tip) this._drop.set_tooltip_text(tip);
+        if(hexpand) this._drop.set_hexpand(true);
+        this.append(this._drop);
+    }
+
+    set active(active) {
+        this._drop.set_selected(active);
+    }
+
+    get active() {
+        return this._drop.get_selected();
+    }
+
+    set actives(actives) {
+        this._drop.set_selected(this._opts.indexOf(actives));
+    }
+
+    get actives() {
+        return this._drop.get_selected_item().get_string();
+    }
+});
+
 var Frame = GObject.registerClass({
     GTypeName: 'Gjs_%s_UI_Frame'.format(Uuid),
 }, class Frame extends Gtk.Frame {
