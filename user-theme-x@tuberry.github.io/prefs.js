@@ -32,6 +32,44 @@ function buildPrefsWidget() {
     return new UserTHemeXPrefs();
 }
 
+var Drop = GObject.registerClass({
+    GTypeName: 'Gjs_%s_UI_Drop'.format(Me.metadata.uuid),
+    Properties: {
+        'actives': GObject.ParamSpec.string('actives', 'actives', 'actives', GObject.ParamFlags.READWRITE, ''),
+        'active' : GObject.ParamSpec.uint('active', 'active', 'active', GObject.ParamFlags.READWRITE, 0, 10000, 0),
+    },
+}, class Drop extends Gtk.Box {
+    _init(opts, tip, hexpand, params) {
+        super._init(params);
+        this._opts = opts;
+        this._drop = Gtk.DropDown.new_from_strings(opts);
+        this._drop.connect('notify::selected', () => {
+            this.notify('active');
+            this.notify('actives');
+        });
+        // this._drop.set_enable_search(true);
+        if(tip) this._drop.set_tooltip_text(tip);
+        if(hexpand) this._drop.set_hexpand(true);
+        this.append(this._drop);
+    }
+
+    set active(active) {
+        this._drop.set_selected(active);
+    }
+
+    get active() {
+        return this._drop.get_selected();
+    }
+
+    set actives(actives) {
+        this._drop.set_selected(this._opts.indexOf(actives));
+    }
+
+    get actives() {
+        return this._drop.get_selected_item().get_string();
+    }
+});
+
 const UserTHemeXPrefs = GObject.registerClass(
 class UserTHemeXPrefs extends Gtk.ScrolledWindow {
     _init() {
@@ -47,14 +85,14 @@ class UserTHemeXPrefs extends Gtk.ScrolledWindow {
         let icon   = Util.getIconThemes();
         let gtk    = Util.getGtkThemes();
         let shell  = Util.getShellThemes();
-        this._field_cursor       = new UI.Drop(cursor, null, true);
-        this._field_cursor_night = new UI.Drop(cursor, null, true);
-        this._field_icons        = new UI.Drop(icon, null, true);
-        this._field_icons_night  = new UI.Drop(icon, null, true);
-        this._field_gtk          = new UI.Drop(gtk, null, true);
-        this._field_gtk_night    = new UI.Drop(gtk, null, true);
-        this._field_shell        = new UI.Drop(shell, null, true);
-        this._field_shell_night  = new UI.Drop(shell, null, true);
+        this._field_cursor       = new Drop(cursor, null, true);
+        this._field_cursor_night = new Drop(cursor, null, true);
+        this._field_icons        = new Drop(icon, null, true);
+        this._field_icons_night  = new Drop(icon, null, true);
+        this._field_gtk          = new Drop(gtk, null, true);
+        this._field_gtk_night    = new Drop(gtk, null, true);
+        this._field_shell        = new Drop(shell, null, true);
+        this._field_shell_night  = new Drop(shell, null, true);
         this._field_night        = new Gtk.CheckButton({ label: _('Themes') });
         this._field_style        = new UI.Check(_('Load user stylesheet “~/.config/gnome-shell/gnome-shell{,-dark}.css”'));
     }

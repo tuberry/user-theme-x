@@ -58,8 +58,8 @@ These themes will be toggled automatically when Night Light is active or inactiv
 
 ## Note
 
-1. The extension is forked from [user-theme].
-2. If there is something wrong, try to disable the user stylesheet.
+* The extension is forked from [user-theme].
+* If there is something wrong, try to disable the user stylesheet.
 
 [floating panel]:https://www.reddit.com/r/gnome/comments/mfj1mw/i_noticed_there_isnt_really_help_on_how_to_make/
 [EGO]:https://extensions.gnome.org/extension/3019/user-themes-x/
