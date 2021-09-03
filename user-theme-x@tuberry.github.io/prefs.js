@@ -1,14 +1,14 @@
 // vim:fdm=syntax
-// by: tuberry@github
+// by tuberry
 'use strict';
 
 const { Gio, GObject, Gtk } = imports.gi;
 
 const ExtensionUtils = imports.misc.extensionUtils;
+const gsettings = ExtensionUtils.getSettings();
+const _ = ExtensionUtils.gettext;
 const Me = ExtensionUtils.getCurrentExtension();
 const Util = Me.imports.util;
-const _ = imports.gettext.domain(Me.metadata['gettext-domain']).gettext;
-const gsettings = ExtensionUtils.getSettings();
 const UI = Me.imports.ui;
 
 var Fields = {
@@ -29,7 +29,7 @@ function init() {
 }
 
 function buildPrefsWidget() {
-    return new UserTHemeXPrefs();
+    return new UserThemeXPrefs();
 }
 
 var Drop = GObject.registerClass({
@@ -70,8 +70,8 @@ var Drop = GObject.registerClass({
     }
 });
 
-const UserTHemeXPrefs = GObject.registerClass(
-class UserTHemeXPrefs extends Gtk.ScrolledWindow {
+const UserThemeXPrefs = GObject.registerClass(
+class UserThemeXPrefs extends Gtk.ScrolledWindow {
     _init() {
         super._init({ hscrollbar_policy: Gtk.PolicyType.NEVER, });
 

@@ -1,5 +1,5 @@
 {
-  "description": "Customizable user-theme with user stylesheet and night theme auto-switch support\n\nFor support, please report any issues via the homepage link below.",
+  "description": "Customizable user-theme with user stylesheet and dark theme auto-switch support\n\nFor support, please report any issues via the homepage link below.",
   "extension-id": "user-theme-x",
   "gettext-domain": "gnome-shell-extension-user-theme-x",
   "name": "User Themes X",
@@ -8,7 +8,7 @@
   ],
   "settings-schema": "org.gnome.shell.extensions.user-theme",
   "shell-version": [
-    "40"
+    "41"
   ],
   "url": "https://github.com/tuberry/user-theme-x",
   "uuid": "user-theme-x@tuberry.github.io",

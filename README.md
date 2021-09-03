@@ -1,20 +1,31 @@
 # user-theme-x
 
-Customizable user-theme with user stylesheet and night themes autoswitch support.
+Customizable user-theme with user stylesheet and night themes auto-switch support.
 > Do not go gentle into that Dark side. <br>
 [![license]](/LICENSE)
 </br>
 
 ## Installation
 
+### Recommended
+
 [<img src="https://raw.githubusercontent.com/andyholmes/gnome-shell-extensions-badge/master/get-it-on-ego.svg?sanitize=true" alt="Get it on GNOME Extensions" height="100" align="middle">][EGO]
 
-Or manually:
+### Manual
+
+The latest and supported version should only work on the the most current stable version of GNOME Shell.
 
 ```bash
-git clone https://github.com/tuberry/user-theme-x.git
-cd user-theme-x && make install
+git clone https://github.com/tuberry/user-theme-x.git && cd user-theme-x
+make && make install
 # make mergepo # for translation
+```
+
+For older versions, it's necessary to switch the git tag before `make`:
+
+```bash
+# git tag # to see available versions
+git checkout your_gnome_shell_version
 ```
 
 ## Features
@@ -29,16 +40,7 @@ Load user stylesheet `~/.config/gnome-shell/gnome-shell{,-dark}.css`.
 mkdir -p ~/.config/gnome-shell && touch ~/.config/gnome-shell/gnome-shell.css
 ```
 
-For example, hide the dropdown arrow:
-
-```css
-/* hide the dropdown arrow, not needed since GNOME 40 */
-#panel .panel-button .popup-menu-arrow {
-    width: 0;
-    height: 0;
-}
-```
-or [floating panel]:
+For example,  [floating panel]:
 
 ```css
 /* floating panel */
@@ -52,7 +54,7 @@ or [floating panel]:
 }
 ```
 
-### Themes autoswitch
+### Themes auto-switch
 
 These themes will be toggled automatically when Night Light is active or inactive.
 
