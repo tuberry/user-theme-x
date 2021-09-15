@@ -1,0 +1,51 @@
+# Dutch translations for gnome-shell-extension-user-theme-x package.
+# Copyright (C) 2021 THE gnome-shell-extension-user-theme-x'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the gnome-shell-extension-user-theme-x package.
+# Automatically generated, 2021.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: gnome-shell-extension-user-theme-x\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-09-14 18:06+0200\n"
+"PO-Revision-Date: 2021-09-14 18:07+0200\n"
+"Last-Translator: Heimen Stoffels <vistausss@fastmail.com>\n"
+"Language-Team: none\n"
+"Language: nl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.0\n"
+
+#: prefs.js:96
+msgid "Themes"
+msgstr "Thema's"
+
+#: prefs.js:97
+msgid "Load user stylesheet “~/.config/gnome-shell/gnome-shell{,-dark}.css”"
+msgstr "Gebruikersstijlblad ‘~/.config/gnome-shell/gnome-shell{,-dark}.css’ laden"
+
+#: prefs.js:103
+msgid "Day"
+msgstr "Dag"
+
+#: prefs.js:103
+msgid "Night"
+msgstr "Nacht"
+
+#: prefs.js:104
+msgid "Gtk"
+msgstr "Gtk"
+
+#: prefs.js:105
+msgid "Shell"
+msgstr "Shell"
+
+#: prefs.js:106
+msgid "Icons"
+msgstr "Pictogrammen"
+
+#: prefs.js:107
+msgid "Cursor"
+msgstr "Cursor"
