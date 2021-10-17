@@ -93,7 +93,7 @@ class UserThemeXPrefs extends Gtk.ScrolledWindow {
         this._field_gtk_night    = new Drop(gtk, null, true);
         this._field_shell        = new Drop(shell, null, true);
         this._field_shell_night  = new Drop(shell, null, true);
-        this._field_night        = new Gtk.CheckButton({ label: _('Themes') });
+        this._field_night        = new Gtk.CheckButton({ label: _('Themes'), tooltip_text: _('Switch according to the Night Light in the Settings') });
         this._field_style        = new UI.Check(_('Load user stylesheet “~/.config/gnome-shell/gnome-shell{,-dark}.css”'));
     }
 
@@ -120,24 +120,12 @@ class UserThemeXPrefs extends Gtk.ScrolledWindow {
         gsettings.bind(Fields.GTKNIGHT,    this._field_gtk_night,    'actives', Gio.SettingsBindFlags.DEFAULT);
         gsettings.bind(Fields.GTK,         this._field_gtk,          'actives', Gio.SettingsBindFlags.DEFAULT);
 
-        this._field_night.connect("notify::active", widget => {
-            this._field_gtk.set_sensitive(widget.active);
-            this._field_icons.set_sensitive(widget.active);
-            this._field_shell.set_sensitive(widget.active);
-            this._field_cursor.set_sensitive(widget.active);
-            this._field_gtk_night.set_sensitive(widget.active);
-            this._field_icons_night.set_sensitive(widget.active);
-            this._field_shell_night.set_sensitive(widget.active);
-            this._field_cursor_night.set_sensitive(widget.active)
-        });
-        this._field_gtk.set_sensitive(this._field_night.active);
-        this._field_icons.set_sensitive(this._field_night.active);
-        this._field_shell.set_sensitive(this._field_night.active);
-        this._field_cursor.set_sensitive(this._field_night.active);
-        this._field_gtk_night.set_sensitive(this._field_night.active);
-        this._field_icons_night.set_sensitive(this._field_night.active);
-        this._field_shell_night.set_sensitive(this._field_night.active);
-        this._field_cursor_night.set_sensitive(this._field_night.active);
+
+        [this._field_gtk, this._field_icons, this._field_shell, this._field_cursor,
+            this._field_gtk_night, this._field_icons_night, this._field_shell_night, this._field_cursor_night].forEach(widget => {
+                this._field_night.bind_property('active', widget, 'sensitive', GObject.BindingFlags.GET);
+                widget.set_sensitive(this._field_night.active);
+            });
     }
 
     _listGridMaker() {

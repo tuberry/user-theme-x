@@ -4,7 +4,7 @@
 
 const Main = imports.ui.main;
 const { Gio, GLib, GObject, St } = imports.gi;
-const LightProxy = Main.panel.statusArea['aggregateMenu']._nightLight._proxy;
+const LightProxy = Main.panel.statusArea.aggregateMenu._nightLight._proxy;
 
 const System = {
     SHELL:       'name',
@@ -36,12 +36,12 @@ var ThemeTweaks = GObject.registerClass({
         super._init();
         sgsettings.bind(Fields.NIGHT, this, 'night', Gio.SettingsBindFlags.GET);
         sgsettings.bind(Fields.STYLE, this, 'style', Gio.SettingsBindFlags.GET);
-        this._proxyChangedId = LightProxy.connect('g-properties-changed', this._onLightChanged.bind(this));
+        this._lightCHangedId = LightProxy.connect('g-properties-changed', this._onLightChanged.bind(this));
         this._nightLightOnId = ngsettings.connect('changed::' + System.NIGHTLIGHT, this._onLightChanged.bind(this));
     }
 
     get _isNight() {
-        return LightProxy.NightLightActive
+        return LightProxy?.NightLightActive
             && sgsettings.get_boolean(Fields.NIGHT)
             && ngsettings.get_boolean(System.NIGHTLIGHT);
     }
@@ -146,13 +146,13 @@ var ThemeTweaks = GObject.registerClass({
             });
         } else {
             if(this._themeChangedId)
-                tgsettings.disconnect(this._themeChangedId), this._themeChangedId = 0;
+                tgsettings.disconnect(this._themeChangedId), delete this._themeChangedId;
             if(this._iconsChangedId)
-                tgsettings.disconnect(this._iconsChangedId), this._iconsChangedId = 0;
+                tgsettings.disconnect(this._iconsChangedId), delete this._iconsChangedId;
             if(this._cursorChangedId)
-                tgsettings.disconnect(this._cursorChangedId), this._cursorChangedId = 0;
+                tgsettings.disconnect(this._cursorChangedId), delete this._cursorChangedId;
             for(let x in this)
-                if(RegExp(/^_.+ID$/).test(x)) eval('if(this.%s) sgsettings.disconnect(this.%s), this.%s = 0;'.format(x, x, x));
+                if(RegExp(/^_.+ID$/).test(x)) eval('if(this.%s) sgsettings.disconnect(this.%s), delete this.%s;'.format(x, x, x));
         }
     }
 
@@ -170,7 +170,7 @@ var ThemeTweaks = GObject.registerClass({
         } else {
             this._unloadStyle();
             if(this._fileChangedId)
-                this._fileMonitor.disconnect(this._fileChangedId), this._fileChangedId = 0;
+                this._fileMonitor.disconnect(this._fileChangedId), delete this._fileChangedId;
             delete this._fileMonitor;
         }
     }
@@ -179,9 +179,9 @@ var ThemeTweaks = GObject.registerClass({
         this.style = false;
         this.night = false;
         if(this._nightLightOnId)
-            ngsettings.disconnect(this._nightLightOnId), this._nightLightOnId = 0;
-        if(this._proxyChangedId)
-            LightProxy.disconnect(this._proxyChangedId), this._proxyChangedId = 0;
+            ngsettings.disconnect(this._nightLightOnId), delete this._nightLightOnId;
+        if(this._lightCHangedId)
+            LightProxy.disconnect(this._lightCHangedId), delete this._lightCHangedId;
     }
 });
 

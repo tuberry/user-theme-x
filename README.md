@@ -13,12 +13,12 @@ Customizable user-theme with user stylesheet and night themes auto-switch suppor
 
 ### Manual
 
-The latest and supported version should only work on the the most current stable version of GNOME Shell.
+The latest and supported version should only work on the most current stable version of GNOME Shell.
 
 ```bash
 git clone https://github.com/tuberry/user-theme-x.git && cd user-theme-x
 make && make install
-# make mergepo # for translation
+# make LANG=your_language_code mergepo # for translation
 ```
 
 For older versions, it's necessary to switch the git tag before `make`:

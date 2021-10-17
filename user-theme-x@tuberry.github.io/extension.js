@@ -26,7 +26,8 @@ class ThemeManager {
     disable() {
         this._tweaks.destroy();
         delete this._tweaks;
-        if(this._settingChangedId) this._settings.disconnect(this._settingChangedId), this._settingChangedId = 0;
+        if(this._settingChangedId)
+            this._settings.disconnect(this._settingChangedId), delete this._settingChangedId;
 
         try {
             Main.setThemeStylesheet(null);
@@ -53,11 +54,6 @@ class ThemeManager {
                 return file.query_exists(null);
             });
         }
-
-        // if (stylesheet)
-        //     global.log(`loading user theme: ${stylesheet}`);
-        // else
-        //     global.log('loading default theme (Adwaita)');
 
         Main.setThemeStylesheet(stylesheet);
         Main.loadTheme();

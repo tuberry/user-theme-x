@@ -103,12 +103,12 @@ var Shortcut = GObject.registerClass({
         model.set_column_types([GObject.TYPE_STRING]);
         let [ok, key, mods] = Gtk.accelerator_parse(shortcut[0]);
         model.set(model.insert(0), [0], [Gtk.accelerator_get_label(key, mods)]);
-        let tree = new Gtk.TreeView({ valign: Gtk.Align.CENTER, model: model, headers_visible: false });
+        this.tree = new Gtk.TreeView({ valign: Gtk.Align.CENTER, model: model, headers_visible: false });
         let acc = new Gtk.CellRendererAccel({ editable: true, accel_mode: Gtk.CellRendererAccelMode.GTK });
         let column = new Gtk.TreeViewColumn();
         column.pack_start(acc, false);
         column.add_attribute(acc, 'text', 0);
-        tree.append_column(column);
+        this.tree.append_column(column);
         acc.connect('accel-edited', (acce, iter, key, mods) => {
             if(!key) return;
             let name = Gtk.accelerator_name(key, mods);
@@ -117,7 +117,7 @@ var Shortcut = GObject.registerClass({
             this.shortcut = [name];
             this.emit('changed', name);
         });
-        this.append(tree);
+        this.append(this.tree);
     }
 
     vfunc_snapshot(snapshot) {
