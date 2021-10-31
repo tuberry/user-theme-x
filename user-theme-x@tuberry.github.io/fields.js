@@ -1,5 +1,8 @@
 // vim:fdm=syntax
 // by: tuberry
+/* exported Fields */
+'use strict';
+
 var Fields = {
     GTK:         'gtk-x',
     ICONS:       'icons-x',

@@ -20,14 +20,13 @@ class ThemeManager {
     enable() {
         this._tweaks = new Me.imports.tweaks.ThemeTweaks();
         this._changeTheme();
-        this._settingChangedId = this._settings.connect(`changed::${SETTINGS_KEY}`, this._changeTheme.bind(this));
+        this._settingChangedId = this._settings.connect('changed::%s'.format(SETTINGS_KEY), this._changeTheme.bind(this));
     }
 
     disable() {
         this._tweaks.destroy();
         delete this._tweaks;
-        if(this._settingChangedId)
-            this._settings.disconnect(this._settingChangedId), delete this._settingChangedId;
+        if(this._settingChangedId) this._settings.disconnect(this._settingChangedId), delete this._settingChangedId;
 
         try {
             Main.setThemeStylesheet(null);
@@ -42,12 +41,12 @@ class ThemeManager {
         let stylesheet = null;
         let themeName = this._settings.get_string(SETTINGS_KEY);
 
-        if (themeName) {
+        if(themeName) {
             const stylesheetPaths = Util.getThemeDirs()
-                .map(dir => `${dir}/${themeName}/gnome-shell/gnome-shell.css`);
+                .map(dir => '%s/%s/gnome-shell/gnome-shell.css'.format(dir, themeName));
 
             stylesheetPaths.push(...Util.getModeThemeDirs()
-                .map(dir => `${dir}/${themeName}.css`));
+                .map(dir => '%s/%s.css'.format(dir, themeName)));
 
             stylesheet = stylesheetPaths.find(path => {
                 let file = Gio.File.new_for_path(path);

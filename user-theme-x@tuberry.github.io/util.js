@@ -1,11 +1,9 @@
 // vim:fdm=syntax
 // by tuberry
+/* exported getThemeDirs getModeThemeDirs getGtkThemes
+ * getShellThemes getIconThemes getCursorThemes*/
 'use strict';
 
-/* *
- * exported getThemeDirs getModeThemeDirs
- * exported get{Gtk,Shell,Icons,Cursor}Themes
- */
 const { Gio, GLib, Gtk } = imports.gi;
 
 const fn = (...args) => GLib.build_filenamev(args);
@@ -19,7 +17,7 @@ function getDirs(type) {
 }
 
 function getThemeDirs() {
-    return getDirs('themes')
+    return getDirs('themes');
 }
 
 function getModeThemeDirs() {
@@ -34,8 +32,7 @@ function getThemes(type) {
         } catch(e) {
             return [];
         }
-        while((info = denum.next_file(null)))
-            (fl => { themes.push({ name: fl.get_basename(), path: fl.get_path() }); })(denum.get_child(info));
+        while((info = denum.next_file(null))) (fl => { themes.push({ name: fl.get_basename(), path: fl.get_path() }); })(denum.get_child(info));
         return themes;
     });
 }
@@ -48,8 +45,7 @@ function getModeThemes() {
         } catch(e) {
             return [];
         }
-        while((info = denum.next_file(null)))
-            (fb => { if(fb.endsWith('.css')) themes.push(fb.slice(0, -4)); })(denum.get_child(info).get_basename());
+        while((info = denum.next_file(null))) (fb => { if(fb.endsWith('.css')) themes.push(fb.slice(0, -4)); })(denum.get_child(info).get_basename());
         return themes;
     });
 }
@@ -57,10 +53,10 @@ function getModeThemes() {
 function getGtkThemes() {
     // Ref: https://gitlab.gnome.org/GNOME/gnome-tweaks/-/blob/master/gtweak/tweaks/tweak_group_appearance.py
     let themes = getThemes('themes').flatMap(theme => [0, Gtk.MINOR_VERSION].some(gtkv => {
-            if(gtkv % 2) gtkv += 1;
-            let css = Gio.File.new_for_path(fn(theme.path, `gtk-3.${gtkv}`, 'gtk.css'));
-            return css.query_exists(null);
-        }) ? [theme.name] : []
+        if(gtkv % 2) gtkv += 1;
+        let css = Gio.File.new_for_path(fn(theme.path, `gtk-3.${gtkv}`, 'gtk.css'));
+        return css.query_exists(null);
+    }) ? [theme.name] : []
     );
 
     return [...new Set(themes)].sort();

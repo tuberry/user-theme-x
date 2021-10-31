@@ -1,5 +1,6 @@
 // vim:fdm=syntax
 // by tuberry
+/* exported init buildPrefsWidget */
 'use strict';
 
 const { Gio, GObject, Gtk } = imports.gi;
@@ -36,7 +37,7 @@ var Drop = GObject.registerClass({
     GTypeName: 'Gjs_%s_UI_Drop'.format(Me.metadata.uuid),
     Properties: {
         'actives': GObject.ParamSpec.string('actives', 'actives', 'actives', GObject.ParamFlags.READWRITE, ''),
-        'active' : GObject.ParamSpec.uint('active', 'active', 'active', GObject.ParamFlags.READWRITE, 0, 10000, 0),
+        'active':  GObject.ParamSpec.uint('active', 'active', 'active', GObject.ParamFlags.READWRITE, 0, 10000, 0),
     },
 }, class Drop extends Gtk.Box {
     _init(opts, tip, hexpand, params) {
@@ -73,8 +74,7 @@ var Drop = GObject.registerClass({
 const UserThemeXPrefs = GObject.registerClass(
 class UserThemeXPrefs extends Gtk.ScrolledWindow {
     _init() {
-        super._init({ hscrollbar_policy: Gtk.PolicyType.NEVER, });
-
+        super._init({ hscrollbar_policy: Gtk.PolicyType.NEVER });
         this._buildWidgets();
         this._bindValues();
         this._buildUI();
@@ -119,13 +119,11 @@ class UserThemeXPrefs extends Gtk.ScrolledWindow {
         gsettings.bind(Fields.SHELL,       this._field_shell,        'actives', Gio.SettingsBindFlags.DEFAULT);
         gsettings.bind(Fields.GTKNIGHT,    this._field_gtk_night,    'actives', Gio.SettingsBindFlags.DEFAULT);
         gsettings.bind(Fields.GTK,         this._field_gtk,          'actives', Gio.SettingsBindFlags.DEFAULT);
-
-
         [this._field_gtk, this._field_icons, this._field_shell, this._field_cursor,
             this._field_gtk_night, this._field_icons_night, this._field_shell_night, this._field_cursor_night].forEach(widget => {
-                this._field_night.bind_property('active', widget, 'sensitive', GObject.BindingFlags.GET);
-                widget.set_sensitive(this._field_night.active);
-            });
+            this._field_night.bind_property('active', widget, 'sensitive', GObject.BindingFlags.GET);
+            widget.set_sensitive(this._field_night.active);
+        });
     }
 
     _listGridMaker() {
@@ -143,14 +141,16 @@ class UserThemeXPrefs extends Gtk.ScrolledWindow {
                 grid.attach(x, 0, c, 3, 1);
             }
             grid._count++;
-        }
+        };
+
         return grid;
     }
 
     _labelMaker(x, y) {
         let label = new UI.Label(x);
         if(!y) label.set_hexpand(false);
-        label.set_halign(y ? Gtk.Align.CENTER : Gtk.Align.END)
+        label.set_halign(y ? Gtk.Align.CENTER : Gtk.Align.END);
+
         return label;
     }
 });
