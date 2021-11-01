@@ -10,7 +10,7 @@ const fn = (...args) => GLib.build_filenamev(args);
 
 function getDirs(type) {
     return [
-        fn(GLib.get_home_dir(), `.${type}`),
+        fn(GLib.get_home_dir(), '.%s'.format(type)),
         fn(GLib.get_user_data_dir(), type),
         ...GLib.get_system_data_dirs().map(dir => fn(dir, type)),
     ];
@@ -54,7 +54,7 @@ function getGtkThemes() {
     // Ref: https://gitlab.gnome.org/GNOME/gnome-tweaks/-/blob/master/gtweak/tweaks/tweak_group_appearance.py
     let themes = getThemes('themes').flatMap(theme => [0, Gtk.MINOR_VERSION].some(gtkv => {
         if(gtkv % 2) gtkv += 1;
-        let css = Gio.File.new_for_path(fn(theme.path, `gtk-3.${gtkv}`, 'gtk.css'));
+        let css = Gio.File.new_for_path(fn(theme.path, 'gtk-3.%d'.format(gtkv), 'gtk.css'));
         return css.query_exists(null);
     }) ? [theme.name] : []
     );
