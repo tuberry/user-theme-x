@@ -8,7 +8,7 @@
   ],
   "settings-schema": "org.gnome.shell.extensions.user-theme",
   "shell-version": [
-    "41"
+    "42"
   ],
   "url": "https://github.com/tuberry/user-theme-x",
   "uuid": "user-theme-x@tuberry.github.io",

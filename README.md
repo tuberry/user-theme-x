@@ -30,11 +30,11 @@ git checkout your_gnome_shell_version
 
 ## Features
 
-![utxprefs](https://user-images.githubusercontent.com/17917040/108627545-1b2dd300-7491-11eb-9d69-11f69769bd0d.png)
+![utxpref](https://user-images.githubusercontent.com/17917040/155883612-491620fe-8fde-4d82-87a4-b7c95bb0926f.png)
 
-### User stylesheet
+### Stylesheet
 
-Load user stylesheet `~/.config/gnome-shell/gnome-shell{,-dark}.css`.
+Load user stylesheet from `~/.config/gnome-shell/gnome-shell{,-dark}.css`.
 
 ```bash
 mkdir -p ~/.config/gnome-shell && touch ~/.config/gnome-shell/gnome-shell.css
@@ -53,10 +53,6 @@ For example,  [floating panel]:
   border-radius: 0.9em;
 }
 ```
-
-### Themes auto-switch
-
-These themes will be toggled automatically when Night Light is active or inactive.
 
 ## Note
 

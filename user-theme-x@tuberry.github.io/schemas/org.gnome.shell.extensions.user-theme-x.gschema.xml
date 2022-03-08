@@ -5,55 +5,70 @@
       <summary>Theme name</summary>
       <description>The name of the theme, to be loaded from ~/.themes/name/gnome-shell</description>
     </key>
-    <key name="stylesheet-x" type="b">
+    <key name="x-wallpaper" type="b">
+      <default>false</default>
+      <summary>wallpaper</summary>
+      <description>set dark/light wallpaper</description>
+    </key>
+    <key name="x-stylesheet" type="b">
       <default>false</default>
       <summary>user stylesheet</summary>
       <description>Load user stylesheet or not</description>
     </key>
-    <key name="night-x" type="b">
+    <key name="x-night" type="b">
       <default>false</default>
       <summary>night theme switch</summary>
       <description>Auto switch gtk, shell and icon theme when Night Light is active and inactive</description>
     </key>
-    <key name="shell-x" type="s">
+    <key name="x-shell" type="s">
       <default>""</default>
       <summary>shell theme</summary>
       <description>The shell theme when Night Light is inactive</description>
     </key>
-    <key name="shell-night-x" type="s">
+    <key name="x-shell-night" type="s">
       <default>""</default>
       <summary>shell night theme</summary>
       <description>The shell theme when Night Light is active</description>
     </key>
-    <key name="gtk-x" type="s">
+    <key name="x-gtk" type="s">
       <default>""</default>
       <summary>gtk theme</summary>
       <description>The gtk theme when Night Light is inactive</description>
     </key>
-    <key name="gtk-night-x" type="s">
+    <key name="x-gtk-night" type="s">
       <default>""</default>
       <summary>gtk night theme</summary>
       <description>The gtk theme when Night Light is active</description>
     </key>
-    <key name="icons-x" type="s">
+    <key name="x-icons" type="s">
       <default>""</default>
       <summary>icon theme name</summary>
       <description>The icon theme when Night Light is inactive</description>
     </key>
-    <key name="icons-night-x" type="s">
+    <key name="x-icons-night" type="s">
       <default>""</default>
       <summary>icon theme night name</summary>
       <description>The icon theme when Night Light is active</description>
     </key>
-    <key name="cursor-x" type="s">
+    <key name="x-cursor" type="s">
       <default>""</default>
       <summary>cursor theme name</summary>
       <description>The cursor theme when Night Light is inactive</description>
     </key>
-    <key name="cursor-night-x" type="s">
+    <key name="x-cursor-night" type="s">
       <default>""</default>
       <summary>cursor theme night name</summary>
       <description>The cursor theme when Night Light is active</description>
+    </key>
+    <key name="x-color" type="s">
+      <default>"default"</default>
+      <summary>color scheme name</summary>
+      <description>The color scheme when Night Light is inactive</description>
+    </key>
+    <key name="x-color-night" type="s">
+      <default>"default"</default>
+      <summary>color scheme night name</summary>
+      <description>The color scheme when Night Light is active</description>
     </key>
   </schema>
 </schemalist>
