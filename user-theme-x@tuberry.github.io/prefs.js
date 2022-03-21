@@ -14,7 +14,7 @@ const Fields = Me.imports.fields.Fields;
 const System = Me.imports.fields.System;
 const DAY = 'daytime-sunrise-symbolic';
 const NIGHT = 'daytime-sunset-symbolic';
-const SCHEME = ['default', 'prefer-dark'];
+const SCHEME = ['default', 'prefer-dark', 'prefer-light'];
 const Items = ['COLOR', 'GTK', 'SHELL', 'ICONS', 'CURSOR'];
 
 const _ = ExtensionUtils.gettext;
@@ -47,9 +47,9 @@ class StrDrop extends Gtk.Box {
         this._opts = opts;
         let btn = new Gtk.Button({ icon_name, tooltip_text: tip || '' });
         this._drop = new Gtk.DropDown({ model: Gtk.StringList.new(opts) });
-        this._drop.connect('notify::selected', () => { this.notify('active'); });
+        this._drop.connect('notify::selected', () => this.notify('active'));
         [btn, this._drop].forEach(x => this.append(x));
-        btn.connect('clicked', () => { this._drop.activate(); });
+        btn.connect('clicked', () => this._drop.activate());
     }
 
     vfunc_mnemonic_activate() {
@@ -132,17 +132,25 @@ class Thumb extends Adw.Bin {
     }
 
     _snapshot(snap, w, h, left) {
-        let rect = left ? Rect(0, 0, w / 2, h) : Rect(w / 2, 0, w / 2, h);
+        let cr = snap.append_cairo(Rect(0, 0, w, h));
         try {
             let file = left ? this.light : this.dark;
-            let pix = GdkPixbuf.Pixbuf.new_from_file(file.replace(/^file:\/\//, '')).scale_simple(w, h, GdkPixbuf.InterpType.BILINEAR);
-            snap.push_clip(rect);
-            Gdk.Texture.new_for_pixbuf(pix).snapshot(snap, w, h);
-            snap.pop();
+            let pix = GdkPixbuf.Pixbuf.new_from_file(file.replace(/^file:\/\//, ''));
+            let [W, H] = [pix.get_width(), pix.get_height()];
+            let s = Math.max(w / W, h / H);
+            Gdk.cairo_set_source_pixbuf(cr, pix.scale_simple(W * s, H * s, GdkPixbuf.InterpType.BILINEAR), 0, 0);
+            cr.moveTo(0, 0);
+            cr.lineTo(w, h);
+            left ? cr.lineTo(0, h) : cr.lineTo(w, 0);
+            cr.clip();
+            cr.paint();
         } catch(e) {
-            let color = new Gdk.RGBA();
-            color.parse(left ? '#e6e6e6' : '#242424');
-            snap.append_color(color, rect);
+            let c = left ? 0.9 : 0.14;
+            cr.setSourceRGBA(c, c, c, 1);
+            cr.moveTo(0, 0);
+            cr.lineTo(w, h);
+            left ? cr.lineTo(0, h) : cr.lineTo(w, 0);
+            cr.fill();
         }
     }
 
@@ -183,7 +191,7 @@ class UserThemeXPrefs extends Adw.PreferencesGroup {
         this._buildWidgets().then(() => {
             this._bindValues();
             this._buildUI();
-        }).catch(e => { log(e.message); });
+        }).catch(e => log(e.message));
     }
 
     async _buildWidgets() {
@@ -198,16 +206,16 @@ class UserThemeXPrefs extends Adw.PreferencesGroup {
         this.add(new UI.PrefRow(this._field_style, [_('Stylesheet'), _('Load from “~/.config/gnome-shell/gnome-shell{,-dark}.css”')]));
         this.add(this._field_paper);
         this.add(this._field_night);
-        [[_('Style')], [_('Gtk')], [_('Shell')], [_('Icons')], [_('Cursor')]]
+        [[_('Style')], [_('Gtk3')], [_('Shell')], [_('Icons')], [_('Cursor')]]
             .forEach((x, i) => this._field_night.add_row(new UI.PrefRow(x, ...this._widgets[i])));
         this._field_paper.add_row(new Wall(480, 270));
-        ['_field_night', '_field_paper'].forEach(x => { if(this[x].enable_expansion) this[x].set_expanded(true); });
+        ['_field_night', '_field_paper'].forEach(x => this[x].enable_expansion && this[x].set_expanded(true));
     }
 
     _bindValues() {
         Items.forEach((x, i) => {
             gsettings.bind(Fields[x], this._widgets[i][0], 'active', Gio.SettingsBindFlags.DEFAULT);
-            gsettings.bind('%s-night'.format(Fields[x]), this._widgets[i][1], 'active', Gio.SettingsBindFlags.DEFAULT);
+            gsettings.bind(`${Fields[x]}-night`, this._widgets[i][1], 'active', Gio.SettingsBindFlags.DEFAULT);
         });
         [
             [Fields.STYLE, this._field_style, 'active'],

@@ -30,7 +30,8 @@ git checkout your_gnome_shell_version
 
 ## Features
 
-![utxpref](https://user-images.githubusercontent.com/17917040/155883612-491620fe-8fde-4d82-87a4-b7c95bb0926f.png)
+![utxpref](https://user-images.githubusercontent.com/17917040/159209648-46c3acae-852b-44a7-87e9-50e59925d18a.png)
+
 
 ### Stylesheet
 

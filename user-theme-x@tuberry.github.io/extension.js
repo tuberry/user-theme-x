@@ -19,14 +19,14 @@ const genParam = (type, name, ...dflt) => GObject.ParamSpec[type](name, name, na
 const Items = ['GTK', 'ICONS', 'COLOR', 'CURSOR'];
 const DARK = 'gnome-shell-dark.css';
 const LIGHT = 'gnome-shell.css';
-const BG_XML =
-`<?xml version="1.0"?>
+const genXML = (light, dark) =>
+    `<?xml version="1.0"?>
 <!DOCTYPE wallpapers SYSTEM "gnome-wp-list.dtd">
 <wallpapers>
     <wallpaper deleted="false">
         <name>user-theme-x</name>
-        <filename>%s</filename>
-        <filename-dark>%s</filename-dark>
+        <filename>${light}</filename>
+        <filename-dark>${dark}</filename-dark>
         <options>zoom</options>
         <pcolor>#ffffff</pcolor>
         <scolor>#000000</scolor>
@@ -59,7 +59,7 @@ class ThemeTweaks extends GObject.Object {
             .forEach(([x, y, z]) => sgsettings.bind(x, this, y, z ?? Gio.SettingsBindFlags.GET));
         [[System.LPIC, 'light'], [System.DPIC, 'dark']].forEach(([x, y, z]) => dgsettings.bind(x, this, y, z ?? Gio.SettingsBindFlags.GET));
         LightProxy.connectObject('g-properties-changed', this._onLightChanged.bind(this), this);
-        ngsettings.connectObject('changed::%s'.format(System.NIGHTLIGHT), this._onLightChanged.bind(this), this);
+        ngsettings.connectObject(`changed::${System.NIGHTLIGHT}`, this._onLightChanged.bind(this), this);
     }
 
     get _isNight() {
@@ -73,8 +73,8 @@ class ThemeTweaks extends GObject.Object {
 
     _syncTheme() {
         if(this._isNight) {
-            Items.forEach(x => sync(tgsettings, System[x], sgsettings, '%s-night'.format(Fields[x])));
-            sync(sgsettings, System.SHELL, sgsettings, '%s-night'.format(Fields.SHELL));
+            Items.forEach(x => sync(tgsettings, System[x], sgsettings, `${Fields[x]}-night`));
+            sync(sgsettings, System.SHELL, sgsettings, `${Fields.SHELL}-night`);
         } else {
             Items.forEach(x => sync(tgsettings, System[x], sgsettings, Fields[x]));
             sync(sgsettings, System.SHELL, sgsettings, Fields.SHELL);
@@ -92,8 +92,8 @@ class ThemeTweaks extends GObject.Object {
         if(this._isNight && await Util.checkFile(night).catch(noop)) next.load_stylesheet(night);
         else if(await Util.checkFile(day).catch(noop)) next.load_stylesheet(day);
         else throw new Error('stylesheet not found');
-        if(!next.default_stylesheet) throw new Error("No valid stylesheet found for '%s'".format(Main.sessionMode.stylesheetName));
-        context.get_theme()?.get_custom_stylesheets().forEach(x => { if(!x.equal(day) && !x.equal(night)) next.load_stylesheet(x); });
+        if(!next.default_stylesheet) throw new Error(`No valid stylesheet found for “${Main.sessionMode.stylesheetName}”`);
+        context.get_theme()?.get_custom_stylesheets().forEach(x => (!x.equal(day) && !x.equal(night)) && next.load_stylesheet(x));
         context.set_theme(next);
     }
 
@@ -106,15 +106,15 @@ class ThemeTweaks extends GObject.Object {
         if(this._night === night) return;
         if((this._night = night)) {
             this._syncTheme();
-            let f1 = (s1, k1, s2, k2) => ['changed::%s'.format(k1), () => { sync(s2, this._isNight ? '%s-night'.format(k2) : k2, s1, k1); }];
-            let f2 = (s1, k1, s2, k2) => ['changed::%s'.format(k1), () => { if(!this._isNight) sync(s2, k2, s1, k1); }];
-            let f3 = (s1, k1, s2, k2) => ['changed::%s'.format(k1), () => { if(this._isNight) sync(s2, k2, s1, k1); }];
+            let f1 = (s1, k1, s2, k2) => [`changed::${k1}`, () => sync(s2, this._isNight ? `${k2}-night` : k2, s1, k1)];
+            let f2 = (s1, k1, s2, k2) => [`changed::${k1}`, () => this._isNight || sync(s2, k2, s1, k1)];
+            let f3 = (s1, k1, s2, k2) => [`changed::${k1}`, () => this._isNight && sync(s2, k2, s1, k1)];
             tgsettings.connectObject(...Items.flatMap(x => f1(tgsettings, System[x], sgsettings, Fields[x])), this);
             sgsettings.connectObject(...Items.flatMap(x => f2(sgsettings, Fields[x], tgsettings, System[x]))
-                                     .concat(Items.flatMap(x => f3(sgsettings, '%s-night'.format(Fields[x]), tgsettings, System[x])))
+                                     .concat(Items.flatMap(x => f3(sgsettings, `${Fields[x]}-night`, tgsettings, System[x])))
                                      .concat(f1(sgsettings, System.SHELL, sgsettings, Fields.SHELL))
                                      .concat(f2(sgsettings, Fields.SHELL, sgsettings, System.SHELL))
-                                     .concat(f3(sgsettings, '%s-night'.format(Fields.SHELL), sgsettings, System.SHELL)), this);
+                                     .concat(f3(sgsettings, `${Fields.SHELL}-night`, sgsettings, System.SHELL)), this);
         } else {
             [tgsettings, sgsettings].forEach(x => x.disconnectObject(this));
         }
@@ -144,7 +144,7 @@ class ThemeTweaks extends GObject.Object {
         await dir.make_directory_async(GLib.PRIORITY_DEFAULT, null).catch(noop);
         let file = newFile(GLib.get_user_data_dir(), 'gnome-background-properties', 'user-theme-x-wallpaper.xml');
         await file.create_async(Gio.FileCreateFlags.NONE, GLib.PRIORITY_DEFAULT, null).catch(noop);
-        await file.replace_contents_async(new TextEncoder().encode(BG_XML.format(this._light, this._dark)),
+        await file.replace_contents_async(new TextEncoder().encode(genXML(this._light, this._dark)),
             null, false, Gio.FileCreateFlags.REPLACE_DESTINATION, null);
     }
 
@@ -169,10 +169,10 @@ class ThemeTweaks extends GObject.Object {
 
     set shell(shell) {
         if(shell) {
-            let paths = Util.getThemeDirs().map(x => '%s/%s/gnome-shell/gnome-shell.css'.format(x, shell))
-                .concat(Util.getModeThemeDirs().map(x => '%s/%s.css'.format(x, shell)));
+            let paths = Util.getThemeDirs().map(x => `${x}/${shell}/gnome-shell/gnome-shell.css`)
+                .concat(Util.getModeThemeDirs().map(x => `${x}/${shell}.css`));
             Promise.any(paths.map(async x => await Util.checkFile(Gio.File.new_for_path(x)) && x))
-                .then(this._loadShellTheme.bind(this)).catch(() => { this._loadShellTheme(null); });
+                .then(this._loadShellTheme.bind(this)).catch(() => this._loadShellTheme(null));
         } else {
             this._loadShellTheme(null);
         }

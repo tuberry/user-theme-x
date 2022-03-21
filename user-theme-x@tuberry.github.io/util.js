@@ -18,7 +18,7 @@ function checkFile(file) {
 
 function getDirs(type) {
     return [
-        fn(GLib.get_home_dir(), '.%s'.format(type)),
+        fn(GLib.get_home_dir(), `.${type}`),
         fn(GLib.get_user_data_dir(), type),
         ...GLib.get_system_data_dirs().map(dir => fn(dir, type)),
     ];
@@ -42,7 +42,7 @@ function enumerateDirs(dirs) {
 }
 
 async function getThemes(type) {
-    return (await enumerateDirs(getDirs(type))).flat().map(x => (y => ({ name: y, path: '%s/%s'.format(x.path, y) }))(x.info.get_name()));
+    return (await enumerateDirs(getDirs(type))).flat().map(x => (y => ({ name: y, path: `${x.path}/${y}` }))(x.info.get_name()));
 }
 
 async function getModeThemes() {
@@ -57,7 +57,7 @@ async function getAllThemes() {
     let result = await Promise.all([
         // Ref: https://gitlab.gnome.org/GNOME/gnome-tweaks/-/blob/master/gtweak/tweaks/tweak_group_appearance.py
         themes.map(async t => await check(t.path, 'gtk-3.0', 'gtk.css') ||
-                   await check(t.path, 'gtk-3.%d'.format(Math.ceil(Gtk.MINOR_VERSION / 2) * 2), 'gtk.css') ? [t.name] : []).concat('HighContrastInverse'),
+                   await check(t.path, `gtk-3.${Math.ceil(Gtk.MINOR_VERSION / 2) * 2}`, 'gtk.css') ? [t.name] : []).concat('HighContrastInverse'),
         themes.map(async t => await check(t.path, 'gnome-shell', 'gnome-shell.css') ? [t.name] : []).concat(mode_themes, 'Default'),
         icons.map(async t => await check(t.path, 'icon-theme.cache') ? [t.name] : []),
         icons.map(async t => await check(t.path, 'cursors') ? [t.name] : []),
