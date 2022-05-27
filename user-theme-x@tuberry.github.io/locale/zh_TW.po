@@ -73,5 +73,5 @@ msgstr "清除"
 msgid "Click or Press ENTER to commit changes"
 msgstr "點擊或按輸入鍵提交更改"
 
-#~ msgid "Default"
-#~ msgstr "預設"
+msgid "Default"
+msgstr "預設"
