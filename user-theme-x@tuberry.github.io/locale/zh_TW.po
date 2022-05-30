@@ -1,0 +1,77 @@
+# Chinese (Taiwan) translations for gnome-shell-extension-user-theme-x package
+# gnome-shell-extension-user-theme-x 繁體中文(臺灣)翻譯.
+# Copyright (C) 2022 THE gnome-shell-extension-user-theme-x'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the gnome-shell-extension-user-theme-x package.
+# Translated by 曾嘉禾(olivertzeng), 2022.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: gnome-shell-extension-user-theme-x 25\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-02-27 16:15+0800\n"
+"PO-Revision-Date: 2021-08-18 14:32+0800\n"
+"Last-Translator: 曾嘉禾(olivertzeng)\n"
+"Language-Team: none\n"
+"Language: zh_TW\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: prefs.js:169 prefs.js:194
+msgid "Day"
+msgstr "白天"
+
+#: prefs.js:169 prefs.js:194
+msgid "Night"
+msgstr "夜晚"
+
+#: prefs.js:195
+msgid "Themes"
+msgstr "主題"
+
+#: prefs.js:195
+msgid "Switch according to the Night Light in the Settings"
+msgstr "隨夜光設定切換"
+
+#: prefs.js:196
+msgid "Wallpaper"
+msgstr "背景"
+
+#: prefs.js:201
+msgid "Stylesheet"
+msgstr "樣式表"
+
+#: prefs.js:201
+msgid "Load from “~/.config/gnome-shell/gnome-shell{,-dark}.css”"
+msgstr "從“~/.config/gnome-shell/gnome-shell{,-dark}.css”載入"
+
+#: prefs.js:204
+msgid "Style"
+msgstr "樣式"
+
+#: prefs.js:204
+msgid "Gtk"
+msgstr "Gtk"
+
+#: prefs.js:204
+msgid "Shell"
+msgstr "Shell"
+
+#: prefs.js:204
+msgid "Icons"
+msgstr "圖示"
+
+#: prefs.js:204
+msgid "Cursor"
+msgstr "游標"
+
+#: ui.js:56
+msgid "Clear"
+msgstr "清除"
+
+#: ui.js:250
+msgid "Click or Press ENTER to commit changes"
+msgstr "點擊或按輸入鍵提交更改"
+
+msgid "Default"
+msgstr "預設"
