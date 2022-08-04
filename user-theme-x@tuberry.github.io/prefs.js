@@ -10,10 +10,9 @@ const gsettings = ExtensionUtils.getSettings();
 const Me = ExtensionUtils.getCurrentExtension();
 const Util = Me.imports.util;
 const UI = Me.imports.ui;
-const Fields = Me.imports.fields.Fields;
-const System = Me.imports.fields.System;
 const DAY = 'daytime-sunrise-symbolic';
 const NIGHT = 'daytime-sunset-symbolic';
+const { Fields, System } = Me.imports.fields;
 const SCHEME = ['default', 'prefer-dark', 'prefer-light'];
 const Items = ['COLOR', 'GTK', 'SHELL', 'ICONS', 'CURSOR'];
 

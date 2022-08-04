@@ -2,25 +2,22 @@
 // by: tuberry
 /* exported init */
 
-const { Gio, GLib, GObject, St } = imports.gi;
+const { Gio, GLib, St } = imports.gi;
 const Main = imports.ui.main;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Util = Me.imports.util;
-const Fields = Me.imports.fields.Fields;
-const System = Me.imports.fields.System;
+const { Fields, System } = Me.imports.fields;
 const LightProxy = Main.panel.statusArea.aggregateMenu._nightLight._proxy;
 
 const noop = () => {};
 const newFile = (...x) => Gio.File.new_for_path(GLib.build_filenamev(x));
 const newConf = (...x) => newFile(GLib.get_user_config_dir(), ...x);
 const sync = (s1, k1, s2, k2) => s1.get_string(k1) !== s2.get_string(k2) && s1.set_string(k1, s2.get_string(k2));
-const genParam = (type, name, ...dflt) => GObject.ParamSpec[type](name, name, name, GObject.ParamFlags.READWRITE, ...dflt);
 const Items = ['GTK', 'ICONS', 'COLOR', 'CURSOR'];
 const DARK = 'gnome-shell-dark.css';
 const LIGHT = 'gnome-shell.css';
-const genXML = (light, dark) =>
-    `<?xml version="1.0"?>
+const genXML = (light, dark) => `<?xml version="1.0"?>
 <!DOCTYPE wallpapers SYSTEM "gnome-wp-list.dtd">
 <wallpapers>
     <wallpaper deleted="false">
@@ -33,37 +30,66 @@ const genXML = (light, dark) =>
     </wallpaper>
 </wallpapers>`;
 
-let [sgsettings, ngsettings, tgsettings, dgsettings] = Array(4).fill(null);
-
 Gio._promisify(Gio.File.prototype, 'create_async');
 Gio._promisify(Gio.File.prototype, 'make_directory_async');
 Gio._promisify(Gio.File.prototype, 'replace_contents_async');
 
-class ThemeTweaks extends GObject.Object {
-    static {
-        GObject.registerClass({
-            Properties: {
-                dark:  genParam('string', 'dark', ''),
-                light: genParam('string', 'light', ''),
-                shell: genParam('string', 'shell', ''),
-                night: genParam('boolean', 'night', false),
-                paper: genParam('boolean', 'paper', false),
-                style: genParam('boolean', 'style', false),
-            },
-        }, this);
+class Field {
+    constructor(prop, gset, obj) {
+        this.gset = typeof gset === 'string' ? new Gio.Settings({ schema: gset }) : gset;
+        this.prop = prop;
+        this.bind(obj);
     }
 
+    _get(x) {
+        return this.gset[`get_${this.prop[x][1]}`](this.prop[x][0]);
+    }
+
+    _set(x, y) {
+        this.gset[`set_${this.prop[x][1]}`](this.prop[x][0], y);
+    }
+
+    bind(a) {
+        let fs = Object.entries(this.prop);
+        fs.forEach(([x]) => { a[x] = this._get(x); });
+        this.gset.connectObject(...fs.flatMap(([x, [y]]) => [`changed::${y}`, () => { a[x] = this._get(x); }]), a);
+    }
+
+    unbind(a) {
+        this.gset.disconnectObject(a);
+    }
+}
+
+class ThemeTweaks {
     constructor() {
-        super();
-        [[Fields.NIGHT, 'night'], [Fields.STYLE, 'style'], [System.SHELL, 'shell'], [Fields.PAPER, 'paper']]
-            .forEach(([x, y, z]) => sgsettings.bind(x, this, y, z ?? Gio.SettingsBindFlags.GET));
-        [[System.LPIC, 'light'], [System.DPIC, 'dark']].forEach(([x, y, z]) => dgsettings.bind(x, this, y, z ?? Gio.SettingsBindFlags.GET));
+        this._buildWidgets();
+        this._bindSettings();
+    }
+
+    _buildWidgets() {
+        this.sgset = ExtensionUtils.getSettings();
+        this.tgset = new Gio.Settings({ schema: 'org.gnome.desktop.interface' });
+    }
+
+    _bindSettings() {
+        this._dfield = new Field({
+            light: [System.LPIC, 'string'],
+            dark:  [System.DPIC, 'string'],
+        }, 'org.gnome.desktop.background', this);
+        this._sfield = new Field({
+            night: [Fields.NIGHT, 'boolean'],
+            style: [Fields.STYLE, 'boolean'],
+            shell: [System.SHELL, 'string'],
+            paper: [Fields.PAPER, 'boolean'],
+        }, this.sgset, this);
+        this._nfield = new Field({
+            light_on: [System.NIGHTLIGHT, 'boolean'],
+        }, 'org.gnome.settings-daemon.plugins.color', this);
         LightProxy.connectObject('g-properties-changed', this._onLightChanged.bind(this), this);
-        ngsettings.connectObject(`changed::${System.NIGHTLIGHT}`, this._onLightChanged.bind(this), this);
     }
 
     get _isNight() {
-        return LightProxy?.NightLightActive && sgsettings.get_boolean(Fields.NIGHT) && ngsettings.get_boolean(System.NIGHTLIGHT);
+        return LightProxy?.NightLightActive && this._night && this._light_on;
     }
 
     async _onLightChanged() {
@@ -72,12 +98,13 @@ class ThemeTweaks extends GObject.Object {
     }
 
     _syncTheme() {
+        Main.layoutManager.screenTransition.run();
         if(this._isNight) {
-            Items.forEach(x => sync(tgsettings, System[x], sgsettings, `${Fields[x]}-night`));
-            sync(sgsettings, System.SHELL, sgsettings, `${Fields.SHELL}-night`);
+            Items.forEach(x => sync(this.tgset, System[x], this.sgset, `${Fields[x]}-night`));
+            sync(this.sgset, System.SHELL, this.sgset, `${Fields.SHELL}-night`);
         } else {
-            Items.forEach(x => sync(tgsettings, System[x], sgsettings, Fields[x]));
-            sync(sgsettings, System.SHELL, sgsettings, Fields.SHELL);
+            Items.forEach(x => sync(this.tgset, System[x], this.sgset, Fields[x]));
+            sync(this.sgset, System.SHELL, this.sgset, Fields.SHELL);
         }
     }
 
@@ -102,6 +129,12 @@ class ThemeTweaks extends GObject.Object {
         [LIGHT, DARK].forEach(x => theme?.unload_stylesheet(newConf('gnome-shell', x)));
     }
 
+    set light_on(on) {
+        if(this._light_on === on) return;
+        this._light_on = on;
+        this._onLightChanged().catch(noop);
+    }
+
     set night(night) { // sync values: 5 sys <=> 10 user
         if(this._night === night) return;
         if((this._night = night)) {
@@ -109,34 +142,32 @@ class ThemeTweaks extends GObject.Object {
             let f1 = (s1, k1, s2, k2) => [`changed::${k1}`, () => sync(s2, this._isNight ? `${k2}-night` : k2, s1, k1)];
             let f2 = (s1, k1, s2, k2) => [`changed::${k1}`, () => this._isNight || sync(s2, k2, s1, k1)];
             let f3 = (s1, k1, s2, k2) => [`changed::${k1}`, () => this._isNight && sync(s2, k2, s1, k1)];
-            tgsettings.connectObject(...Items.flatMap(x => f1(tgsettings, System[x], sgsettings, Fields[x])), this);
-            sgsettings.connectObject(...Items.flatMap(x => f2(sgsettings, Fields[x], tgsettings, System[x]))
-                                     .concat(Items.flatMap(x => f3(sgsettings, `${Fields[x]}-night`, tgsettings, System[x])))
-                                     .concat(f1(sgsettings, System.SHELL, sgsettings, Fields.SHELL))
-                                     .concat(f2(sgsettings, Fields.SHELL, sgsettings, System.SHELL))
-                                     .concat(f3(sgsettings, `${Fields.SHELL}-night`, sgsettings, System.SHELL)), this);
+            this.tgset.connectObject(...Items.flatMap(x => f1(this.tgset, System[x], this.sgset, Fields[x])), this);
+            this.sgset.connectObject(...Items.flatMap(x => f2(this.sgset, Fields[x], this.tgset, System[x]))
+                                     .concat(Items.flatMap(x => f3(this.sgset, `${Fields[x]}-night`, this.tgset, System[x])))
+                                     .concat(f1(this.sgset, System.SHELL, this.sgset, Fields.SHELL))
+                                     .concat(f2(this.sgset, Fields.SHELL, this.sgset, System.SHELL))
+                                     .concat(f3(this.sgset, `${Fields.SHELL}-night`, this.sgset, System.SHELL)), this);
         } else {
-            [tgsettings, sgsettings].forEach(x => x.disconnectObject(this));
+            ['tgset', 'sgset'].forEach(x => this[x].disconnectObject(this));
         }
     }
 
     set light(light) {
         this._light = light;
-        this.paper = true;
+        if(this._paper === undefined) return;
+        this.paper = this._paper;
     }
 
     set dark(dark) {
         this._dark = dark;
-        this.paper = true;
+        this.paper = this._paper;
     }
 
     set paper(paper) {
-        if(paper) {
-            if(!this._dark || !this._light) return;
-            this._writeToXML().catch(noop);
-        } else {
-            //
-        }
+        this._paper = paper;
+        if(!this._paper || !this._dark || !this._light) return;
+        this._writeToXML().catch(noop);
     }
 
     async _writeToXML() {
@@ -188,24 +219,20 @@ class ThemeTweaks extends GObject.Object {
     }
 
     destroy() {
-        ngsettings.disconnectObject(this);
         LightProxy.disconnectObject(this);
+        ['_nfield', '_sfield', '_dfield'].forEach(x => this[x].unbind(this));
         this.style = this.night = this.shell = null;
     }
 }
 
 class Extension {
     enable() {
-        sgsettings = ExtensionUtils.getSettings();
-        tgsettings = new Gio.Settings({ schema: 'org.gnome.desktop.interface' });
-        dgsettings = new Gio.Settings({ schema: 'org.gnome.desktop.background' });
-        ngsettings = new Gio.Settings({ schema: 'org.gnome.settings-daemon.plugins.color' });
         this._ext = new ThemeTweaks();
     }
 
     disable() {
         this._ext.destroy();
-        sgsettings = tgsettings = ngsettings = dgsettings = this._ext = null;
+        this._ext = null;
     }
 }
 
