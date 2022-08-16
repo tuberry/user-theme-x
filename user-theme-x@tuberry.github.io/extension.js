@@ -8,7 +8,7 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Util = Me.imports.util;
 const { Fields, System } = Me.imports.fields;
-const LightProxy = Main.panel.statusArea.aggregateMenu._nightLight._proxy;
+const LightProxy = Main.panel.statusArea.quickSettings._nightLight._proxy;
 
 const noop = () => {};
 const newFile = (...x) => Gio.File.new_for_path(GLib.build_filenamev(x));

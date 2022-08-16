@@ -6,7 +6,6 @@
 const { Adw, Gio, GObject, Gtk, Gdk, Graphene, GdkPixbuf } = imports.gi;
 
 const ExtensionUtils = imports.misc.extensionUtils;
-const gsettings = ExtensionUtils.getSettings();
 const Me = ExtensionUtils.getCurrentExtension();
 const Util = Me.imports.util;
 const UI = Me.imports.ui;
@@ -187,6 +186,7 @@ class UserThemeXPrefs extends Adw.PreferencesGroup {
 
     constructor() {
         super();
+        this.gset = ExtensionUtils.getSettings();
         this._buildWidgets().then(() => {
             this._bindValues();
             this._buildUI();
@@ -213,14 +213,14 @@ class UserThemeXPrefs extends Adw.PreferencesGroup {
 
     _bindValues() {
         Items.forEach((x, i) => {
-            gsettings.bind(Fields[x], this._widgets[i][0], 'active', Gio.SettingsBindFlags.DEFAULT);
-            gsettings.bind(`${Fields[x]}-night`, this._widgets[i][1], 'active', Gio.SettingsBindFlags.DEFAULT);
+            this.gset.bind(Fields[x], this._widgets[i][0], 'active', Gio.SettingsBindFlags.DEFAULT);
+            this.gset.bind(`${Fields[x]}-night`, this._widgets[i][1], 'active', Gio.SettingsBindFlags.DEFAULT);
         });
         [
             [Fields.STYLE, this._field_style, 'active'],
             [Fields.NIGHT, this._field_night, 'enable-expansion'],
             [Fields.PAPER, this._field_paper, 'enable-expansion'],
-        ].forEach(xs => gsettings.bind(...xs, Gio.SettingsBindFlags.DEFAULT));
+        ].forEach(xs => this.gset.bind(...xs, Gio.SettingsBindFlags.DEFAULT));
     }
 }
 
