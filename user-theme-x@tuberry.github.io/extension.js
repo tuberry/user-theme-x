@@ -15,6 +15,7 @@ const newFile = (...x) => Gio.File.new_for_path(GLib.build_filenamev(x));
 const newConf = (...x) => newFile(GLib.get_user_config_dir(), ...x);
 const sync = (s1, k1, s2, k2) => s1.get_string(k1) !== s2.get_string(k2) && s1.set_string(k1, s2.get_string(k2));
 const Items = ['GTK', 'ICONS', 'COLOR', 'CURSOR'];
+// const Items = ['GTK', 'ICONS', 'CURSOR'];
 const DARK = 'gnome-shell-dark.css';
 const LIGHT = 'gnome-shell.css';
 const genXML = (light, dark) => `<?xml version="1.0"?>
@@ -72,20 +73,20 @@ class ThemeTweaks {
     }
 
     _bindSettings() {
+        LightProxy.connectObject('g-properties-changed', this._onLightChanged.bind(this), this);
         this._dfield = new Field({
             light: [System.LPIC, 'string'],
             dark:  [System.DPIC, 'string'],
         }, 'org.gnome.desktop.background', this);
+        this._nfield = new Field({
+            light_on: [System.NIGHTLIGHT, 'boolean'],
+        }, 'org.gnome.settings-daemon.plugins.color', this);
         this._sfield = new Field({
             night: [Fields.NIGHT, 'boolean'],
             style: [Fields.STYLE, 'boolean'],
             shell: [System.SHELL, 'string'],
             paper: [Fields.PAPER, 'boolean'],
         }, this.sgset, this);
-        this._nfield = new Field({
-            light_on: [System.NIGHTLIGHT, 'boolean'],
-        }, 'org.gnome.settings-daemon.plugins.color', this);
-        LightProxy.connectObject('g-properties-changed', this._onLightChanged.bind(this), this);
     }
 
     get _isNight() {
@@ -98,6 +99,7 @@ class ThemeTweaks {
     }
 
     _syncTheme() {
+        if(!['_light_on', '_night'].every(x => x in this)) return;
         Main.layoutManager.screenTransition.run();
         if(this._isNight) {
             Items.forEach(x => sync(this.tgset, System[x], this.sgset, `${Fields[x]}-night`));

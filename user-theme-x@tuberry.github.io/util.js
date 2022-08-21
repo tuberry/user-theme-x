@@ -34,7 +34,7 @@ function getModeThemeDirs() {
 function enumerateDirs(dirs) {
     return Promise.all(dirs.map(async path => {
         let files = [];
-        for await (let info of await Gio.File.new_for_path(path).enumerate_children_async(Gio.FILE_ATTRIBUTE_STANDARD_NAME, Gio.FileQueryInfoFlags.NONE, GLib.PRIORITY_DEFAULT, null).catch(noop) ?? []) files.push({ name: info.get_name(), path  });
+        for await (let info of await Gio.File.new_for_path(path).enumerate_children_async(Gio.FILE_ATTRIBUTE_STANDARD_NAME, Gio.FileQueryInfoFlags.NONE, GLib.PRIORITY_DEFAULT, null).catch(noop) ?? []) files.push({ name: info.get_name(), path });
         return files;
     }));
 }
