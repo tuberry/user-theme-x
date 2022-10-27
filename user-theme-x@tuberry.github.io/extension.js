@@ -15,7 +15,6 @@ const newFile = (...x) => Gio.File.new_for_path(GLib.build_filenamev(x));
 const newConf = (...x) => newFile(GLib.get_user_config_dir(), ...x);
 const sync = (s1, k1, s2, k2) => s1.get_string(k1) !== s2.get_string(k2) && s1.set_string(k1, s2.get_string(k2));
 const Items = ['GTK', 'ICONS', 'COLOR', 'CURSOR'];
-// const Items = ['GTK', 'ICONS', 'CURSOR'];
 const DARK = 'gnome-shell-dark.css';
 const LIGHT = 'gnome-shell.css';
 const genXML = (light, dark) => `<?xml version="1.0"?>
@@ -39,7 +38,7 @@ class Field {
     constructor(prop, gset, obj) {
         this.gset = typeof gset === 'string' ? new Gio.Settings({ schema: gset }) : gset;
         this.prop = prop;
-        this.bind(obj);
+        this.attach(obj);
     }
 
     _get(x) {
@@ -50,13 +49,13 @@ class Field {
         this.gset[`set_${this.prop[x][1]}`](this.prop[x][0], y);
     }
 
-    bind(a) {
+    attach(a) {
         let fs = Object.entries(this.prop);
         fs.forEach(([x]) => { a[x] = this._get(x); });
         this.gset.connectObject(...fs.flatMap(([x, [y]]) => [`changed::${y}`, () => { a[x] = this._get(x); }]), a);
     }
 
-    unbind(a) {
+    detach(a) {
         this.gset.disconnectObject(a);
     }
 }
@@ -89,7 +88,7 @@ class ThemeTweaks {
         }, this.sgset, this);
     }
 
-    get _isNight() {
+    isNight() {
         return LightProxy?.NightLightActive && this._night && this._light_on;
     }
 
@@ -101,7 +100,7 @@ class ThemeTweaks {
     _syncTheme() {
         if(!['_light_on', '_night'].every(x => x in this)) return;
         Main.layoutManager.screenTransition.run();
-        if(this._isNight) {
+        if(this.isNight()) {
             Items.forEach(x => sync(this.tgset, System[x], this.sgset, `${Fields[x]}-night`));
             sync(this.sgset, System.SHELL, this.sgset, `${Fields.SHELL}-night`);
         } else {
@@ -118,7 +117,7 @@ class ThemeTweaks {
         });
         let day = newConf('gnome-shell', LIGHT);
         let night = newConf('gnome-shell', DARK);
-        if(this._isNight && await Util.checkFile(night).catch(noop)) next.load_stylesheet(night);
+        if(this.isNight() && await Util.checkFile(night).catch(noop)) next.load_stylesheet(night);
         else if(await Util.checkFile(day).catch(noop)) next.load_stylesheet(day);
         else throw new Error('stylesheet not found');
         if(!next.default_stylesheet) throw new Error(`No valid stylesheet found for “${Main.sessionMode.stylesheetName}”`);
@@ -141,9 +140,9 @@ class ThemeTweaks {
         if(this._night === night) return;
         if((this._night = night)) {
             this._syncTheme();
-            let f1 = (s1, k1, s2, k2) => [`changed::${k1}`, () => sync(s2, this._isNight ? `${k2}-night` : k2, s1, k1)];
-            let f2 = (s1, k1, s2, k2) => [`changed::${k1}`, () => this._isNight || sync(s2, k2, s1, k1)];
-            let f3 = (s1, k1, s2, k2) => [`changed::${k1}`, () => this._isNight && sync(s2, k2, s1, k1)];
+            let f1 = (s1, k1, s2, k2) => [`changed::${k1}`, () => sync(s2, this.isNight() ? `${k2}-night` : k2, s1, k1)];
+            let f2 = (s1, k1, s2, k2) => [`changed::${k1}`, () => this.isNight() || sync(s2, k2, s1, k1)];
+            let f3 = (s1, k1, s2, k2) => [`changed::${k1}`, () => this.isNight() && sync(s2, k2, s1, k1)];
             this.tgset.connectObject(...Items.flatMap(x => f1(this.tgset, System[x], this.sgset, Fields[x])), this);
             this.sgset.connectObject(...Items.flatMap(x => f2(this.sgset, Fields[x], this.tgset, System[x]))
                                      .concat(Items.flatMap(x => f3(this.sgset, `${Fields[x]}-night`, this.tgset, System[x])))
@@ -184,13 +183,8 @@ class ThemeTweaks {
     set style(style) {
         if((this._style = style)) {
             if(this._fileMonitor) return;
-            this._emitCount = 0;
             this._fileMonitor = newConf('gnome-shell').monitor_directory(Gio.FileMonitorFlags.WATCH_MOVES, null);
-            this._fileMonitor.connect('changed', () => {
-                if(++this._emitCount !== 10) return; // NOTE: ugly hack for 10 signals when saving file
-                this._emitCount = 0;
-                this._loadStyle().catch(noop);
-            });
+            this._fileMonitor.connect('changed', (o, s, t, e) => e !== Gio.FileMonitorEvent.CHANGED && this._loadStyle().catch(noop));
             this._loadStyle().catch(noop);
         } else {
             if(!this._fileMonitor) return;
@@ -222,7 +216,7 @@ class ThemeTweaks {
 
     destroy() {
         LightProxy.disconnectObject(this);
-        ['_nfield', '_sfield', '_dfield'].forEach(x => this[x].unbind(this));
+        ['_nfield', '_sfield', '_dfield'].forEach(x => this[x].detach(this));
         this.style = this.night = this.shell = null;
     }
 }

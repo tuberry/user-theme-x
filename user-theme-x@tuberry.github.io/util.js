@@ -60,6 +60,5 @@ async function getAllThemes() {
         icons.map(async ({ name, path }) => await check(path, 'icon-theme.cache') ? [name] : []),
         icons.map(async ({ name, path }) => await check(path, 'cursors') ? [name] : []),
     ].map(x => Promise.all(x)));
-
     return result.map(x => [...new Set(x.flat())].sort());
 }

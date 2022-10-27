@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-shell-extension-user-theme-x 25\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-08-06 19:11+0800\n"
+"POT-Creation-Date: 2022-10-25 20:28+0800\n"
 "PO-Revision-Date: 2021-08-18 14:32+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -17,11 +17,11 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: prefs.js:172 prefs.js:198
+#: prefs.js:171 prefs.js:198
 msgid "Day"
 msgstr "白天"
 
-#: prefs.js:172 prefs.js:198
+#: prefs.js:171 prefs.js:198
 msgid "Night"
 msgstr "夜晚"
 
@@ -65,11 +65,11 @@ msgstr "图标"
 msgid "Cursor"
 msgstr "光标"
 
-#: ui.js:30
+#: ui.js:32
 msgid "Clear"
 msgstr "清除"
 
-#: ui.js:258
+#: ui.js:262
 msgid "Click or press ENTER to commit changes"
 msgstr "单击或按回车提交更改"
 

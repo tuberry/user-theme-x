@@ -190,7 +190,7 @@ class UserThemeXPrefs extends Adw.PreferencesGroup {
         this._buildWidgets().then(() => {
             this._bindValues();
             this._buildUI();
-        }).catch(e => log(e.message));
+        });
     }
 
     async _buildWidgets() {
