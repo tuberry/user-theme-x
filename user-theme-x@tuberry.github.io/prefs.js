@@ -132,10 +132,10 @@ class Thumb extends Adw.Bin {
     _snapshot(snap, w, h, left) {
         let cr = snap.append_cairo(Rect(0, 0, w, h));
         try {
-            let file = left ? this.light : this.dark;
-            let pix = GdkPixbuf.Pixbuf.new_from_file(file.replace(/^file:\/\//, ''));
-            let [W, H] = [pix.get_width(), pix.get_height()];
-            let s = Math.max(w / W, h / H);
+            let file = left ? this.light : this.dark,
+                pix = GdkPixbuf.Pixbuf.new_from_file(file.replace(/^file:\/\//, '')),
+                [W, H] = [pix.get_width(), pix.get_height()],
+                s = Math.max(w / W, h / H);
             Gdk.cairo_set_source_pixbuf(cr, pix.scale_simple(W * s, H * s, GdkPixbuf.InterpType.BILINEAR), 0, 0);
             cr.moveTo(0, 0);
             cr.lineTo(w, h);
@@ -165,15 +165,15 @@ class Wall extends Adw.PreferencesRow {
 
     constructor(w, h) {
         super();
-        let box = new Gtk.Box({ css_classes: ['linked'] });
-        let thumb = new Thumb(w, h);
-        let dgsettings = new Gio.Settings({ schema: 'org.gnome.desktop.background' });
-        let [light, dark] = [[_('Day'), DAY, 'light', System.LPIC], [_('Night'), NIGHT, 'dark', System.DPIC]].map(x => {
-            let btn = new ImgBtn(x[0], x[1], h);
-            btn.bind_property('file', thumb, x[2], GObject.BindingFlags.DEFAULT);
-            dgsettings.bind(x[3], btn, 'file', Gio.SettingsBindFlags.DEFAULT);
-            return btn;
-        });
+        let box = new Gtk.Box({ css_classes: ['linked'] }),
+            thumb = new Thumb(w, h),
+            dgsettings = new Gio.Settings({ schema: 'org.gnome.desktop.background' }),
+            [light, dark] = [[_('Day'), DAY, 'light', System.LPIC], [_('Night'), NIGHT, 'dark', System.DPIC]].map(x => {
+                let btn = new ImgBtn(x[0], x[1], h);
+                btn.bind_property('file', thumb, x[2], GObject.BindingFlags.DEFAULT);
+                dgsettings.bind(x[3], btn, 'file', Gio.SettingsBindFlags.DEFAULT);
+                return btn;
+            });
         [light, thumb, dark].forEach(x => box.append(x));
         this.set_child(box);
     }
@@ -223,4 +223,3 @@ class UserThemeXPrefs extends Adw.PreferencesGroup {
         ].forEach(xs => this.gset.bind(...xs, Gio.SettingsBindFlags.DEFAULT));
     }
 }
-

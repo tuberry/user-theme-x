@@ -262,9 +262,9 @@ var LazyEntry = class extends Gtk.Stack {
         this.add_named(this._mkBox(this._label, this._edit), 'label');
         this.add_named(this._mkBox(this._entry, this._done), 'entry');
         this.bind_property('text', this._label, 'text', GObject.BindingFlags.BIDIRECTIONAL | GObject.BindingFlags.SYNC_CREATE);
-        this._edit.connect('clicked', this._onEdit.bind(this));
-        this._done.connect('clicked', this._onDone.bind(this));
-        this._entry.connect('activate', this._onDone.bind(this));
+        this._edit.connect('clicked', () => this._onEdit());
+        this._done.connect('clicked', () => this._onDone());
+        this._entry.connect('activate', () => this._onDone());
         this.set_visible_child_name('label');
     }
 

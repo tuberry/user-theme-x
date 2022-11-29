@@ -48,17 +48,17 @@ async function getModeThemes() {
 }
 
 async function getAllThemes() {
-    let icons = await getThemes('icons');
-    let themes = await getThemes('themes');
-    let mode_themes = await getModeThemes();
-    let check = (...x) => checkFile(Gio.File.new_for_path(fn(...x))).catch(noop);
-    let result = await Promise.all([
+    let icons = await getThemes('icons'),
+        themes = await getThemes('themes'),
+        modes = await getModeThemes(),
+        check = (...x) => checkFile(Gio.File.new_for_path(fn(...x))).catch(noop),
+        ret = await Promise.all([
         // Ref: https://gitlab.gnome.org/GNOME/gnome-tweaks/-/blob/master/gtweak/tweaks/tweak_group_appearance.py
-        themes.map(async ({ name, path }) => await check(path, 'gtk-3.0', 'gtk.css') ||
+            themes.map(async ({ name, path }) => await check(path, 'gtk-3.0', 'gtk.css') ||
                    await check(path, `gtk-3.${Math.ceil(Gtk.MINOR_VERSION / 2) * 2}`, 'gtk.css') ? [name] : []).concat('HighContrastInverse'),
-        themes.map(async ({ name, path }) => await check(path, 'gnome-shell', 'gnome-shell.css') ? [name] : []).concat(mode_themes, 'Default'),
-        icons.map(async ({ name, path }) => await check(path, 'icon-theme.cache') ? [name] : []),
-        icons.map(async ({ name, path }) => await check(path, 'cursors') ? [name] : []),
-    ].map(x => Promise.all(x)));
-    return result.map(x => [...new Set(x.flat())].sort());
+            themes.map(async ({ name, path }) => await check(path, 'gnome-shell', 'gnome-shell.css') ? [name] : []).concat(modes, 'Default'),
+            icons.map(async ({ name, path }) => await check(path, 'icon-theme.cache') ? [name] : []),
+            icons.map(async ({ name, path }) => await check(path, 'cursors') ? [name] : []),
+        ].map(x => Promise.all(x)));
+    return ret.map(x => [...new Set(x.flat())].sort());
 }
