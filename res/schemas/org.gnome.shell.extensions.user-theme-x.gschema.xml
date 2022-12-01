@@ -1,5 +1,5 @@
 <schemalist gettext-domain="gnome-shell-extension-user-theme-x">
-  <schema id="org.gnome.shell.extensions.user-theme" path="/org/gnome/shell/extensions/user-theme/">
+  <schema id="org.gnome.shell.extensions.user-theme-x" path="/org/gnome/shell/extensions/user-theme-x/">
     <key name="name" type="s">
       <default>""</default>
       <summary>Theme name</summary>

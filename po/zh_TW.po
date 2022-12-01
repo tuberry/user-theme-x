@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-shell-extension-user-theme-x 25\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-02-27 16:15+0800\n"
+"POT-Creation-Date: 2023-02-10 05:38+0800\n"
 "PO-Revision-Date: 2021-08-18 14:32+0800\n"
 "Last-Translator: 曾嘉禾(olivertzeng)\n"
 "Language-Team: none\n"
@@ -17,61 +17,65 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: prefs.js:169 prefs.js:194
-msgid "Day"
-msgstr "白天"
-
-#: prefs.js:169 prefs.js:194
-msgid "Night"
-msgstr "夜晚"
-
-#: prefs.js:195
-msgid "Themes"
-msgstr "主題"
-
-#: prefs.js:195
-msgid "Switch according to the Night Light in the Settings"
-msgstr "隨夜光設定切換"
-
-#: prefs.js:196
-msgid "Wallpaper"
-msgstr "背景"
-
-#: prefs.js:201
-msgid "Stylesheet"
-msgstr "樣式表"
-
-#: prefs.js:201
-msgid "Load from “~/.config/gnome-shell/gnome-shell{,-dark}.css”"
-msgstr "從“~/.config/gnome-shell/gnome-shell{,-dark}.css”載入"
-
-#: prefs.js:204
-msgid "Style"
-msgstr "樣式"
-
-#: prefs.js:204
-msgid "Gtk"
-msgstr "Gtk"
-
-#: prefs.js:204
-msgid "Shell"
-msgstr "Shell"
-
-#: prefs.js:204
-msgid "Icons"
-msgstr "圖示"
-
-#: prefs.js:204
-msgid "Cursor"
-msgstr "游標"
-
-#: ui.js:56
+#: src/ui.js:32
 msgid "Clear"
 msgstr "清除"
 
-#: ui.js:250
-msgid "Click or Press ENTER to commit changes"
+#: src/ui.js:266
+#, fuzzy
+msgid "Click or press ENTER to commit changes"
 msgstr "點擊或按輸入鍵提交更改"
 
-msgid "Default"
-msgstr "預設"
+#: src/prefs.js:171 src/prefs.js:198
+msgid "Day"
+msgstr "白天"
+
+#: src/prefs.js:171 src/prefs.js:198
+msgid "Night"
+msgstr "夜晚"
+
+#: src/prefs.js:199
+msgid "Themes"
+msgstr "主題"
+
+#: src/prefs.js:199
+msgid "Switch according to the Night Light in the Settings"
+msgstr "隨夜光設定切換"
+
+#: src/prefs.js:200
+msgid "Wallpaper"
+msgstr "背景"
+
+#: src/prefs.js:205
+msgid "Stylesheet"
+msgstr "樣式表"
+
+#: src/prefs.js:205
+msgid "Load from “~/.config/gnome-shell/gnome-shell{,-dark}.css”"
+msgstr "從“~/.config/gnome-shell/gnome-shell{,-dark}.css”載入"
+
+#: src/prefs.js:208
+msgid "Style"
+msgstr "樣式"
+
+#: src/prefs.js:208
+msgid "Gtk3"
+msgstr ""
+
+#: src/prefs.js:208
+msgid "Shell"
+msgstr "Shell"
+
+#: src/prefs.js:208
+msgid "Icons"
+msgstr "圖示"
+
+#: src/prefs.js:208
+msgid "Cursor"
+msgstr "游標"
+
+#~ msgid "Gtk"
+#~ msgstr "Gtk"
+
+#~ msgid "Default"
+#~ msgstr "預設"

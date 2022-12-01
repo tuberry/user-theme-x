@@ -121,7 +121,7 @@ class ThemeTweaks {
         if((this._style = style)) {
             if(this._fileMonitor) return;
             this._fileMonitor = conf('gnome-shell').monitor_directory(Gio.FileMonitorFlags.WATCH_MOVES, null);
-            this._fileMonitor.connect('changed', (_o, _s, _t, e) => e !== Gio.FileMonitorEvent.CHANGED && this._loadStyle().catch(noop));
+            this._fileMonitor.connect('changed', (_o, _s, _t, e) => e === Gio.FileMonitorEvent.CHANGED && this._loadStyle().catch(noop));
             this._loadStyle().catch(noop);
         } else {
             if(!this._fileMonitor) return;
@@ -132,7 +132,7 @@ class ThemeTweaks {
     }
 
     async _loadStyle() {
-        let context = St.ThemeContext.get_for_stage(global.stage);
+        let ctx = St.ThemeContext.get_for_stage(global.stage);
         let next = new St.Theme({
             application_stylesheet: Main.getThemeStylesheet(),
             default_stylesheet: Main._getDefaultStylesheet(),
@@ -143,8 +143,8 @@ class ThemeTweaks {
         else if(await Util.checkFile(day).catch(noop)) next.load_stylesheet(day);
         else throw new Error('stylesheet not found');
         if(!next.default_stylesheet) throw new Error(`No valid stylesheet found for “${Main.sessionMode.stylesheetName}”`);
-        context.get_theme()?.get_custom_stylesheets().forEach(x => (!x.equal(day) && !x.equal(night)) && next.load_stylesheet(x));
-        context.set_theme(next);
+        ctx.get_theme()?.get_custom_stylesheets().forEach(x => (!x.equal(day) && !x.equal(night)) && next.load_stylesheet(x));
+        ctx.set_theme(next);
     }
 
     _unloadStyle() {

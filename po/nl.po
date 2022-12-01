@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-shell-extension-user-theme-x\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-09-14 18:06+0200\n"
+"POT-Creation-Date: 2023-02-10 05:38+0800\n"
 "PO-Revision-Date: 2021-09-14 18:07+0200\n"
 "Last-Translator: Heimen Stoffels <vistausss@fastmail.com>\n"
 "Language-Team: none\n"
@@ -18,34 +18,63 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 3.0\n"
 
-#: prefs.js:96
-msgid "Themes"
-msgstr "Thema's"
+#: src/ui.js:32
+msgid "Clear"
+msgstr ""
 
-#: prefs.js:97
-msgid "Load user stylesheet “~/.config/gnome-shell/gnome-shell{,-dark}.css”"
-msgstr "Gebruikersstijlblad ‘~/.config/gnome-shell/gnome-shell{,-dark}.css’ laden"
+#: src/ui.js:266
+msgid "Click or press ENTER to commit changes"
+msgstr ""
 
-#: prefs.js:103
+#: src/prefs.js:171 src/prefs.js:198
 msgid "Day"
 msgstr "Dag"
 
-#: prefs.js:103
+#: src/prefs.js:171 src/prefs.js:198
 msgid "Night"
 msgstr "Nacht"
 
-#: prefs.js:104
-msgid "Gtk"
-msgstr "Gtk"
+#: src/prefs.js:199
+msgid "Themes"
+msgstr "Thema's"
 
-#: prefs.js:105
+#: src/prefs.js:199
+msgid "Switch according to the Night Light in the Settings"
+msgstr ""
+
+#: src/prefs.js:200
+msgid "Wallpaper"
+msgstr ""
+
+#: src/prefs.js:205
+msgid "Stylesheet"
+msgstr ""
+
+#: src/prefs.js:205
+#, fuzzy
+msgid "Load from “~/.config/gnome-shell/gnome-shell{,-dark}.css”"
+msgstr ""
+"Gebruikersstijlblad ‘~/.config/gnome-shell/gnome-shell{,-dark}.css’ laden"
+
+#: src/prefs.js:208
+msgid "Style"
+msgstr ""
+
+#: src/prefs.js:208
+msgid "Gtk3"
+msgstr ""
+
+#: src/prefs.js:208
 msgid "Shell"
 msgstr "Shell"
 
-#: prefs.js:106
+#: src/prefs.js:208
 msgid "Icons"
 msgstr "Pictogrammen"
 
-#: prefs.js:107
+#: src/prefs.js:208
 msgid "Cursor"
 msgstr "Cursor"
+
+#~ msgid "Gtk"
+#~ msgstr "Gtk"
