@@ -5,7 +5,7 @@ project(
 )
 
 NAME = 'User Theme X'
-DESCRIPTION = 'Customizable user-theme with user stylesheet and dark theme auto-switch based on the Night Light\\n\\nFor support, please report any issues via the homepage link below.'
+INFO = 'Customizable user-theme with user stylesheet and dark theme auto-switch based on the Night Light'
 EID = meson.project_name().replace('gnome-shell-extension-', '')
 UUID = EID + '@tuberry.github.io'
 EGO = 'EGO=3019' / 'user-themes-x'
