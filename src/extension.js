@@ -11,6 +11,7 @@ const { Fields, Field, System } = Me.imports.fields;
 const LightProxy = Main.panel.statusArea.quickSettings._nightLight._proxy;
 
 const noop = () => {};
+const xnor = (x, y) => !x === !y;
 const fl = (...x) => Gio.File.new_for_path(GLib.build_filenamev(x));
 const conf = (...x) => fl(GLib.get_user_config_dir(), ...x);
 const sync = (s1, k1, s2, k2) => s1.get_string(k1) !== s2.get_string(k2) && s2.set_string(k2, s1.get_string(k1));
@@ -118,13 +119,12 @@ class ThemeTweaks {
     }
 
     set style(style) {
-        if((this._style = style)) {
-            if(this._fileMonitor) return;
+        if(xnor(this._style = style, this._fileMonitor)) return;
+        if(this._style) {
             this._fileMonitor = conf('gnome-shell').monitor_directory(Gio.FileMonitorFlags.WATCH_MOVES, null);
             this._fileMonitor.connect('changed', (_o, _s, _t, e) => e === Gio.FileMonitorEvent.CHANGED && this._loadStyle().catch(noop));
             this._loadStyle().catch(noop);
         } else {
-            if(!this._fileMonitor) return;
             this._fileMonitor.cancel();
             this._fileMonitor = null;
             this._unloadStyle();
