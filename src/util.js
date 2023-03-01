@@ -11,8 +11,12 @@ const fn = (...args) => GLib.build_filenamev(args);
 Gio._promisify(Gio.File.prototype, 'query_info_async');
 Gio._promisify(Gio.File.prototype, 'enumerate_children_async');
 
-function checkFile(file) {
-    return file.query_info_async(Gio.FILE_ATTRIBUTE_STANDARD_NAME, Gio.FileQueryInfoFlags.NONE, GLib.PRIORITY_DEFAULT, null);
+async function checkFile(file) {
+    try {
+        return await file.query_info_async(Gio.FILE_ATTRIBUTE_STANDARD_NAME, Gio.FileQueryInfoFlags.NONE, GLib.PRIORITY_DEFAULT, null);
+    } catch(e) {
+        return false;
+    }
 }
 
 function getDirs(type) {
@@ -51,7 +55,7 @@ async function getAllThemes() {
     let icons = await getThemes('icons'),
         themes = await getThemes('themes'),
         modes = await getModeThemes(),
-        check = (...x) => checkFile(Gio.File.new_for_path(fn(...x))).catch(noop),
+        check = (...x) => checkFile(Gio.File.new_for_path(fn(...x))),
         ret = await Promise.all([
         // Ref: https://gitlab.gnome.org/GNOME/gnome-tweaks/-/blob/master/gtweak/tweaks/tweak_group_appearance.py
             themes.map(async ({ name, path }) => await check(path, 'gtk-3.0', 'gtk.css') ||

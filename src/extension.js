@@ -139,8 +139,8 @@ class ThemeTweaks {
         });
         let day = conf('gnome-shell', LIGHT);
         let night = conf('gnome-shell', DARK);
-        if(this.isNight() && await Util.checkFile(night).catch(noop)) next.load_stylesheet(night);
-        else if(await Util.checkFile(day).catch(noop)) next.load_stylesheet(day);
+        if(this.isNight() && await Util.checkFile(night)) next.load_stylesheet(night);
+        else if(await Util.checkFile(day)) next.load_stylesheet(day);
         else throw new Error('stylesheet not found');
         if(!next.default_stylesheet) throw new Error(`No valid stylesheet found for “${Main.sessionMode.stylesheetName}”`);
         ctx.get_theme()?.get_custom_stylesheets().forEach(x => (!x.equal(day) && !x.equal(night)) && next.load_stylesheet(x));
