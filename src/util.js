@@ -1,68 +1,53 @@
 // vim:fdm=syntax
 // by tuberry
-/* exported getThemeDirs getModeThemeDirs checkFile getAllThemes */
+/* exported fcheck fquery execute noop xnor omap
+   genParam _GTK _ fl fn ec dc fwrite fexist
+   fread fdelete fcopy denum dtouch
+ */
 'use strict';
 
-const { Gio, GLib, Gtk } = imports.gi;
+const { GObject, Gio, GLib } = imports.gi;
+const ExtensionUtils = imports.misc.extensionUtils;
 
-const noop = () => {};
-const fn = (...args) => GLib.build_filenamev(args);
+const STDN = Gio.FILE_ATTRIBUTE_STANDARD_NAME;
 
+Gio._promisify(Gio.File.prototype, 'copy_async');
+Gio._promisify(Gio.File.prototype, 'delete_async');
 Gio._promisify(Gio.File.prototype, 'query_info_async');
+Gio._promisify(Gio.File.prototype, 'load_contents_async');
+Gio._promisify(Gio.File.prototype, 'make_directory_async');
+Gio._promisify(Gio.File.prototype, 'replace_contents_async');
 Gio._promisify(Gio.File.prototype, 'enumerate_children_async');
+Gio._promisify(Gio.Subprocess.prototype, 'communicate_utf8_async');
 
-async function checkFile(file) {
-    try {
-        return await file.query_info_async(Gio.FILE_ATTRIBUTE_STANDARD_NAME, Gio.FileQueryInfoFlags.NONE, GLib.PRIORITY_DEFAULT, null);
-    } catch(e) {
-        return false;
-    }
-}
+var noop = () => {};
+var xnor = (x, y) => !x === !y;
+var _ = ExtensionUtils.gettext;
+var dc = x => new TextDecoder().decode(x);
+var ec = x => new TextEncoder().encode(x);
+var fn = (...xs) => GLib.build_filenamev(xs);
+var fl = (...xs) => Gio.File.new_for_path(fn(...xs));
+var _GTK = imports.gettext.domain('gtk40').gettext;
+var omap = (o, f) => Object.fromEntries(Object.entries(o).map(f));
+var genParam = (x, y, ...z) => GObject.ParamSpec[x](y, y, y, GObject.ParamFlags.READWRITE, ...z);
+var denum = (x, y = STDN) => x.enumerate_children_async(y, Gio.FileQueryInfoFlags.NONE, GLib.PRIORITY_DEFAULT, null);
+var fquery = (x, y) => x.query_info_async(y, Gio.FileQueryInfoFlags.NONE, GLib.PRIORITY_DEFAULT, null);
+var fwrite = (x, y) => x.replace_contents_async(ec(y), null, false, Gio.FileCreateFlags.NONE, null);
+var fcopy = (x, y) => x.copy_async(y, Gio.FileCopyFlags.NONE, GLib.PRIORITY_DEFAULT, null, null);
+var fcheck = (...xs) => fquery(xs[0] instanceof Gio.File ? xs[0] : fl(...xs), STDN);
+var dtouch = x => x.make_directory_async(GLib.PRIORITY_DEFAULT, null);
+var fdelete = x => x.delete_async(GLib.PRIORITY_DEFAULT, null);
+var fexist = (...xs) => fcheck(...xs).catch(noop);
+var fread = x => x.load_contents_async(null);
 
-function getDirs(type) {
-    return [
-        fn(GLib.get_home_dir(), `.${type}`),
-        fn(GLib.get_user_data_dir(), type),
-        ...GLib.get_system_data_dirs().map(dir => fn(dir, type)),
-    ];
-}
-
-function getThemeDirs() {
-    return getDirs('themes');
-}
-
-function getModeThemeDirs() {
-    return GLib.get_system_data_dirs().map(dir => fn(dir, 'gnome-shell', 'theme'));
-}
-
-function enumerateDirs(dirs) {
-    return Promise.all(dirs.map(async path => {
-        let files = [];
-        for await (let info of await Gio.File.new_for_path(path).enumerate_children_async(Gio.FILE_ATTRIBUTE_STANDARD_NAME, Gio.FileQueryInfoFlags.NONE, GLib.PRIORITY_DEFAULT, null).catch(noop) ?? []) files.push({ name: info.get_name(), path });
-        return files;
-    }));
-}
-
-async function getThemes(type) {
-    return (await enumerateDirs(getDirs(type))).flat().map(({ name, path }) => ({ name, path: `${path}/${name}` }));
-}
-
-async function getModeThemes() {
-    return (await enumerateDirs(getModeThemeDirs())).flat().flatMap(({ name }) => name.endsWith('.css') ? [name.slice(0, -4)] : []);
-}
-
-async function getAllThemes() {
-    let icons = await getThemes('icons'),
-        themes = await getThemes('themes'),
-        modes = await getModeThemes(),
-        check = (...x) => checkFile(Gio.File.new_for_path(fn(...x))),
-        ret = await Promise.all([
-        // Ref: https://gitlab.gnome.org/GNOME/gnome-tweaks/-/blob/master/gtweak/tweaks/tweak_group_appearance.py
-            themes.map(async ({ name, path }) => await check(path, 'gtk-3.0', 'gtk.css') ||
-                   await check(path, `gtk-3.${Math.ceil(Gtk.MINOR_VERSION / 2) * 2}`, 'gtk.css') ? [name] : []).concat('HighContrastInverse'),
-            themes.map(async ({ name, path }) => await check(path, 'gnome-shell', 'gnome-shell.css') ? [name] : []).concat(modes, 'Default'),
-            icons.map(async ({ name, path }) => await check(path, 'icon-theme.cache') ? [name] : []),
-            icons.map(async ({ name, path }) => await check(path, 'cursors') ? [name] : []),
-        ].map(x => Promise.all(x)));
-    return ret.map(x => [...new Set(x.flat())].sort());
+async function execute(cmd, fmt = x => x.trim()) {
+    let proc = new Gio.Subprocess({
+        argv: GLib.shell_parse_argv(cmd).at(1),
+        flags: Gio.SubprocessFlags.STDOUT_PIPE | Gio.SubprocessFlags.STDERR_PIPE,
+    });
+    proc.init(null);
+    let [stdout, stderr] = await proc.communicate_utf8_async(null, null);
+    let status = proc.get_exit_status();
+    if(status) throw new Gio.IOErrorEnum({ code: Gio.io_error_from_errno(status), message: stderr.trim() || GLib.strerror(status) });
+    return fmt(stdout);
 }

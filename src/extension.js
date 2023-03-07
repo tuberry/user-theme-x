@@ -4,17 +4,18 @@
 
 const { Gio, GLib, St } = imports.gi;
 const Main = imports.ui.main;
-const ExtensionUtils = imports.misc.extensionUtils;
-const Me = ExtensionUtils.getCurrentExtension();
-const Util = Me.imports.util;
-const { Fields, Field, System } = Me.imports.fields;
 const LightProxy = Main.panel.statusArea.quickSettings._nightLight._proxy;
 
-const noop = () => {};
-const xnor = (x, y) => !x === !y;
-const fl = (...x) => Gio.File.new_for_path(GLib.build_filenamev(x));
+const ExtensionUtils = imports.misc.extensionUtils;
+const Me = ExtensionUtils.getCurrentExtension();
+const { xnor, noop, fl, fwrite, fcheck, fexist, dtouch } = Me.imports.util;
+const { Fulu, Extension, Symbiont, DEventEmitter } = Me.imports.fubar;
+const { Field, System } = Me.imports.const;
+const Theme = Me.imports.theme;
+
 const conf = (...x) => fl(GLib.get_user_config_dir(), ...x);
 const sync = (s1, k1, s2, k2) => s1.get_string(k1) !== s2.get_string(k2) && s2.set_string(k2, s1.get_string(k1));
+
 const Items = ['GTK', 'ICONS', 'COLOR', 'CURSOR'];
 const DARK = 'gnome-shell-dark.css';
 const LIGHT = 'gnome-shell.css';
@@ -31,11 +32,9 @@ const genXML = (light, dark) => `<?xml version="1.0"?>
     </wallpaper>
 </wallpapers>`;
 
-Gio._promisify(Gio.File.prototype, 'make_directory_async');
-Gio._promisify(Gio.File.prototype, 'replace_contents_async');
-
-class ThemeTweaks {
+class UserThemeX extends DEventEmitter {
     constructor() {
+        super();
         this._buildWidgets();
         this._bindSettings();
         this._syncNightLight();
@@ -44,17 +43,21 @@ class ThemeTweaks {
     _buildWidgets() {
         this.sgset = ExtensionUtils.getSettings();
         this.tgset = new Gio.Settings({ schema: 'org.gnome.desktop.interface' });
+        new Symbiont(() => {
+            LightProxy.disconnectObject(this);
+            this.style = this.night = this.shell = null;
+        }, this);
     }
 
     _bindSettings() {
-        this._sfield = new Field({
-            night: [Fields.NIGHT, 'boolean'],
-            style: [Fields.STYLE, 'boolean'],
+        this._fulu_s = new Fulu({
+            night: [Field.NIGHT, 'boolean'],
+            style: [Field.STYLE, 'boolean'],
             shell: [System.SHELL, 'string'],
         }, this.sgset, this).attach({
-            paper: [Fields.PAPER, 'boolean'],
+            paper: [Field.PAPER, 'boolean'],
         }, this, 'wallpaper');
-        this._dfield = new Field({
+        this._fulu_d = new Fulu({
             lpic: [System.LPIC, 'string'],
             dpic: [System.DPIC, 'string'],
         }, 'org.gnome.desktop.background', this, 'wallpaper');
@@ -80,12 +83,12 @@ class ThemeTweaks {
             let f1 = (a, b, c, d) => [`changed::${b}`, () => sync(a, b, c, this.isNight() ? `${d}-night` : d)],
                 f2 = (a, b, c, d) => [`changed::${b}`, () => this.isNight() || sync(a, b, c, d)],
                 f3 = (a, b, c, d) => [`changed::${b}`, () => this.isNight() && sync(a, b, c, d)];
-            this.tgset.connectObject(...Items.flatMap(x => f1(this.tgset, System[x], this.sgset, Fields[x])), this);
-            this.sgset.connectObject(...Items.flatMap(x => f2(this.sgset, Fields[x], this.tgset, System[x]))
-                                     .concat(Items.flatMap(x => f3(this.sgset, `${Fields[x]}-night`, this.tgset, System[x])))
-                                     .concat(f1(this.sgset, System.SHELL, this.sgset, Fields.SHELL))
-                                     .concat(f2(this.sgset, Fields.SHELL, this.sgset, System.SHELL))
-                                     .concat(f3(this.sgset, `${Fields.SHELL}-night`, this.sgset, System.SHELL)), this);
+            this.tgset.connectObject(...Items.flatMap(x => f1(this.tgset, System[x], this.sgset, Field[x])), this);
+            this.sgset.connectObject(...Items.flatMap(x => f2(this.sgset, Field[x], this.tgset, System[x]))
+                                     .concat(Items.flatMap(x => f3(this.sgset, `${Field[x]}-night`, this.tgset, System[x])))
+                                     .concat(f1(this.sgset, System.SHELL, this.sgset, Field.SHELL))
+                                     .concat(f2(this.sgset, Field.SHELL, this.sgset, System.SHELL))
+                                     .concat(f3(this.sgset, `${Field.SHELL}-night`, this.sgset, System.SHELL)), this);
         } else {
             ['tgset', 'sgset'].forEach(x => this[x].disconnectObject(this));
         }
@@ -93,13 +96,13 @@ class ThemeTweaks {
 
     _syncTheme() {
         if(!('night_light' in this)) return;
-        // Main.layoutManager.screenTransition.run();
+        Main.layoutManager.screenTransition.run();
         if(this.isNight()) {
-            Items.forEach(x => sync(this.sgset, `${Fields[x]}-night`, this.tgset, System[x]));
-            sync(this.sgset, `${Fields.SHELL}-night`, this.sgset, System.SHELL);
+            Items.forEach(x => sync(this.sgset, `${Field[x]}-night`, this.tgset, System[x]));
+            sync(this.sgset, `${Field.SHELL}-night`, this.sgset, System.SHELL);
         } else {
-            Items.forEach(x => sync(this.sgset, Fields[x], this.tgset, System[x]));
-            sync(this.sgset, Fields.SHELL, this.sgset, System.SHELL);
+            Items.forEach(x => sync(this.sgset, Field[x], this.tgset, System[x]));
+            sync(this.sgset, Field.SHELL, this.sgset, System.SHELL);
         }
     }
 
@@ -111,11 +114,8 @@ class ThemeTweaks {
     async _writeToXML() {
         if(!(this.paper && this.dpic && this.lpic)) return;
         let dir = fl(GLib.get_user_data_dir(), 'gnome-background-properties');
-        await dir.make_directory_async(GLib.PRIORITY_DEFAULT, null).catch(noop);
-        let file = fl(GLib.get_user_data_dir(), 'gnome-background-properties', 'user-theme-x-wallpaper.xml');
-        await file.touch_async().catch(noop);
-        await file.replace_contents_async(new TextEncoder().encode(genXML(this.lpic, this.dpic)),
-            null, false, Gio.FileCreateFlags.REPLACE_DESTINATION, null);
+        if(!await fexist(dir)) await dtouch(dir);
+        await fwrite(fl(GLib.get_user_data_dir(), 'gnome-background-properties', 'user-theme-x-wallpaper.xml'), genXML(this.lpic, this.dpic));
     }
 
     set style(style) {
@@ -139,10 +139,9 @@ class ThemeTweaks {
         });
         let day = conf('gnome-shell', LIGHT);
         let night = conf('gnome-shell', DARK);
-        if(this.isNight() && await Util.checkFile(night)) next.load_stylesheet(night);
-        else if(await Util.checkFile(day)) next.load_stylesheet(day);
-        else throw new Error('stylesheet not found');
-        if(!next.default_stylesheet) throw new Error(`No valid stylesheet found for “${Main.sessionMode.stylesheetName}”`);
+        if(this.isNight() && await fexist(night)) next.load_stylesheet(night);
+        else if(await fexist(day)) next.load_stylesheet(day);
+        else throw new Gio.IOErrorEnum({ code: Gio.IOErrorEnum.NOT_FOUND, message: 'No custom stylesheet found' });
         ctx.get_theme()?.get_custom_stylesheets().forEach(x => (!x.equal(day) && !x.equal(night)) && next.load_stylesheet(x));
         ctx.set_theme(next);
     }
@@ -154,9 +153,9 @@ class ThemeTweaks {
 
     set shell(shell) {
         if(shell) {
-            let paths = Util.getThemeDirs().map(x => `${x}/${shell}/gnome-shell/gnome-shell.css`)
-                .concat(Util.getModeThemeDirs().map(x => `${x}/${shell}.css`));
-            Promise.any(paths.map(async x => await Util.checkFile(Gio.File.new_for_path(x)) && x))
+            let paths = Theme.getThemeDirs().map(x => `${x}/${shell}/gnome-shell/gnome-shell.css`)
+                .concat(Theme.getModeThemeDirs().map(x => `${x}/${shell}.css`));
+            Promise.any(paths.map(async x => await fcheck(x) && x))
                 .then(this._loadShellTheme.bind(this)).catch(() => this._loadShellTheme(null));
         } else {
             this._loadShellTheme(null);
@@ -171,25 +170,8 @@ class ThemeTweaks {
             // ignore
         }
     }
-
-    destroy() {
-        LightProxy.disconnectObject(this);
-        ['_sfield', '_dfield'].forEach(x => this[x].detach(this));
-        this.style = this.night = this.shell = null;
-    }
-}
-
-class Extension {
-    enable() {
-        this._ext = new ThemeTweaks();
-    }
-
-    disable() {
-        this._ext.destroy();
-        this._ext = null;
-    }
 }
 
 function init() {
-    return new Extension();
+    return new Extension(UserThemeX);
 }

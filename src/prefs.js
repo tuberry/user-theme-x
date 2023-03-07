@@ -7,17 +7,15 @@ const { Adw, Gio, GObject, Gtk, Gdk, Graphene, GdkPixbuf } = imports.gi;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
-const Util = Me.imports.util;
+const { _, _GTK, genParam } = Me.imports.util;
+const { Field, System } = Me.imports.const;
+const Theme = Me.imports.theme;
 const UI = Me.imports.ui;
+
 const DAY = 'daytime-sunrise-symbolic';
 const NIGHT = 'daytime-sunset-symbolic';
-const { Fields, System } = Me.imports.fields;
 const SCHEME = ['default', 'prefer-dark', 'prefer-light'];
 const Items = ['COLOR', 'GTK', 'SHELL', 'ICONS', 'CURSOR'];
-
-const _ = ExtensionUtils.gettext;
-const _GTK = imports.gettext.domain('gtk40').gettext;
-const genParam = (type, name, ...dflt) => GObject.ParamSpec[type](name, name, name, GObject.ParamFlags.READWRITE, ...dflt);
 
 function init() {
     ExtensionUtils.initTranslations();
@@ -194,32 +192,34 @@ class UserThemeXPrefs extends Adw.PreferencesGroup {
     }
 
     async _buildWidgets() {
-        let themes = await Util.getAllThemes();
-        this._widgets = [SCHEME, ...themes].map(x => [[DAY, _('Day')], [NIGHT, _('Night')]].map(y => new StrDrop(x, ...y)));
-        this._field_night = new Adw.ExpanderRow({ title: _('Themes'), show_enable_switch: true, subtitle: _('Switch according to the Night Light in the Settings') });
-        this._field_paper = new Adw.ExpanderRow({ title: _('Wallpaper'), show_enable_switch: true });
-        this._field_style = new Gtk.CheckButton();
+        let themes = await Theme.getAllThemes();
+        this._wdg = [SCHEME, ...themes].map(x => [[DAY, _('Day')], [NIGHT, _('Night')]].map(y => new StrDrop(x, ...y)));
+        this._blk = {
+            night: new Adw.ExpanderRow({ title: _('Themes'), show_enable_switch: true, subtitle: _('Switch according to the Night Light in the Settings') }),
+            paper: new Adw.ExpanderRow({ title: _('Wallpaper'), show_enable_switch: true }),
+            style: new Gtk.CheckButton(),
+        };
     }
 
     _buildUI() {
-        this.add(new UI.PrefRow(this._field_style, [_('Stylesheet'), _('Load from “~/.config/gnome-shell/gnome-shell{,-dark}.css”')]));
-        this.add(this._field_paper);
-        this.add(this._field_night);
+        this.add(new UI.PrefRow(this._blk.style, [_('Stylesheet'), _('Load from “~/.config/gnome-shell/gnome-shell{,-dark}.css”')]));
+        this.add(this._blk.paper);
+        this.add(this._blk.night);
         [[_('Style')], [_('Gtk3')], [_('Shell')], [_('Icons')], [_('Cursor')]]
-            .forEach((x, i) => this._field_night.add_row(new UI.PrefRow(x, ...this._widgets[i])));
-        this._field_paper.add_row(new Wall(480, 270));
-        ['_field_night', '_field_paper'].forEach(x => this[x].enable_expansion && this[x].set_expanded(true));
+            .forEach((x, i) => this._blk.night.add_row(new UI.PrefRow(x, ...this._wdg[i])));
+        this._blk.paper.add_row(new Wall(480, 270));
+        ['night', 'paper'].forEach(x => this._blk[x].enable_expansion && this._blk[x].set_expanded(true));
     }
 
     _bindValues() {
         Items.forEach((x, i) => {
-            this.gset.bind(Fields[x], this._widgets[i][0], 'active', Gio.SettingsBindFlags.DEFAULT);
-            this.gset.bind(`${Fields[x]}-night`, this._widgets[i][1], 'active', Gio.SettingsBindFlags.DEFAULT);
+            this.gset.bind(Field[x], this._wdg[i][0], 'active', Gio.SettingsBindFlags.DEFAULT);
+            this.gset.bind(`${Field[x]}-night`, this._wdg[i][1], 'active', Gio.SettingsBindFlags.DEFAULT);
         });
         [
-            [Fields.STYLE, this._field_style, 'active'],
-            [Fields.NIGHT, this._field_night, 'enable-expansion'],
-            [Fields.PAPER, this._field_paper, 'enable-expansion'],
+            [Field.STYLE, this._blk.style, 'active'],
+            [Field.NIGHT, this._blk.night, 'enable-expansion'],
+            [Field.PAPER, this._blk.paper, 'enable-expansion'],
         ].forEach(xs => this.gset.bind(...xs, Gio.SettingsBindFlags.DEFAULT));
     }
 }
