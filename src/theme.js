@@ -1,6 +1,6 @@
 // vim:fdm=syntax
 // by tuberry
-/* exported getThemeDirs getModeThemeDirs checkFile getAllThemes */
+/* exported getThemeDirs getModeThemeDirs getAllThemes */
 'use strict';
 
 const { GLib } = imports.gi;

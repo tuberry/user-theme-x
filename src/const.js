@@ -1,5 +1,5 @@
 // vim:fdm=syntax
-// by: tuberry
+// by tuberry
 /* exported System Field */
 'use strict';
 
@@ -14,17 +14,17 @@ var System = {
 };
 
 var Field = {
-    GTK:         'x-gtk',
-    COLOR:       'x-color',
-    ICONS:       'x-icons',
-    NIGHT:       'x-night',
-    SHELL:       'x-shell',
-    CURSOR:      'x-cursor',
-    GTKNIGHT:    'x-gtk-night',
-    PAPER:       'x-wallpaper',
-    STYLE:       'x-stylesheet',
-    COLORNIGHT:  'x-color-night',
-    ICONSNIGHT:  'x-icons-night',
-    SHELLNIGHT:  'x-shell-night',
-    CURSORNIGHT: 'x-cursor-night',
+    GTK:     'x-gtk',
+    COLOR:   'x-color',
+    ICONS:   'x-icons',
+    NIGHT:   'x-night',
+    SHELL:   'x-shell',
+    CURSOR:  'x-cursor',
+    NGTK:    'x-gtk-night',
+    PAPER:   'x-wallpaper',
+    STYLE:   'x-stylesheet',
+    NCOLOR:  'x-color-night',
+    NICONS:  'x-icons-night',
+    NSHELL:  'x-shell-night',
+    NCURSOR: 'x-cursor-night',
 };

@@ -1,5 +1,5 @@
 // vim:fdm=syntax
-// by: tuberry
+// by tuberry
 /* exported init */
 
 const { Gio, GLib, St } = imports.gi;
@@ -8,17 +8,16 @@ const LightProxy = Main.panel.statusArea.quickSettings._nightLight._proxy;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
-const { xnor, noop, fl, fwrite, fcheck, fexist, dtouch } = Me.imports.util;
-const { Fulu, Extension, Symbiont, DEventEmitter } = Me.imports.fubar;
+const { xnor, noop, fl, fread, fwrite, fcheck, fexist, dtouch, gerror } = Me.imports.util;
+const { Fulu, Extension, DEventEmitter, symbiose, omit, onus } = Me.imports.fubar;
 const { Field, System } = Me.imports.const;
 const Theme = Me.imports.theme;
 
 const conf = (...x) => fl(GLib.get_user_config_dir(), ...x);
 const sync = (s1, k1, s2, k2) => s1.get_string(k1) !== s2.get_string(k2) && s2.set_string(k2, s1.get_string(k1));
 
+const Sheet = { LIGHT: 'gnome-shell.css', DARK: 'gnome-shell-dark.css' };
 const Items = ['GTK', 'ICONS', 'COLOR', 'CURSOR'];
-const DARK = 'gnome-shell-dark.css';
-const LIGHT = 'gnome-shell.css';
 const genXML = (light, dark) => `<?xml version="1.0"?>
 <!DOCTYPE wallpapers SYSTEM "gnome-wp-list.dtd">
 <wallpapers>
@@ -41,28 +40,26 @@ class UserThemeX extends DEventEmitter {
     }
 
     _buildWidgets() {
-        this.sgset = ExtensionUtils.getSettings();
-        this.tgset = new Gio.Settings({ schema: 'org.gnome.desktop.interface' });
-        new Symbiont(() => {
-            LightProxy.disconnectObject(this);
-            this.style = this.night = this.shell = null;
-        }, this);
+        this.gset = ExtensionUtils.getSettings();
+        this.gset_t = new Gio.Settings({ schema: 'org.gnome.desktop.interface' });
+        this._sbt = symbiose(this, () => omit(this, 'style', 'shell'), {
+            watch: [x => x && x.cancel(),  x => x && conf('gnome-shell').monitor(Gio.FileMonitorFlags.WATCH_MOVES, null)],
+        });
     }
 
     _bindSettings() {
-        this._fulu_s = new Fulu({
+        this._fulu = new Fulu({
             night: [Field.NIGHT, 'boolean'],
             style: [Field.STYLE, 'boolean'],
             shell: [System.SHELL, 'string'],
-        }, this.sgset, this).attach({
+        }, this.gset, this).attach({
             paper: [Field.PAPER, 'boolean'],
         }, this, 'wallpaper');
         this._fulu_d = new Fulu({
             lpic: [System.LPIC, 'string'],
             dpic: [System.DPIC, 'string'],
         }, 'org.gnome.desktop.background', this, 'wallpaper');
-        LightProxy.connectObject('g-properties-changed',
-            (_l, p) => p.lookup_value('NightLightActive', null) && this._syncNightLight(), this);
+        LightProxy.connectObject('g-properties-changed', () => this._syncNightLight(), onus(this));
     }
 
     _syncNightLight() {
@@ -77,20 +74,18 @@ class UserThemeX extends DEventEmitter {
     }
 
     set night(night) { // sync values: 5 sys <=> 10 user
-        if(this._night === night) return;
+        if(xnor(this._night, night)) return;
         if((this._night = night)) {
             this._syncTheme();
             let f1 = (a, b, c, d) => [`changed::${b}`, () => sync(a, b, c, this.isNight() ? `${d}-night` : d)],
-                f2 = (a, b, c, d) => [`changed::${b}`, () => this.isNight() || sync(a, b, c, d)],
-                f3 = (a, b, c, d) => [`changed::${b}`, () => this.isNight() && sync(a, b, c, d)];
-            this.tgset.connectObject(...Items.flatMap(x => f1(this.tgset, System[x], this.sgset, Field[x])), this);
-            this.sgset.connectObject(...Items.flatMap(x => f2(this.sgset, Field[x], this.tgset, System[x]))
-                                     .concat(Items.flatMap(x => f3(this.sgset, `${Field[x]}-night`, this.tgset, System[x])))
-                                     .concat(f1(this.sgset, System.SHELL, this.sgset, Field.SHELL))
-                                     .concat(f2(this.sgset, Field.SHELL, this.sgset, System.SHELL))
-                                     .concat(f3(this.sgset, `${Field.SHELL}-night`, this.sgset, System.SHELL)), this);
+                f2 = (a, b, c, d) => [`changed::${b}`, () => this.isNight() || sync(a, b, c, d),
+                    `changed::${b}-night`, () => this.isNight() && sync(a, `${b}-night`, c, d)];
+            this.gset.connectObject(...Items.flatMap(x => f2(this.gset, Field[x], this.gset_t, System[x]))
+                                     .concat(f1(this.gset, System.SHELL, this.gset, Field.SHELL))
+                                     .concat(f2(this.gset, Field.SHELL, this.gset, System.SHELL)), onus(this));
+            this.gset_t.connectObject(...Items.flatMap(x => f1(this.gset_t, System[x], this.gset, Field[x])), onus(this));
         } else {
-            ['tgset', 'sgset'].forEach(x => this[x].disconnectObject(this));
+            ['gset', 'gset_t'].forEach(x => this[x].disconnectObject(onus(this)));
         }
     }
 
@@ -98,11 +93,11 @@ class UserThemeX extends DEventEmitter {
         if(!('night_light' in this)) return;
         Main.layoutManager.screenTransition.run();
         if(this.isNight()) {
-            Items.forEach(x => sync(this.sgset, `${Field[x]}-night`, this.tgset, System[x]));
-            sync(this.sgset, `${Field.SHELL}-night`, this.sgset, System.SHELL);
+            Items.forEach(x => sync(this.gset, `${Field[x]}-night`, this.gset_t, System[x]));
+            sync(this.gset, `${Field.SHELL}-night`, this.gset, System.SHELL);
         } else {
-            Items.forEach(x => sync(this.sgset, Field[x], this.tgset, System[x]));
-            sync(this.sgset, Field.SHELL, this.sgset, System.SHELL);
+            Items.forEach(x => sync(this.gset, Field[x], this.gset_t, System[x]));
+            sync(this.gset, Field.SHELL, this.gset, System.SHELL);
         }
     }
 
@@ -119,40 +114,35 @@ class UserThemeX extends DEventEmitter {
     }
 
     set style(style) {
-        if(xnor(this._style = style, this._fileMonitor)) return;
-        if(this._style) {
-            this._fileMonitor = conf('gnome-shell').monitor_directory(Gio.FileMonitorFlags.WATCH_MOVES, null);
-            this._fileMonitor.connect('changed', (_o, _s, _t, e) => e === Gio.FileMonitorEvent.CHANGED && this._loadStyle().catch(noop));
-            this._loadStyle().catch(noop);
-        } else {
-            this._fileMonitor.cancel();
-            this._fileMonitor = null;
-            this._unloadStyle();
-        }
+        if(xnor(this._style, style)) return;
+        this._sbt.watch.revive(style)?.connect?.('changed', (...xs) => xs[3] === Gio.FileMonitorEvent.CHANGED && this._loadStyle().catch(noop));
+        if((this._style = style)) this._loadStyle().catch(noop);
+        else this._unloadStyle();
     }
 
     async _loadStyle() {
+        let light = conf('gnome-shell', Sheet.LIGHT),
+            dark = conf('gnome-shell', Sheet.DARK),
+            style = this.isNight() && await fexist(dark) ? dark : await fexist(light) ? light : null;
+        if(!style) throw gerror('NOT_FOUND', 'No custom stylesheet found');
+        let style_md5 = GLib.compute_checksum_for_data(GLib.ChecksumType.MD5, (await fread(style)).at(1));
+        if(this._style_md5 === style_md5) return;
+        this._style_md5 = style_md5;
         let ctx = St.ThemeContext.get_for_stage(global.stage);
-        let next = new St.Theme({
-            application_stylesheet: Main.getThemeStylesheet(),
-            default_stylesheet: Main._getDefaultStylesheet(),
-        });
-        let day = conf('gnome-shell', LIGHT);
-        let night = conf('gnome-shell', DARK);
-        if(this.isNight() && await fexist(night)) next.load_stylesheet(night);
-        else if(await fexist(day)) next.load_stylesheet(day);
-        else throw new Gio.IOErrorEnum({ code: Gio.IOErrorEnum.NOT_FOUND, message: 'No custom stylesheet found' });
-        ctx.get_theme()?.get_custom_stylesheets().forEach(x => (!x.equal(day) && !x.equal(night)) && next.load_stylesheet(x));
-        ctx.set_theme(next);
+        let thm = new St.Theme({ application_stylesheet: Main.getThemeStylesheet(), default_stylesheet: Main._getDefaultStylesheet() });
+        ctx.get_theme()?.get_custom_stylesheets().forEach(x => !x.equal(light) && !x.equal(dark) && thm.load_stylesheet(x));
+        thm.load_stylesheet(style);
+        ctx.set_theme(thm);
     }
 
     _unloadStyle() {
         let theme = St.ThemeContext.get_for_stage(global.stage).get_theme();
-        [LIGHT, DARK].forEach(x => theme?.unload_stylesheet(conf('gnome-shell', x)));
+        if(theme) Object.values(Sheet).forEach(x => theme.unload_stylesheet(conf('gnome-shell', x)));
     }
 
     set shell(shell) {
-        if(shell) {
+        if(this._shell === shell) return;
+        if((this._shell = shell)) {
             let paths = Theme.getThemeDirs().map(x => `${x}/${shell}/gnome-shell/gnome-shell.css`)
                 .concat(Theme.getModeThemeDirs().map(x => `${x}/${shell}.css`));
             Promise.any(paths.map(async x => await fcheck(x) && x))
