@@ -87,24 +87,8 @@ class Thumb extends Adw.Bin {
 
     constructor(w, h) {
         super({ width_request: w || 640,  height_request: h || 360 });
-    }
-
-    set dark(dark) {
-        this._dark = dark;
-        this.queue_draw();
-    }
-
-    get dark() {
-        return this._dark ?? '';
-    }
-
-    set light(light) {
-        this._light = light;
-        this.queue_draw();
-    }
-
-    get light() {
-        return this._light ?? '';
+        this.connect('notify::light', () => this.queue_draw());
+        this.connect('notify::dark', () => this.queue_draw());
     }
 
     _snapshot(ss, w, h, left) {

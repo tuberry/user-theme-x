@@ -2,8 +2,8 @@
 // by tuberry
 /* exported init */
 
-const { Gio, GLib, St } = imports.gi;
 const Main = imports.ui.main;
+const { Gio, GLib, St } = imports.gi;
 const LightProxy = Main.panel.statusArea.quickSettings._nightLight._proxy;
 
 const ExtensionUtils = imports.misc.extensionUtils;
@@ -13,7 +13,7 @@ const { Fulu, Extension, DEventEmitter, symbiose, omit, onus } = Me.imports.fuba
 const { Field, System } = Me.imports.const;
 const Theme = Me.imports.theme;
 
-const conf = (...x) => fl(GLib.get_user_config_dir(), ...x);
+const conf = (...xs) => fl(GLib.get_user_config_dir(), ...xs);
 const sync = (s1, k1, s2, k2) => s1.get_string(k1) !== s2.get_string(k2) && s2.set_string(k2, s1.get_string(k1));
 
 const Sheet = { LIGHT: 'gnome-shell.css', DARK: 'gnome-shell-dark.css' };
@@ -77,13 +77,13 @@ class UserThemeX extends DEventEmitter {
         if(xnor(this._night, night)) return;
         if((this._night = night)) {
             this._syncTheme();
-            let f1 = (a, b, c, d) => [`changed::${b}`, () => sync(a, b, c, this.isNight() ? `${d}-night` : d)],
-                f2 = (a, b, c, d) => [`changed::${b}`, () => this.isNight() || sync(a, b, c, d),
+            let store = (a, b, c, d) => [`changed::${b}`, () => sync(a, b, c, this.isNight() ? `${d}-night` : d)],
+                fetch = (a, b, c, d) => [`changed::${b}`, () => this.isNight() || sync(a, b, c, d),
                     `changed::${b}-night`, () => this.isNight() && sync(a, `${b}-night`, c, d)];
-            this.gset.connectObject(...Items.flatMap(x => f2(this.gset, Field[x], this.gset_t, System[x]))
-                                     .concat(f1(this.gset, System.SHELL, this.gset, Field.SHELL))
-                                     .concat(f2(this.gset, Field.SHELL, this.gset, System.SHELL)), onus(this));
-            this.gset_t.connectObject(...Items.flatMap(x => f1(this.gset_t, System[x], this.gset, Field[x])), onus(this));
+            this.gset.connectObject(...Items.flatMap(x => fetch(this.gset, Field[x], this.gset_t, System[x]))
+                                    .concat(fetch(this.gset, Field.SHELL, this.gset, System.SHELL))
+                                    .concat(store(this.gset, System.SHELL, this.gset, Field.SHELL)), onus(this));
+            this.gset_t.connectObject(...Items.flatMap(x => store(this.gset_t, System[x], this.gset, Field[x])), onus(this));
         } else {
             ['gset', 'gset_t'].forEach(x => this[x].disconnectObject(onus(this)));
         }

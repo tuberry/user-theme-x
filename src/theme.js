@@ -25,11 +25,7 @@ function getModeThemeDirs() {
 }
 
 function enumerateDirs(dirs) {
-    return Promise.all(dirs.map(async path => {
-        let files = [];
-        for(let x of await denum(fl(path)).catch(noop) ?? []) files.push({ name: x.get_name(), path });
-        return files;
-    }));
+    return Promise.all(dirs.map(async path => [...await denum(fl(path)).catch(noop) ?? []].map(x => ({ name: x.get_name(), path }))));
 }
 
 async function getThemes(type) {
