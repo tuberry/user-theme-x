@@ -7,7 +7,7 @@ const { Adw, Gio, GObject, Gtk, Gdk, GdkPixbuf } = imports.gi;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
-const { _, _GTK, noop, gparam, grect } = Me.imports.util;
+const { _, _GTK, noop, gprops, grect } = Me.imports.util;
 const { Field, System } = Me.imports.const;
 const Theme = Me.imports.theme;
 const UI = Me.imports.ui;
@@ -26,9 +26,9 @@ function buildPrefsWidget() {
 class StrDrop extends UI.Box {
     static {
         GObject.registerClass({
-            Properties: {
-                active: gparam('string', 'active', ''),
-            },
+            Properties: gprops({
+                active: ['string', ''],
+            }),
         }, this);
     }
 
@@ -59,9 +59,9 @@ class StrDrop extends UI.Box {
 class ImgBtn extends Gtk.Button {
     static {
         GObject.registerClass({
-            Properties: {
-                value: gparam('string', 'value', ''),
-            },
+            Properties: gprops({
+                value: ['string', ''],
+            }),
         }, this);
     }
 
@@ -78,10 +78,10 @@ class ImgBtn extends Gtk.Button {
 class Thumb extends Adw.Bin {
     static {
         GObject.registerClass({
-            Properties: {
-                dark:  gparam('string', 'dark', ''),
-                light: gparam('string', 'light', ''),
-            },
+            Properties: gprops({
+                dark:  ['string', ''],
+                light: ['string', ''],
+            }),
         }, this);
     }
 

@@ -9,7 +9,7 @@ const LightProxy = Main.panel.statusArea.quickSettings._nightLight._proxy;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const { xnor, noop, fl, fread, fwrite, fcheck, fexist, dtouch, gerror } = Me.imports.util;
-const { Fulu, Extension, DEventEmitter, symbiose, omit, onus } = Me.imports.fubar;
+const { Fulu, Extension, DummyActor, symbiose, omit, onus } = Me.imports.fubar;
 const { Field, System } = Me.imports.const;
 const Theme = Me.imports.theme;
 
@@ -31,7 +31,7 @@ const genXML = (light, dark) => `<?xml version="1.0"?>
     </wallpaper>
 </wallpapers>`;
 
-class UserThemeX extends DEventEmitter {
+class UserThemeX extends DummyActor {
     constructor() {
         super();
         this._buildWidgets();
