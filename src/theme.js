@@ -6,13 +6,13 @@
 const { GLib } = imports.gi;
 
 const Me = imports.misc.extensionUtils.getCurrentExtension();
-const { noop, fn, fl, fexist, denum } = Me.imports.util;
+const { noop, fname, fopen, fexist, denum } = Me.imports.util;
 
 function getDirs(type) {
     return [
-        fn(GLib.get_home_dir(), `.${type}`),
-        fn(GLib.get_user_data_dir(), type),
-        ...GLib.get_system_data_dirs().map(dir => fn(dir, type)),
+        fname(GLib.get_home_dir(), `.${type}`),
+        fname(GLib.get_user_data_dir(), type),
+        ...GLib.get_system_data_dirs().map(dir => fname(dir, type)),
     ];
 }
 
@@ -21,11 +21,11 @@ function getThemeDirs() {
 }
 
 function getModeThemeDirs() {
-    return GLib.get_system_data_dirs().map(dir => fn(dir, 'gnome-shell', 'theme'));
+    return GLib.get_system_data_dirs().map(dir => fname(dir, 'gnome-shell', 'theme'));
 }
 
 function enumerateDirs(dirs) {
-    return Promise.all(dirs.map(async path => [...await denum(fl(path)).catch(noop) ?? []].map(x => ({ name: x.get_name(), path }))));
+    return Promise.all(dirs.map(async path => [...await denum(fopen(path)).catch(noop) ?? []].map(x => ({ name: x.get_name(), path }))));
 }
 
 async function getThemes(type) {

@@ -4,21 +4,20 @@
 
 const Main = imports.ui.main;
 const { Gio, GLib, St } = imports.gi;
-const LightProxy = Main.panel.statusArea.quickSettings._nightLight._proxy;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
-const { xnor, noop, fl, fread, fwrite, fcheck, fexist, dtouch, gerror } = Me.imports.util;
-const { Fulu, Extension, DummyActor, symbiose, omit, onus } = Me.imports.fubar;
+const { xnor, noop, fopen, fread, fwrite, fcheck, fexist, dtouch, gerror } = Me.imports.util;
+const { Fulu, Extension, Destroyable, symbiose, omit, initLightProxy } = Me.imports.fubar;
 const { Field, System } = Me.imports.const;
 const Theme = Me.imports.theme;
 
-const conf = (...xs) => fl(GLib.get_user_config_dir(), ...xs);
+const conf = (...xs) => fopen(GLib.get_user_config_dir(), ...xs);
 const sync = (s1, k1, s2, k2) => s1.get_string(k1) !== s2.get_string(k2) && s2.set_string(k2, s1.get_string(k1));
 
-const Sheet = { LIGHT: 'gnome-shell.css', DARK: 'gnome-shell-dark.css' };
+const Sheet = { LIGHT: 'gnome-shell-light.css', DARK: 'gnome-shell-dark.css' };
 const Items = ['GTK', 'ICONS', 'COLOR', 'CURSOR'];
-const genXML = (light, dark) => `<?xml version="1.0"?>
+const genBgXML = (light, dark) => `<?xml version="1.0"?>
 <!DOCTYPE wallpapers SYSTEM "gnome-wp-list.dtd">
 <wallpapers>
     <wallpaper deleted="false">
@@ -31,20 +30,20 @@ const genXML = (light, dark) => `<?xml version="1.0"?>
     </wallpaper>
 </wallpapers>`;
 
-class UserThemeX extends DummyActor {
+class UserThemeX extends Destroyable {
     constructor() {
         super();
         this._buildWidgets();
         this._bindSettings();
-        this._syncNightLight();
     }
 
     _buildWidgets() {
         this.gset = ExtensionUtils.getSettings();
         this.gset_t = new Gio.Settings({ schema: 'org.gnome.desktop.interface' });
-        this._sbt = symbiose(this, () => omit(this, 'style', 'shell'), {
+        this._sbt = symbiose(this, () => omit(this, 'style', 'shell', '_light'), {
             watch: [x => x && x.cancel(),  x => x && conf('gnome-shell').monitor(Gio.FileMonitorFlags.WATCH_MOVES, null)],
         });
+        this._light = initLightProxy(() => this._syncNightLight(), this);
     }
 
     _bindSettings() {
@@ -59,12 +58,11 @@ class UserThemeX extends DummyActor {
             lpic: [System.LPIC, 'string'],
             dpic: [System.DPIC, 'string'],
         }, 'org.gnome.desktop.background', this, 'wallpaper');
-        LightProxy.connectObject('g-properties-changed', () => this._syncNightLight(), onus(this));
     }
 
     _syncNightLight() {
-        if(LightProxy.NightLightActive === null) return;
-        this.night_light = LightProxy.NightLightActive;
+        if(this._light.NightLightActive === null) return;
+        this.night_light = this._light.NightLightActive;
         if(this._style) this._loadStyle().catch(noop);
         if(this._night) this._syncTheme();
     }
@@ -82,10 +80,10 @@ class UserThemeX extends DummyActor {
                     `changed::${b}-night`, () => this.isNight() && sync(a, `${b}-night`, c, d)];
             this.gset.connectObject(...Items.flatMap(x => fetch(this.gset, Field[x], this.gset_t, System[x]))
                                     .concat(fetch(this.gset, Field.SHELL, this.gset, System.SHELL))
-                                    .concat(store(this.gset, System.SHELL, this.gset, Field.SHELL)), onus(this));
-            this.gset_t.connectObject(...Items.flatMap(x => store(this.gset_t, System[x], this.gset, Field[x])), onus(this));
+                                    .concat(store(this.gset, System.SHELL, this.gset, Field.SHELL)), this);
+            this.gset_t.connectObject(...Items.flatMap(x => store(this.gset_t, System[x], this.gset, Field[x])), this);
         } else {
-            ['gset', 'gset_t'].forEach(x => this[x].disconnectObject(onus(this)));
+            ['gset', 'gset_t'].forEach(x => this[x].disconnectObject(this));
         }
     }
 
@@ -108,9 +106,9 @@ class UserThemeX extends DummyActor {
 
     async _writeToXML() {
         if(!(this.paper && this.dpic && this.lpic)) return;
-        let dir = fl(GLib.get_user_data_dir(), 'gnome-background-properties');
+        let dir = fopen(GLib.get_user_data_dir(), 'gnome-background-properties');
         if(!await fexist(dir)) await dtouch(dir);
-        await fwrite(fl(GLib.get_user_data_dir(), 'gnome-background-properties', 'user-theme-x-wallpaper.xml'), genXML(this.lpic, this.dpic));
+        await fwrite(fopen(GLib.get_user_data_dir(), 'gnome-background-properties', 'user-theme-x-wallpaper.xml'), genBgXML(this.lpic, this.dpic));
     }
 
     set style(style) {
