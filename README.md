@@ -36,10 +36,10 @@ For older versions (< 44), it's recommended to install via:
 
 ### Stylesheet
 
-Load user stylesheet from `~/.config/gnome-shell/gnome-shell{,-dark}.css`.
+Load user stylesheet from `~/.config/gnome-shell/gnome-shell{-light,-dark}.css`.
 
 ```bash
-mkdir -p ~/.config/gnome-shell && touch ~/.config/gnome-shell/gnome-shell.css
+mkdir -p ~/.config/gnome-shell && touch ~/.config/gnome-shell/gnome-shell-light.css
 ```
 
 For example,  [floating panel]:

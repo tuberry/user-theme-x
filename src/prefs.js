@@ -168,7 +168,7 @@ class UserThemeXPrefs extends Adw.PreferencesGroup {
     _buildUI() {
         this._blk.PAPER.add_row(new Wall(480, 270));
         [_('Style'), _('Gtk3'), _('Shell'), _('Icons'), _('Cursor')].forEach((x, i) => this._blk.NIGHT.add_row(new UI.PrefRow([x], ...this._wdg[i])));
-        this.add(new UI.PrefRow(this._blk.STYLE, [_('Stylesheet'), _('Load from “~/.config/gnome-shell/gnome-shell{,-dark}.css”')]));
+        this.add(new UI.PrefRow(this._blk.STYLE, [_('Stylesheet'), _('Load from “~/.config/gnome-shell/gnome-shell{-light,-dark}.css”')]));
         ['NIGHT', 'PAPER'].forEach(x => { this.add(this._blk[x]); this._blk[x].enable_expansion && this._blk[x].set_expanded(true); });
     }
 }
