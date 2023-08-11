@@ -1,27 +1,22 @@
 // vim:fdm=syntax
 // by tuberry
-/* exported init buildPrefsWidget */
-'use strict';
 
-const { Adw, Gio, GObject, Gtk, Gdk, GdkPixbuf } = imports.gi;
+import Adw from 'gi://Adw';
+import Gio from 'gi://Gio';
+import Gtk from 'gi://Gtk';
+import Gdk from 'gi://Gdk';
+import GObject from 'gi://GObject';
+import GdkPixbuf from 'gi://GdkPixbuf';
 
-const ExtensionUtils = imports.misc.extensionUtils;
-const Me = ExtensionUtils.getCurrentExtension();
-const { _, _GTK, noop, gprops, grect } = Me.imports.util;
-const { Field, System } = Me.imports.const;
-const Theme = Me.imports.theme;
-const UI = Me.imports.ui;
+import * as UI from './ui.js';
+import * as Theme from './theme.js';
+import { Field, System } from './const.js';
+import { noop, gprops, grect } from './util.js';
+
+const { _, _GTK } = UI;
 
 const Color = ['default', 'prefer-dark', 'prefer-light'];
 const Icon = { SUN: 'weather-clear-symbolic', MOON: 'weather-clear-night-symbolic' };
-
-function init() {
-    ExtensionUtils.initTranslations();
-}
-
-function buildPrefsWidget() {
-    return new UserThemeXPrefs();
-}
 
 class StrDrop extends UI.Box {
     static {
@@ -145,14 +140,13 @@ class UserThemeXPrefs extends Adw.PreferencesGroup {
         GObject.registerClass(this);
     }
 
-    constructor() {
+    constructor(gset) {
         super();
-        this._buildWidgets().then(() => this._buildUI());
+        this._buildWidgets(gset).then(() => this._buildUI());
     }
 
-    async _buildWidgets() {
+    async _buildWidgets(gset) {
         let themes = await Theme.getAllThemes();
-        let gset = ExtensionUtils.getSettings();
         this._blk = UI.block({
             STYLE: ['active', new Gtk.CheckButton()],
             PAPER: ['enable-expansion', new Adw.ExpanderRow({ title: _('Wallpaper'), show_enable_switch: true })],
@@ -172,3 +166,6 @@ class UserThemeXPrefs extends Adw.PreferencesGroup {
         ['NIGHT', 'PAPER'].forEach(x => { this.add(this._blk[x]); this._blk[x].enable_expansion && this._blk[x].set_expanded(true); });
     }
 }
+
+export default class PrefsWidget extends UI.Prefs { $klass = UserThemeXPrefs; }
+

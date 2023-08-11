@@ -1,7 +1,7 @@
 project(
   'gnome-shell-extension-user-theme-x',
   license: 'LGPL3+',
-  version: '45.alpha',
+  version: '45.beta',
 )
 
 NAME = 'User Theme X'

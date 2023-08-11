@@ -1,12 +1,9 @@
 // vim:fdm=syntax
 // by tuberry
-/* exported getThemeDirs getModeThemeDirs getAllThemes */
-'use strict';
 
-const { GLib } = imports.gi;
+import GLib from 'gi://GLib';
 
-const Me = imports.misc.extensionUtils.getCurrentExtension();
-const { noop, fname, fopen, fexist, denum } = Me.imports.util;
+import { noop, fname, fopen, fexist, denum } from './util.js';
 
 function getDirs(type) {
     return [
@@ -16,11 +13,11 @@ function getDirs(type) {
     ];
 }
 
-function getThemeDirs() {
+export function getThemeDirs() {
     return getDirs('themes');
 }
 
-function getModeThemeDirs() {
+export function getModeThemeDirs() {
     return GLib.get_system_data_dirs().map(dir => fname(dir, 'gnome-shell', 'theme'));
 }
 
@@ -36,7 +33,7 @@ async function getModeThemes() {
     return (await enumerateDirs(getModeThemeDirs())).flat().flatMap(({ name }) => name.endsWith('.css') ? [name.slice(0, -4)] : []);
 }
 
-async function getAllThemes() {
+export async function getAllThemes() {
     let icons = await getThemes('icons'),
         themes = await getThemes('themes'),
         modes = await getModeThemes(),

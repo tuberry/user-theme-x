@@ -1,9 +1,7 @@
 // vim:fdm=syntax
 // by tuberry
-/* exported System Field */
-'use strict';
 
-var System = {
+export const System = {
     SHELL:  'name',
     GTK:    'gtk-theme',
     ICONS:  'icon-theme',
@@ -13,7 +11,7 @@ var System = {
     DPIC:   'picture-uri-dark',
 };
 
-var Field = {
+export const Field = {
     GTK:     'x-gtk',
     COLOR:   'x-color',
     ICONS:   'x-icons',

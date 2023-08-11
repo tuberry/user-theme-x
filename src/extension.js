@@ -1,16 +1,16 @@
 // vim:fdm=syntax
 // by tuberry
-/* exported init */
 
-const Main = imports.ui.main;
-const { Gio, GLib, St } = imports.gi;
+import St from 'gi://St';
+import Gio from 'gi://Gio';
+import GLib from 'gi://GLib';
 
-const ExtensionUtils = imports.misc.extensionUtils;
-const Me = ExtensionUtils.getCurrentExtension();
-const { xnor, noop, fopen, fread, fwrite, fcheck, fexist, dtouch, gerror } = Me.imports.util;
-const { Fulu, Extension, Destroyable, symbiose, omit, initLightProxy } = Me.imports.fubar;
-const { Field, System } = Me.imports.const;
-const Theme = Me.imports.theme;
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+
+import * as Theme from './theme.js';
+import { Field, System } from './const.js';
+import { xnor, noop, fopen, fread, fwrite, fcheck, fexist, dtouch, gerror } from './util.js';
+import { Fulu, BaseExtension, Destroyable, symbiose, omit, onus, lightProxy } from './fubar.js';
 
 const conf = (...xs) => fopen(GLib.get_user_config_dir(), ...xs);
 const sync = (s1, k1, s2, k2) => s1.get_string(k1) !== s2.get_string(k2) && s2.set_string(k2, s1.get_string(k1));
@@ -31,19 +31,19 @@ const genBgXML = (light, dark) => `<?xml version="1.0"?>
 </wallpapers>`;
 
 class UserThemeX extends Destroyable {
-    constructor() {
+    constructor(gset) {
         super();
+        this.gset = gset;
         this._buildWidgets();
         this._bindSettings();
     }
 
     _buildWidgets() {
-        this.gset = ExtensionUtils.getSettings();
         this.gset_t = new Gio.Settings({ schema: 'org.gnome.desktop.interface' });
         this._sbt = symbiose(this, () => omit(this, 'style', 'shell', '_light'), {
             watch: [x => x && x.cancel(),  x => x && conf('gnome-shell').monitor(Gio.FileMonitorFlags.WATCH_MOVES, null)],
         });
-        this._light = initLightProxy(() => this._syncNightLight(), this);
+        this._light = lightProxy(() => this._syncNightLight(), this);
     }
 
     _bindSettings() {
@@ -80,10 +80,10 @@ class UserThemeX extends Destroyable {
                     `changed::${b}-night`, () => this.isNight() && sync(a, `${b}-night`, c, d)];
             this.gset.connectObject(...Items.flatMap(x => fetch(this.gset, Field[x], this.gset_t, System[x]))
                                     .concat(fetch(this.gset, Field.SHELL, this.gset, System.SHELL))
-                                    .concat(store(this.gset, System.SHELL, this.gset, Field.SHELL)), this);
-            this.gset_t.connectObject(...Items.flatMap(x => store(this.gset_t, System[x], this.gset, Field[x])), this);
+                                    .concat(store(this.gset, System.SHELL, this.gset, Field.SHELL)), onus(this));
+            this.gset_t.connectObject(...Items.flatMap(x => store(this.gset_t, System[x], this.gset, Field[x])), onus(this));
         } else {
-            ['gset', 'gset_t'].forEach(x => this[x].disconnectObject(this));
+            ['gset', 'gset_t'].forEach(x => this[x].disconnectObject(onus(this)));
         }
     }
 
@@ -160,6 +160,4 @@ class UserThemeX extends Destroyable {
     }
 }
 
-function init() {
-    return new Extension(UserThemeX);
-}
+export default class Extension extends BaseExtension { $klass = UserThemeX; }
