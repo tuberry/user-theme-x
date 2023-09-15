@@ -10,7 +10,7 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as Theme from './theme.js';
 import { Field, System } from './const.js';
 import { xnor, noop, fopen, fread, fwrite, fcheck, fexist, dtouch, gerror } from './util.js';
-import { Fulu, BaseExtension, Destroyable, symbiose, omit, onus, lightProxy } from './fubar.js';
+import { Fulu, ExtensionBase, Destroyable, symbiose, omit, onus, lightProxy } from './fubar.js';
 
 const conf = (...xs) => fopen(GLib.get_user_config_dir(), ...xs);
 const sync = (s1, k1, s2, k2) => s1.get_string(k1) !== s2.get_string(k2) && s2.set_string(k2, s1.get_string(k1));
@@ -160,4 +160,4 @@ class UserThemeX extends Destroyable {
     }
 }
 
-export default class Extension extends BaseExtension { $klass = UserThemeX; }
+export default class Extension extends ExtensionBase { $klass = UserThemeX; }

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-shell-extension-user-theme-x 25\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-08-03 09:13+0800\n"
+"POT-Creation-Date: 2023-09-22 00:20+0800\n"
 "PO-Revision-Date: 2021-08-18 14:32+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -17,64 +17,75 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/ui.js:206
+#: src/ui.js:280
+msgid "All"
+msgstr "全部"
+
+#: src/ui.js:280
+msgid "Normal"
+msgstr "常规"
+
+#: src/ui.js:280
+msgid "Symbolic"
+msgstr "符号"
+
+#: src/ui.js:329
 msgid "Clear"
 msgstr "清除"
 
-#. NOTE: issue for folder - https://gitlab.gnome.org/GNOME/gtk/-/issues/5348
-#: src/ui.js:299
+#: src/ui.js:437
 msgid "Mismatched filetype"
 msgstr "文件类型不匹配"
 
-#: src/ui.js:458
+#: src/ui.js:583
 msgid "Click or press ENTER to commit changes"
 msgstr "单击或按回车提交更改"
 
-#: src/prefs.js:133 src/prefs.js:161
+#: src/prefs.js:81 src/prefs.js:127
 msgid "Day"
 msgstr "白天"
 
-#: src/prefs.js:133 src/prefs.js:161
+#: src/prefs.js:81 src/prefs.js:127
 msgid "Night"
 msgstr "夜晚"
 
-#: src/prefs.js:158
+#: src/prefs.js:124
 msgid "Wallpaper"
 msgstr "壁纸"
 
-#: src/prefs.js:159
+#: src/prefs.js:125
 msgid "Themes"
 msgstr "主题"
 
-#: src/prefs.js:159
+#: src/prefs.js:125
 msgid "Switch according to the Night Light in the Settings"
 msgstr "随夜灯设置切换"
 
-#: src/prefs.js:170
+#: src/prefs.js:136
 msgid "Style"
 msgstr "样式"
 
-#: src/prefs.js:170
+#: src/prefs.js:136
 msgid "Gtk3"
 msgstr "Gtk3"
 
-#: src/prefs.js:170
+#: src/prefs.js:136
 msgid "Shell"
 msgstr "Shell"
 
-#: src/prefs.js:170
+#: src/prefs.js:136
 msgid "Icons"
 msgstr "图标"
 
-#: src/prefs.js:170
+#: src/prefs.js:136
 msgid "Cursor"
 msgstr "光标"
 
-#: src/prefs.js:171
+#: src/prefs.js:137
 msgid "Stylesheet"
 msgstr "样式表"
 
-#: src/prefs.js:171
+#: src/prefs.js:137
 msgid "Load from “~/.config/gnome-shell/gnome-shell{-light,-dark}.css”"
 msgstr "加载“~/.config/gnome-shell/gnome-shell{-light,-dark}.css”"
 

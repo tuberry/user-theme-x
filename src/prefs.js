@@ -11,47 +11,14 @@ import GdkPixbuf from 'gi://GdkPixbuf';
 import * as UI from './ui.js';
 import * as Theme from './theme.js';
 import { Field, System } from './const.js';
-import { noop, gprops, grect } from './util.js';
+import { gprops, noop, BIND_FULL } from './util.js';
 
-const { _, _GTK } = UI;
+const { _, hook } = UI;
 
 const Color = ['default', 'prefer-dark', 'prefer-light'];
 const Icon = { SUN: 'weather-clear-symbolic', MOON: 'weather-clear-night-symbolic' };
 
-class StrDrop extends UI.Box {
-    static {
-        GObject.registerClass({
-            Properties: gprops({
-                active: ['string', ''],
-            }),
-        }, this);
-    }
-
-    constructor(opts, icon_name, tip) {
-        super();
-        this._opts = opts;
-        let btn = new Gtk.Button({ icon_name, tooltip_text: tip || '' });
-        this._drop = new Gtk.DropDown({ model: Gtk.StringList.new(opts) });
-        this._drop.connect('notify::selected', () => this.notify('active'));
-        btn.connect('clicked', () => this._drop.activate());
-        [btn, this._drop].forEach(x => this.append(x));
-    }
-
-    vfunc_mnemonic_activate() {
-        this._drop.activate();
-    }
-
-    set active(active) {
-        let index = this._opts.indexOf(active);
-        this._drop.set_selected(index > 0 ? index : 0);
-    }
-
-    get active() {
-        return this._opts[this._drop.get_selected() || 0];
-    }
-}
-
-class ImgBtn extends Gtk.Button {
+class StringDrop extends UI.Drop {
     static {
         GObject.registerClass({
             Properties: gprops({
@@ -60,17 +27,22 @@ class ImgBtn extends Gtk.Button {
         }, this);
     }
 
-    constructor(title, icon, h) {
-        super({ height_request: h || 360 });
-        this.add_css_class('suggested-action');
-        this.set_child(new Gtk.Image({ icon_name: icon || 'document-open-symbolic', icon_size: Gtk.IconSize.LARGE }));
-        this.connect('clicked', () => this._dlg.open(this.get_root(), null).then(x => { this.value = x.get_path(); }).catch(noop));
-        this._dlg = new Gtk.FileDialog({ modal: true, title: title || _GTK('File'), default_filter: new Gtk.FileFilter() });
-        this._dlg.default_filter.add_pixbuf_formats();
+    constructor(opts, icon_name, tip) {
+        super(opts, tip);
+        this.set_list_factory(this.factory);
+        this.set_factory(hook({
+            setup: (_f, x) => x.set_child(new UI.IconLabel(icon_name)),
+            bind: (_f, x) => x.get_child().setupContent(null, x.item.string),
+        }, new Gtk.SignalListItemFactory()));
+        this.bind_property_full('value', this, 'selected', BIND_FULL, (_b, data) => {
+            let ret = this.model.get_n_items();
+            do ret--; while(ret > -1 && data !== this.model.get_item(ret).string);
+            return [ret !== -1, ret];
+        }, (_b, data) => [data !== Gtk.INVALID_LIST_POSITION, this.model.get_item(data)?.string]);
     }
 }
 
-class Thumb extends Adw.Bin {
+class Wallpaper extends Adw.PreferencesRow {
     static {
         GObject.registerClass({
             Properties: gprops({
@@ -80,58 +52,58 @@ class Thumb extends Adw.Bin {
         }, this);
     }
 
-    constructor(w, h) {
-        super({ width_request: w || 640,  height_request: h || 360 });
-        this.connect('notify::light', () => this.queue_draw());
-        this.connect('notify::dark', () => this.queue_draw());
-    }
-
-    _snapshot(ss, w, h, left) {
-        let cr = ss.append_cairo(grect(w, h));
-        try {
-            let file = left ? this.light : this.dark,
-                pix = GdkPixbuf.Pixbuf.new_from_file(file.replace(/^file:\/\//, '')),
-                [W, H] = [pix.get_width(), pix.get_height()],
-                s = Math.max(w / W, h / H);
-            Gdk.cairo_set_source_pixbuf(cr, pix.scale_simple(W * s, H * s, GdkPixbuf.InterpType.BILINEAR), 0, 0);
-            cr.moveTo(0, 0);
-            cr.lineTo(w, h);
-            left ? cr.lineTo(0, h) : cr.lineTo(w, 0);
-            cr.clip();
-            cr.paint();
-        } catch(e) {
-            let c = left ? 0.9 : 0.14;
-            cr.setSourceRGBA(c, c, c, 1);
-            cr.moveTo(0, 0);
-            cr.lineTo(w, h);
-            left ? cr.lineTo(0, h) : cr.lineTo(w, 0);
-            cr.fill();
-        }
-        cr.$dispose();
-    }
-
-    vfunc_snapshot(snapshot) {
-        let [w, h] = this.get_size_request();
-        [true, false].forEach(x => this._snapshot(snapshot, w, h, x));
-    }
-}
-
-class Wall extends Adw.PreferencesRow {
-    static {
-        GObject.registerClass(this);
-    }
-
-    constructor(w, h) {
+    constructor(width_request, height_request) {
         super();
-        let thumb = new Thumb(w, h),
-            dgset = new Gio.Settings({ schema: 'org.gnome.desktop.background' }),
-            [light, dark] = [[_('Day'), Icon.SUN, 'light', System.LPIC], [_('Night'), Icon.MOON, 'dark', System.DPIC]].map(x => {
-                let btn = new ImgBtn(x[0], x[1], h);
-                btn.bind_property('value', thumb, x[2], GObject.BindingFlags.DEFAULT);
-                dgset.bind(x[3], btn, 'value', Gio.SettingsBindFlags.DEFAULT);
-                return btn;
-            });
-        this.set_child(new UI.Box([light, thumb, dark]));
+        let area = new Gtk.DrawingArea({ width_request, height_request }),
+            gset = new Gio.Settings({ schema: 'org.gnome.desktop.background' }),
+            [light, dark] = [['light', Icon.SUN, System.LPIC], ['dark', Icon.MOON, System.DPIC]]
+                .map(([prop, icon_name, key]) => {
+                    gset.bind(key, this, prop, Gio.SettingsBindFlags.DEFAULT);
+                    this.connect(`notify::${prop}`, () => area.queue_draw());
+                    return hook({
+                        clicked: () => this._onClick(prop).then(x => { this[prop] = x.get_path(); }).catch(noop),
+                    },  new Gtk.Button({
+                        css_classes: ['suggested-action'], height_request,
+                        child: new Gtk.Image({ icon_name, icon_size: Gtk.IconSize.LARGE }),
+                    }));
+                });
+        area.set_draw_func(this._drawThumbnail.bind(this));
+        this.set_child(new UI.Box([light, area, dark]));
+    }
+
+    _buildDialog() {
+        this._dlg = new Gtk.FileDialog({ modal: true, default_filter: new Gtk.FileFilter() });
+        this._dlg.default_filter.add_pixbuf_formats();
+    }
+
+    _onClick(prop) {
+        if(!this._dlg) this._buildDialog();
+        this._dlg.set_title(prop === 'light' ? _('Day') : _('Night'));
+        return this._dlg.open(this.get_root(), null);
+    }
+
+    _drawThumbnail(_a, cr, w, h) {
+        ['dark', 'light'].forEach(prop => {
+            let light = prop === 'light';
+            cr.save();
+            try {
+                let pixbuf = GdkPixbuf.Pixbuf.new_from_file(this[prop].replace(/^file:\/\//, '')),
+                    [W, H] = [pixbuf.get_width(), pixbuf.get_height()],
+                    scale = Math.max(w / W, h / H);
+                Gdk.cairo_set_source_pixbuf(cr, pixbuf.scale_simple(W * scale, H * scale, GdkPixbuf.InterpType.BILINEAR), 0, 0);
+            } catch(e) {
+                logError(e);
+                light ? cr.setSourceRGBA(0.9, 0.9, 0.9, 1) : cr.setSourceRGBA(0.2, 0.2, 0.2, 1);
+            } finally {
+                cr.moveTo(0, 0);
+                cr.lineTo(w, h);
+                light ? cr.lineTo(0, h) : cr.lineTo(w, 0);
+                cr.clip();
+                cr.paint();
+            }
+            cr.restore();
+        });
+        cr.$dispose();
     }
 }
 
@@ -152,15 +124,15 @@ class UserThemeXPrefs extends Adw.PreferencesGroup {
             PAPER: ['enable-expansion', new Adw.ExpanderRow({ title: _('Wallpaper'), show_enable_switch: true })],
             NIGHT: ['enable-expansion', new Adw.ExpanderRow({ title: _('Themes'), show_enable_switch: true, subtitle: _('Switch according to the Night Light in the Settings') })],
         }, gset);
-        this._wdg = [Color, ...themes].map(x => [[Icon.SUN, _('Day')], [Icon.MOON, _('Night')]].map(y => new StrDrop(x, ...y)));
+        this._wdg = [Color, ...themes].map(x => [[Icon.SUN, _('Day')], [Icon.MOON, _('Night')]].map(y => new StringDrop(x, ...y)));
         ['COLOR', 'GTK', 'SHELL', 'ICONS', 'CURSOR'].forEach((x, i) => {
-            gset.bind(Field[x], this._wdg[i][0], 'active', Gio.SettingsBindFlags.DEFAULT);
-            gset.bind(`${Field[x]}-night`, this._wdg[i][1], 'active', Gio.SettingsBindFlags.DEFAULT);
+            gset.bind(Field[x], this._wdg[i][0], 'value', Gio.SettingsBindFlags.DEFAULT);
+            gset.bind(`${Field[x]}-night`, this._wdg[i][1], 'value', Gio.SettingsBindFlags.DEFAULT);
         });
     }
 
     _buildUI() {
-        this._blk.PAPER.add_row(new Wall(480, 270));
+        this._blk.PAPER.add_row(new Wallpaper(480, 270));
         [_('Style'), _('Gtk3'), _('Shell'), _('Icons'), _('Cursor')].forEach((x, i) => this._blk.NIGHT.add_row(new UI.PrefRow([x], ...this._wdg[i])));
         this.add(new UI.PrefRow(this._blk.STYLE, [_('Stylesheet'), _('Load from “~/.config/gnome-shell/gnome-shell{-light,-dark}.css”')]));
         ['NIGHT', 'PAPER'].forEach(x => { this.add(this._blk[x]); this._blk[x].enable_expansion && this._blk[x].set_expanded(true); });
@@ -168,4 +140,3 @@ class UserThemeXPrefs extends Adw.PreferencesGroup {
 }
 
 export default class PrefsWidget extends UI.Prefs { $klass = UserThemeXPrefs; }
-
