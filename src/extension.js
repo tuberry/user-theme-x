@@ -10,7 +10,7 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as Theme from './theme.js';
 import { Field, System } from './const.js';
 import { xnor, noop, fopen, fread, fwrite, fcheck, fexist, dtouch, gerror } from './util.js';
-import { Fulu, BaseExtension, Destroyable, symbiose, omit, onus, lightProxy } from './fubar.js';
+import { Fulu, BaseExtension, Destroyable, manageSource, omit, getSignalHolder, lightProxy } from './fubar.js';
 
 const conf = (...xs) => fopen(GLib.get_user_config_dir(), ...xs);
 const sync = (s1, k1, s2, k2) => s1.get_string(k1) !== s2.get_string(k2) && s2.set_string(k2, s1.get_string(k1));
@@ -40,7 +40,7 @@ class UserThemeX extends Destroyable {
 
     _buildWidgets() {
         this.gset_t = new Gio.Settings({ schema: 'org.gnome.desktop.interface' });
-        this._sbt = symbiose(this, () => omit(this, 'style', 'shell', '_light'), {
+        this._src = manageSource(this, () => omit(this, 'style', 'shell', '_light'), {
             watch: [x => x && x.cancel(),  x => x && conf('gnome-shell').monitor(Gio.FileMonitorFlags.WATCH_MOVES, null)],
         });
         this._light = lightProxy(() => this._syncNightLight(), this);
@@ -80,10 +80,10 @@ class UserThemeX extends Destroyable {
                     `changed::${b}-night`, () => this.isNight() && sync(a, `${b}-night`, c, d)];
             this.gset.connectObject(...Items.flatMap(x => fetch(this.gset, Field[x], this.gset_t, System[x]))
                                     .concat(fetch(this.gset, Field.SHELL, this.gset, System.SHELL))
-                                    .concat(store(this.gset, System.SHELL, this.gset, Field.SHELL)), onus(this));
-            this.gset_t.connectObject(...Items.flatMap(x => store(this.gset_t, System[x], this.gset, Field[x])), onus(this));
+                                    .concat(store(this.gset, System.SHELL, this.gset, Field.SHELL)), getSignalHolder(this));
+            this.gset_t.connectObject(...Items.flatMap(x => store(this.gset_t, System[x], this.gset, Field[x])), getSignalHolder(this));
         } else {
-            ['gset', 'gset_t'].forEach(x => this[x].disconnectObject(onus(this)));
+            ['gset', 'gset_t'].forEach(x => this[x].disconnectObject(getSignalHolder(this)));
         }
     }
 
@@ -113,7 +113,7 @@ class UserThemeX extends Destroyable {
 
     set style(style) {
         if(xnor(this._style, style)) return;
-        this._sbt.watch.revive(style)?.connect?.('changed', (...xs) => xs[3] === Gio.FileMonitorEvent.CHANGED && this._loadStyle().catch(noop));
+        this._src.watch.refreshSource(style)?.connect?.('changed', (...xs) => xs[3] === Gio.FileMonitorEvent.CHANGED && this._loadStyle().catch(noop));
         if((this._style = style)) this._loadStyle().catch(noop);
         else this._unloadStyle();
     }
