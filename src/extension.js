@@ -144,7 +144,7 @@ class UserThemeX extends Destroyable {
             let paths = Theme.getThemeDirs().map(x => `${x}/${shell}/gnome-shell/gnome-shell.css`)
                 .concat(Theme.getModeThemeDirs().map(x => `${x}/${shell}.css`));
             Promise.any(paths.map(async x => await fcheck(x) && x))
-                .then(this._loadShellTheme.bind(this)).catch(() => this._loadShellTheme(null));
+                .then(x => this._loadShellTheme(x)).catch(() => this._loadShellTheme(null));
         } else {
             this._loadShellTheme(null);
         }

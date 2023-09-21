@@ -11,9 +11,9 @@ import GdkPixbuf from 'gi://GdkPixbuf';
 import * as UI from './ui.js';
 import * as Theme from './theme.js';
 import { Field, System } from './const.js';
-import { gprops, noop, BIND_FULL } from './util.js';
+import { gprops, noop, hook, BIND_FULL } from './util.js';
 
-const { _, hook } = UI;
+const { _ } = UI;
 
 const Color = ['default', 'prefer-dark', 'prefer-light'];
 const Icon = { SUN: 'weather-clear-symbolic', MOON: 'weather-clear-night-symbolic' };

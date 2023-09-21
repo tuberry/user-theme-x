@@ -1,9 +1,8 @@
 // vim:fdm=syntax
 // by tuberry
-
 import GLib from 'gi://GLib';
 
-import { noop, fpath, fopen, fexist, denum } from './util.js';
+import { fpath, denum, fexist } from './util.js';
 
 const gtk3_presets = ['Adwaita', 'HighContrast', 'HighContrastInverse'];
 
@@ -23,17 +22,13 @@ export function getModeThemeDirs() {
     return GLib.get_system_data_dirs().map(dir => fpath(dir, 'gnome-shell', 'theme'));
 }
 
-async function enumerateDirs(dirs) {
-    return (await Promise.all(dirs.map(async path =>
-        [...await denum(fopen(path)).catch(noop) ?? []].map(x => ({ name: x.get_name(), path }))))).flat();
+async function getModeThemes() {
+    let files = await Promise.all(getModeThemeDirs().map(dir => denum(dir, x => x.get_name())));
+    return files.flat().flatMap(x => x.endsWith('.css') ? [x.slice(0, -4)] : []);
 }
 
 async function getThemes(type) {
-    return (await enumerateDirs(getDataDirs(type))).map(({ name, path }) => ({ name, path: `${path}/${name}` }));
-}
-
-async function getModeThemes() {
-    return (await enumerateDirs(getModeThemeDirs())).flatMap(({ name }) => name.endsWith('.css') ? [name.slice(0, -4)] : []);
+    return (await Promise.all(getDataDirs(type).map(dir => denum(dir, x => [dir, x.get_name()])))).flat();
 }
 
 export async function getAllThemes() {
@@ -42,10 +37,10 @@ export async function getAllThemes() {
         modes = await getModeThemes(),
         ret = await Promise.all([
             // Ref: https://gitlab.gnome.org/GNOME/gnome-tweaks/-/blob/master/gtweak/tweaks/tweak_group_appearance.py
-            themes.map(async ({ path: x, name: y }) => await fexist(x, 'gtk-3.0', 'gtk.css').catch(noop) ? [y] : []).concat(gtk3_presets),
-            themes.map(async ({ path: x, name: y }) => await fexist(x, 'gnome-shell', 'gnome-shell.css').catch(noop) ? [y] : []).concat(modes, 'Default'),
-            icons.map(async ({ path: x, name: y }) => await fexist(x, 'icon-theme.cache') ? [y] : []),
-            icons.map(async ({ path: x, name: y }) => await fexist(x, 'cursors') ? [y] : []),
+            themes.map(async ([x, y]) => await fexist(x, y, 'gtk-3.0', 'gtk.css') ? [y] : []).concat(gtk3_presets),
+            themes.map(async ([x, y]) => await fexist(x, y, 'gnome-shell', 'gnome-shell.css') ? [y] : []).concat(modes, 'Default'),
+            icons.map(async ([x, y]) => await fexist(x, y, 'icon-theme.cache') ? [y] : []),
+            icons.map(async ([x, y]) => await fexist(x, y, 'cursors') ? [y] : []),
         ].map(x => Promise.all(x)));
     return ret.map(x => [...new Set(x.flat())].sort()); // => [gtk, shell, icon, cursor]
 }
