@@ -27,8 +27,13 @@ class StringDrop extends UI.Drop {
         }, this);
     }
 
-    constructor(opts, icon_name, tip) {
-        super(opts, tip);
+    constructor(strv, icon_name, tooltip) {
+        super(strv, tooltip);
+        if(strv.length > 7) {
+            this.set_enable_search(true);
+            this.set_search_match_mode(Gtk.StringFilterMatchMode.SUBSTRING);
+            this.set_expression(new Gtk.PropertyExpression(Gtk.StringObject, null, 'string'));
+        }
         this.set_list_factory(this.factory);
         this.set_factory(hook({
             setup: (_f, x) => x.set_child(new UI.IconLabel(icon_name)),
@@ -38,7 +43,7 @@ class StringDrop extends UI.Drop {
             let ret = this.model.get_n_items();
             do ret--; while(ret > -1 && data !== this.model.get_item(ret).string);
             return [ret !== -1, ret];
-        }, (_b, data) => [data !== Gtk.INVALID_LIST_POSITION, this.model.get_item(data)?.string]);
+        }, (_b, data) => [data !== Gtk.INVALID_LIST_POSITION, this.model.get_item(data)?.string ?? '']);
     }
 }
 

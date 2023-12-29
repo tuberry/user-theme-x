@@ -9,8 +9,8 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 import * as Theme from './theme.js';
 import { Field, System } from './const.js';
-import { xnor, noop, fopen, fread, fwrite, fcheck, fexist, dtouch, gerror } from './util.js';
-import { Fulu, ExtensionBase, Destroyable, symbiose, omit, onus, lightProxy } from './fubar.js';
+import { xnor, noop, fopen, fread, fwrite, fcheck, fexist, mkdir, gerror } from './util.js';
+import { Fulu, ExtensionBase, Destroyable, symbiose, omit, connect, disconnect, lightProxy } from './fubar.js';
 
 const conf = (...xs) => fopen(GLib.get_user_config_dir(), ...xs);
 const sync = (s1, k1, s2, k2) => s1.get_string(k1) !== s2.get_string(k2) && s2.set_string(k2, s1.get_string(k1));
@@ -25,6 +25,7 @@ const genBgXML = (light, dark) => `<?xml version="1.0"?>
         <filename>${light}</filename>
         <filename-dark>${dark}</filename-dark>
         <options>zoom</options>
+        <shade_type>solid</shade_type>
         <pcolor>#ffffff</pcolor>
         <scolor>#000000</scolor>
     </wallpaper>
@@ -63,7 +64,7 @@ class UserThemeX extends Destroyable {
     _syncNightLight() {
         if(this._light.NightLightActive === null) return;
         this.night_light = this._light.NightLightActive;
-        if(this._style) this._loadStyle().catch(noop);
+        if(this._style) this._loadStyle();
         if(this._night) this._syncTheme();
     }
 
@@ -78,12 +79,12 @@ class UserThemeX extends Destroyable {
             let store = (a, b, c, d) => [`changed::${b}`, () => sync(a, b, c, this.isNight() ? `${d}-night` : d)],
                 fetch = (a, b, c, d) => [`changed::${b}`, () => this.isNight() || sync(a, b, c, d),
                     `changed::${b}-night`, () => this.isNight() && sync(a, `${b}-night`, c, d)];
-            this.gset.connectObject(...Items.flatMap(x => fetch(this.gset, Field[x], this.gset_t, System[x]))
+            connect(this, [this.gset_t, ...Items.flatMap(x => store(this.gset_t, System[x], this.gset, Field[x]))],
+                [this.gset, ...Items.flatMap(x => fetch(this.gset, Field[x], this.gset_t, System[x]))
                                     .concat(fetch(this.gset, Field.SHELL, this.gset, System.SHELL))
-                                    .concat(store(this.gset, System.SHELL, this.gset, Field.SHELL)), onus(this));
-            this.gset_t.connectObject(...Items.flatMap(x => store(this.gset_t, System[x], this.gset, Field[x])), onus(this));
+                                    .concat(store(this.gset, System.SHELL, this.gset, Field.SHELL))]);
         } else {
-            ['gset', 'gset_t'].forEach(x => this[x].disconnectObject(onus(this)));
+            disconnect(this, this.gset, this.gset_t);
         }
     }
 
@@ -107,35 +108,42 @@ class UserThemeX extends Destroyable {
     async _writeToXML() {
         if(!(this.paper && this.dpic && this.lpic)) return;
         let dir = fopen(GLib.get_user_data_dir(), 'gnome-background-properties');
-        if(!await fexist(dir)) await dtouch(dir);
+        if(!await fexist(dir)) await mkdir(dir);
         await fwrite(fopen(GLib.get_user_data_dir(), 'gnome-background-properties', 'user-theme-x-wallpaper.xml'), genBgXML(this.lpic, this.dpic));
     }
 
     set style(style) {
         if(xnor(this._style, style)) return;
-        this._sbt.watch.revive(style)?.connect?.('changed', (...xs) => xs[3] === Gio.FileMonitorEvent.CHANGED && this._loadStyle().catch(noop));
-        if((this._style = style)) this._loadStyle().catch(noop);
+        this._sbt.watch.revive(style)?.connect?.('changed', (...xs) => xs[3] === Gio.FileMonitorEvent.CHANGED && this._loadStyle());
+        if((this._style = style)) this._loadStyle();
         else this._unloadStyle();
     }
 
     async _loadStyle() {
-        let light = conf('gnome-shell', Sheet.LIGHT),
-            dark = conf('gnome-shell', Sheet.DARK),
-            style = this.isNight() && await fexist(dark) ? dark : await fexist(light) ? light : null;
-        if(!style) throw gerror('NOT_FOUND', 'No custom stylesheet found');
-        let style_md5 = GLib.compute_checksum_for_data(GLib.ChecksumType.MD5, (await fread(style)).at(1));
-        if(this._style_md5 === style_md5) return;
-        this._style_md5 = style_md5;
-        let ctx = St.ThemeContext.get_for_stage(global.stage);
-        let thm = new St.Theme({ application_stylesheet: Main.getThemeStylesheet(), default_stylesheet: Main._getDefaultStylesheet() });
-        ctx.get_theme()?.get_custom_stylesheets().forEach(x => !x.equal(light) && !x.equal(dark) && thm.load_stylesheet(x));
-        thm.load_stylesheet(style);
-        ctx.set_theme(thm);
+        try {
+            let light = conf('gnome-shell', Sheet.LIGHT),
+                dark = conf('gnome-shell', Sheet.DARK),
+                style = this.isNight() && await fexist(dark) ? dark : await fexist(light) ? light : null;
+            if(!style) throw gerror('NOT_FOUND', 'No custom stylesheet found');
+            let style_md5 = GLib.compute_checksum_for_data(GLib.ChecksumType.MD5, (await fread(style)).at(0));
+            if(this._style_md5 === style_md5) return;
+            this._style_md5 = style_md5;
+            let context = St.ThemeContext.get_for_stage(global.stage);
+            let old_theme = context.get_theme();
+            let { application_stylesheet, default_stylesheet, theme_stylesheet } = old_theme;
+            let new_theme = new St.Theme({ application_stylesheet, default_stylesheet, theme_stylesheet });
+            old_theme.get_custom_stylesheets().forEach(x => !x.equal(light) && !x.equal(dark) && new_theme.load_stylesheet(x));
+            new_theme.load_stylesheet(style);
+            context.set_theme(new_theme);
+        } catch(e) {
+            logError(e);
+        }
     }
 
     _unloadStyle() {
         let theme = St.ThemeContext.get_for_stage(global.stage).get_theme();
-        if(theme) Object.values(Sheet).forEach(x => theme.unload_stylesheet(conf('gnome-shell', x)));
+        Object.values(Sheet).forEach(x => theme.unload_stylesheet(conf('gnome-shell', x)));
+        this._style_md5 = null;
     }
 
     set shell(shell) {
@@ -151,12 +159,8 @@ class UserThemeX extends Destroyable {
     }
 
     _loadShellTheme(stylesheet) {
-        try {
-            Main.setThemeStylesheet(stylesheet);
-            Main.loadTheme();
-        } catch(e) {
-            // ignore
-        }
+        Main.setThemeStylesheet(stylesheet);
+        Main.loadTheme();
     }
 }
 
