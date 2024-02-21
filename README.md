@@ -2,7 +2,7 @@
 
 Customizable user-theme with user stylesheet and night themes auto-switch based on the Night Light.
 > Do not go gentle into that Dark side. <br>
-[![license]](/LICENSE)
+[![license]](/LICENSE.md)
 </br>
 
 ## Installation
@@ -56,7 +56,7 @@ For example,  [floating panel]:
 }
 ```
 
-## Note
+## Notes
 
 * The extension is forked from [user-theme].
 * If there is something wrong, try to disable the user stylesheet.
@@ -64,4 +64,4 @@ For example,  [floating panel]:
 [floating panel]:https://www.reddit.com/r/gnome/comments/mfj1mw/i_noticed_there_isnt_really_help_on_how_to_make/
 [EGO]:https://extensions.gnome.org/extension/3019/user-themes-x/
 [user-theme]:https://extensions.gnome.org/extension/19/user-themes/
-[license]:https://img.shields.io/badge/license-LGPLv3-lightgreen.svg
+[license]:https://img.shields.io/badge/license-GPLv3+-green.svg

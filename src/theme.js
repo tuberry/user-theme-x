@@ -1,46 +1,47 @@
-// vim:fdm=syntax
-// by tuberry
+// SPDX-FileCopyrightText: tuberry
+// SPDX-License-Identifier: GPL-3.0-or-later
 import GLib from 'gi://GLib';
 
-import { fpath, denum, fexist } from './util.js';
+import {readdir, noop} from './util.js';
 
-const gtk3_presets = ['Adwaita', 'HighContrast', 'HighContrastInverse'];
+const Gtk3 = ['Adwaita', 'HighContrast', 'HighContrastInverse'];
 
 function getDataDirs(type) {
     return [
-        fpath(GLib.get_home_dir(), `.${type}`),
-        fpath(GLib.get_user_data_dir(), type),
-        ...GLib.get_system_data_dirs().map(dir => fpath(dir, type)),
+        `${GLib.get_home_dir()}/.${type}`,
+        `${GLib.get_user_data_dir()}/${type}`,
+        ...GLib.get_system_data_dirs().map(dir => `${dir}/${type}`),
     ];
 }
+
+export const extant = x => !GLib.access(x, 0); // F_OK == 0
 
 export function getThemeDirs() {
     return getDataDirs('themes');
 }
 
 export function getModeThemeDirs() {
-    return GLib.get_system_data_dirs().map(dir => fpath(dir, 'gnome-shell', 'theme'));
+    return GLib.get_system_data_dirs().map(dir => `${dir}/gnome-shell/theme`);
 }
 
 async function getModeThemes() {
-    let files = await Promise.all(getModeThemeDirs().map(dir => denum(dir, x => x.get_name())));
+    let files = await Promise.all(getModeThemeDirs().map(async d => await readdir(d, x => x.get_name()).catch(noop) ?? []));
     return files.flat().flatMap(x => x.endsWith('.css') ? [x.slice(0, -4)] : []);
 }
 
 async function getThemes(type) {
-    return (await Promise.all(getDataDirs(type).map(dir => denum(dir, x => [dir, x.get_name()])))).flat();
+    return (await Promise.all(getDataDirs(type).map(async d => await readdir(d, x => [d, x.get_name()]).catch(noop) ?? []))).flat();
 }
 
 export async function getAllThemes() {
-    let icons = await getThemes('icons'),
-        themes = await getThemes('themes'),
-        modes = await getModeThemes(),
-        ret = await Promise.all([
-            // Ref: https://gitlab.gnome.org/GNOME/gnome-tweaks/-/blob/master/gtweak/tweaks/tweak_group_appearance.py
-            themes.map(async ([x, y]) => await fexist(x, y, 'gtk-3.0', 'gtk.css') ? [y] : []).concat(gtk3_presets),
-            themes.map(async ([x, y]) => await fexist(x, y, 'gnome-shell', 'gnome-shell.css') ? [y] : []).concat(modes, 'Default'),
-            icons.map(async ([x, y]) => await fexist(x, y, 'icon-theme.cache') ? [y] : []),
-            icons.map(async ([x, y]) => await fexist(x, y, 'cursors') ? [y] : []),
-        ].map(x => Promise.all(x)));
-    return ret.map(x => [...new Set(x.flat())].sort()); // => [gtk, shell, icon, cursor]
+    let modes = await getModeThemes(),
+        icons = await getThemes('icons'),
+        themes = await getThemes('themes');
+    return [
+        // Ref: https://gitlab.gnome.org/GNOME/gnome-tweaks/-/blob/master/gtweak/tweaks/tweak_group_appearance.py
+        themes.map(([x, y]) => extant(`${x}/${y}/gtk-3.0/gtk.css`) ? [y] : []).concat(Gtk3),
+        themes.map(([x, y]) => extant(`${x}/${y}/gnome-shell/gnome-shell.css`) ? [y] : []).concat(modes, 'Default'),
+        icons.map(([x, y]) => extant(`${x}/${y}/icon-theme.cache`) ? [y] : []),
+        icons.map(([x, y]) => extant(`${x}/${y}/cursors`) ? [y] : []),
+    ].map(x => [...new Set(x.flat())].sort((a, b) => a.localeCompare(b))); // => [gtk, shell, icon, cursor]
 }

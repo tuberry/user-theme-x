@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-shell-extension-user-theme-x 25\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-12-28 05:29+0800\n"
+"POT-Creation-Date: 2024-02-18 16:12+0800\n"
 "PO-Revision-Date: 2021-08-18 14:32+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -17,77 +17,86 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/ui.js:281
+#: src/ui.js:305
 msgid "All"
 msgstr "全部"
 
-#: src/ui.js:281
+#: src/ui.js:305
 msgid "Normal"
 msgstr "常规"
 
-#: src/ui.js:281
+#: src/ui.js:305
 msgid "Symbolic"
 msgstr "符号"
 
-#: src/ui.js:326
+#: src/ui.js:343
 msgid "Clear"
 msgstr "清除"
 
-#: src/ui.js:425
+#: src/ui.js:445
 msgid "Mismatched filetype"
 msgstr "文件类型不匹配"
 
-#: src/ui.js:565
+#: src/ui.js:577
 msgid "Click or press ENTER to commit changes"
 msgstr "单击或按回车提交更改"
 
-#: src/prefs.js:86 src/prefs.js:132
+#: src/prefs.js:83 src/prefs.js:130
 msgid "Day"
 msgstr "白天"
 
-#: src/prefs.js:86 src/prefs.js:132
+#: src/prefs.js:83 src/prefs.js:130
 msgid "Night"
 msgstr "夜晚"
 
-#: src/prefs.js:129
+#: src/prefs.js:127
 msgid "Wallpaper"
 msgstr "壁纸"
 
-#: src/prefs.js:130
+#: src/prefs.js:127
+#, javascript-format
+msgid "Save as <i>%s</i>"
+msgstr "另存为<i>%s</i>"
+
+#: src/prefs.js:128
 msgid "Themes"
 msgstr "主题"
 
-#: src/prefs.js:130
-msgid "Switch according to the Night Light in the Settings"
-msgstr "随夜灯设置切换"
+#: src/prefs.js:128
+msgid "Switch according to the Night Light status"
+msgstr "随夜灯状态切换"
 
-#: src/prefs.js:141
+#: src/prefs.js:139
 msgid "Style"
 msgstr "样式"
 
-#: src/prefs.js:141
+#: src/prefs.js:139
 msgid "Gtk3"
 msgstr "Gtk3"
 
-#: src/prefs.js:141
+#: src/prefs.js:139
 msgid "Shell"
 msgstr "Shell"
 
-#: src/prefs.js:141
+#: src/prefs.js:139
 msgid "Icons"
 msgstr "图标"
 
-#: src/prefs.js:141
+#: src/prefs.js:139
 msgid "Cursor"
 msgstr "光标"
 
-#: src/prefs.js:142
+#: src/prefs.js:141
 msgid "Stylesheet"
 msgstr "样式表"
 
-#: src/prefs.js:142
-msgid "Load from “~/.config/gnome-shell/gnome-shell{-light,-dark}.css”"
-msgstr "加载“~/.config/gnome-shell/gnome-shell{-light,-dark}.css”"
+#: src/prefs.js:141
+#, javascript-format
+msgid "Load <i>%s</i>"
+msgstr "加载<i>%s</i>"
+
+#~ msgid "Load from “~/.config/gnome-shell/gnome-shell{-light,-dark}.css”"
+#~ msgstr "加载“~/.config/gnome-shell/gnome-shell{-light,-dark}.css”"
 
 #~ msgid "Gtk"
 #~ msgstr "Gtk"
