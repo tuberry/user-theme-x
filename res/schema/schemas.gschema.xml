@@ -3,22 +3,22 @@
     <key name="name" type="s">
       <default>""</default>
       <summary>Theme name</summary>
-      <description>The name of the theme, to be loaded from ~/.themes/name/gnome-shell</description>
+      <description>The name of the shell theme</description>
     </key>
     <key name="x-wallpaper" type="b">
       <default>false</default>
-      <summary>wallpaper</summary>
-      <description>set dark/light wallpaper</description>
+      <summary>enable wallpaper</summary>
+      <description>Set dark/light wallpaper</description>
     </key>
     <key name="x-stylesheet" type="b">
       <default>false</default>
-      <summary>user stylesheet</summary>
+      <summary>enable user stylesheet</summary>
       <description>Load user stylesheet or not</description>
     </key>
-    <key name="x-night" type="b">
-      <default>false</default>
-      <summary>night theme switch</summary>
-      <description>Auto switch gtk, shell and icon theme when Night Light is active and inactive</description>
+    <key name="x-autoswitch" type="b">
+      <default>true</default>
+      <summary>enable night theme switch</summary>
+      <description>Auto switch gtk, shell, icon, cursor theme when Night Light is active and inactive</description>
     </key>
     <key name="x-shell" type="s">
       <default>"Default"</default>
