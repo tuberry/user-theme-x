@@ -524,6 +524,18 @@ export class Keys extends DialogButtonBase {
     }
 }
 
+export class PrefPage extends Adw.PreferencesPage {
+    static {
+        GObject.registerClass(this);
+    }
+
+    constructor(param, prefs = new Adw.PreferencesGroup()) {
+        super(param);
+        this._add = widget => prefs.add(widget);
+        this.add(prefs);
+    }
+}
+
 export class PrefRow extends Adw.ActionRow {
     static {
         GObject.registerClass(this);
@@ -593,6 +605,6 @@ export class LazyEntry extends Gtk.Stack {
     }
 
     vfunc_mnemonic_activate() {
-        this[this.get_visible_child_name() === 'label' ? '_edit' : '_done'].activate();
+        this.get_visible_child_name() === 'label' ? this._edit.activate() : this._done.activate();
     }
 }

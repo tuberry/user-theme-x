@@ -88,7 +88,6 @@ class UserThemeX extends Destroyable {
 
     _syncTheme() {
         if(!has(this, '_night')) return;
-        Main.layoutManager.screenTransition.run();
         if(this._night) {
             Items.forEach(x => sync(this.gset, `${Field[x]}-night`, this.gset_t, System[x]));
             sync(this.gset, `${Field.SHELL}-night`, this.gset, System.SHELL);
@@ -129,7 +128,7 @@ class UserThemeX extends Destroyable {
             let d_css = fopen(Sheet.DARK),
                 l_css = fopen(Sheet.LIGHT),
                 sheet = this._night && extant(Sheet.DARK) ? d_css : extant(Sheet.LIGHT) ? l_css : null;
-            if(!sheet) debug('$XDG_CONFIG_HOME/gnome-shell/gnome-shell-{light,dark}.css not found');
+            if(!sheet) throw Error('$XDG_CONFIG_HOME/gnome-shell/gnome-shell-{light,dark}.css not found');
             let css_md5 = GLib.compute_checksum_for_data(GLib.ChecksumType.MD5, (await fread(sheet)).at(0));
             if(!bubble && this._css_md5 === css_md5) return;
             this._css_md5 = css_md5;
