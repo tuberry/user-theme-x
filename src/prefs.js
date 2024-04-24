@@ -12,16 +12,16 @@ import GdkPixbuf from 'gi://GdkPixbuf';
 import * as UI from './ui.js';
 import * as Theme from './theme.js';
 import {Field, System} from './const.js';
-import {gprops, noop, hook, BIND} from './util.js';
+import {noop, hook, BIND} from './util.js';
 
-const {_, wrapValue} = UI;
+const {_, gprop, vprop} = UI;
 
 const Color = ['default', 'prefer-dark', 'prefer-light'];
 const Icon = {SUN: 'weather-clear-symbolic', MOON: 'weather-clear-night-symbolic'};
 
 class StringDrop extends Gtk.DropDown {
     static {
-        GObject.registerClass(wrapValue('string', ''), this);
+        GObject.registerClass(vprop('string', ''), this);
     }
 
     constructor(strv, icon_name, tooltip_text) {
@@ -47,7 +47,7 @@ class StringDrop extends Gtk.DropDown {
 class Wallpaper extends Adw.PreferencesRow {
     static {
         GObject.registerClass({
-            Properties: gprops({
+            Properties: gprop({
                 dark:  ['string', ''],
                 light: ['string', ''],
             }),
@@ -63,28 +63,32 @@ class Wallpaper extends Adw.PreferencesRow {
                     gset.bind(key, this, prop, Gio.SettingsBindFlags.DEFAULT);
                     this.connect(`notify::${prop}`, () => area.queue_draw());
                     return hook({
-                        clicked: () => this._onClick(prop).then(x => { this[prop] = x.get_path(); }).catch(noop),
+                        clicked: () => this.$onClick(prop).then(x => { this[prop] = x.get_path(); }).catch(noop),
                     },  new Gtk.Button({
                         css_classes: ['suggested-action'], height_request,
                         child: new Gtk.Image({icon_name, icon_size: Gtk.IconSize.LARGE}),
                     }));
                 });
-        area.set_draw_func(this._drawThumbnail.bind(this));
+        area.set_draw_func(this.$drawThumbnail.bind(this));
         this.set_child(new UI.Box([light, area, dark]));
     }
 
-    _buildDialog() {
-        this._dlg = new Gtk.FileDialog({modal: true, default_filter: new Gtk.FileFilter()});
-        this._dlg.default_filter.add_pixbuf_formats();
+    $genDialog() {
+        let dialog = new Gtk.FileDialog({modal: true, default_filter: new Gtk.FileFilter()});
+        dialog.default_filter.add_pixbuf_formats();
+        return dialog;
     }
 
-    _onClick(prop) {
-        if(!this._dlg) this._buildDialog();
-        this._dlg.set_title(prop === 'light' ? _('Day') : _('Night'));
-        return this._dlg.open(this.get_root(), null);
+    get dlg() {
+        return (this.$dialog ??= this.$genDialog());
     }
 
-    _drawThumbnail(_a, cr, w, h) {
+    $onClick(prop) {
+        this.dlg.set_title(prop === 'light' ? _('Day') : _('Night'));
+        return this.dlg.open(this.get_root(), null);
+    }
+
+    $drawThumbnail(_a, cr, w, h) {
         ['dark', 'light'].forEach(prop => {
             let light = prop === 'light';
             cr.save();
@@ -116,30 +120,30 @@ class UserThemeXPrefs extends Adw.PreferencesGroup {
 
     constructor(gset) {
         super();
-        this._buildWidgets(gset).then(() => this._buildUI());
+        this.$buildWidgets(gset).then(() => this.$buildUI());
     }
 
-    async _buildWidgets(gset) {
+    async $buildWidgets(gset) {
         let themes = await Theme.getAllThemes();
         let paper = `<span><a href="file://${GLib.get_user_data_dir()}/gnome-background-properties/user-theme-x.xml">$XDG_DATA_HOME/gnome-background-properties/user-theme-x.xml</a></span>`;
-        this._blk = UI.block({
-            STYLE: [new UI.Switch()],
-            PAPER: [new Adw.ExpanderRow({title: _('Wallpaper'), show_enable_switch: true, subtitle: _('Save as <i>%s</i>').format(paper)}), 'enable-expansion'],
-            THEME: [new Adw.ExpanderRow({title: _('Themes'), show_enable_switch: true, subtitle: _('Switch according to the Night Light status')}), 'enable-expansion'],
+        this.$blk = UI.block({
+            STYLE: new UI.Switch(),
+            PAPER: new UI.FoldRow(_('Wallpaper'), _('Save as <i>%s</i>').format(paper)),
+            THEME: new UI.FoldRow(_('Themes'), _('Switch according to the Night Light status')),
         }, gset);
-        this._wdg = [Color, ...themes].map(x => [[Icon.SUN, _('Day')], [Icon.MOON, _('Night')]].map(y => new StringDrop(x, ...y)));
+        this.$wdg = [Color, ...themes].map(x => [[Icon.SUN, _('Day')], [Icon.MOON, _('Night')]].map(y => new StringDrop(x, ...y)));
         ['COLOR', 'GTK', 'SHELL', 'ICONS', 'CURSOR'].forEach((x, i) => {
-            gset.bind(Field[x], this._wdg[i][0], 'value', Gio.SettingsBindFlags.DEFAULT);
-            gset.bind(`${Field[x]}-night`, this._wdg[i][1], 'value', Gio.SettingsBindFlags.DEFAULT);
+            gset.bind(Field[x], this.$wdg[i][0], 'value', Gio.SettingsBindFlags.DEFAULT);
+            gset.bind(`${Field[x]}-night`, this.$wdg[i][1], 'value', Gio.SettingsBindFlags.DEFAULT);
         });
     }
 
-    _buildUI() {
-        this._blk.PAPER.add_row(new Wallpaper(480, 270));
-        [_('Style'), _('Gtk3'), _('Shell'), _('Icons'), _('Cursor')].forEach((x, i) => this._blk.THEME.add_row(new UI.PrefRow([x], ...this._wdg[i])));
+    $buildUI() {
+        this.$blk.PAPER.add_row(new Wallpaper(480, 270));
+        [_('Style'), _('Gtk3'), _('Shell'), _('Icons'), _('Cursor')].forEach((x, i) => this.$blk.THEME.add_row(new UI.PrefRow([x], ...this.$wdg[i])));
         let style = `<span><a href="file://${GLib.get_user_config_dir()}/gnome-shell/">$XDG_CONFIG_HOME/gnome-shell</a></span>/gnome-shell{-light,-dark}.css`;
-        this.add(new UI.PrefRow([_('Stylesheet'), _('Load <i>%s</i>').format(style)], this._blk.STYLE));
-        ['THEME', 'PAPER'].forEach(x => { this.add(this._blk[x]); this._blk[x].enable_expansion && this._blk[x].set_expanded(true); });
+        this.add(new UI.PrefRow([_('Stylesheet'), _('Load <i>%s</i>').format(style)], this.$blk.STYLE));
+        ['THEME', 'PAPER'].forEach(x => { this.add(this.$blk[x]); this.$blk[x].enable_expansion && this.$blk[x].set_expanded(true); });
     }
 }
 

@@ -17,12 +17,6 @@ meson setup build && meson install -C build
 # meson setup build -Dtarget=system && meson install -C build # system-wide, default --prefix=/usr/local
 ```
 
-For contributing translations:
-
-```bash
-bash ./cli/update-po.sh your_lang_code # default to $LANG
-```
-
 For older versions (< 44), it's recommended to install via:
 
 ### E.G.O
@@ -33,7 +27,6 @@ For older versions (< 44), it's recommended to install via:
 
 ![utxpref](https://user-images.githubusercontent.com/17917040/159209648-46c3acae-852b-44a7-87e9-50e59925d18a.png)
 
-
 ### Stylesheet
 
 Load user stylesheet from `~/.config/gnome-shell/gnome-shell{-light,-dark}.css`.
@@ -42,7 +35,8 @@ Load user stylesheet from `~/.config/gnome-shell/gnome-shell{-light,-dark}.css`.
 mkdir -p ~/.config/gnome-shell && touch ~/.config/gnome-shell/gnome-shell-light.css
 ```
 
-For example,  [floating panel]:
+For example, [floating panel](https://www.reddit.com/r/gnome/comments/mfj1mw/i_noticed_there_isnt_really_help_on_how_to_make/):
+
 
 ```css
 /* floating panel */
@@ -61,7 +55,30 @@ For example,  [floating panel]:
 * The extension is forked from [user-theme].
 * If there is something wrong, try to disable the user stylesheet.
 
-[floating panel]:https://www.reddit.com/r/gnome/comments/mfj1mw/i_noticed_there_isnt_really_help_on_how_to_make/
+## Contributions
+
+Any contribution is welcome.
+
+### Ideas
+
+For any question or idea, feel free to open an issue or PR in the repo.
+
+### Translations
+
+To update the po file from sources:
+
+```bash
+bash ./cli/update-po.sh [your_lang_code] # like zh_CN, default to $LANG
+```
+
+### Developments
+
+To install GJS TypeScript type [definitions](https://www.npmjs.com/package/@girs/gnome-shell):
+
+```bash
+npm install @girs/gnome-shell --save-dev
+```
+
 [EGO]:https://extensions.gnome.org/extension/3019/user-themes-x/
 [user-theme]:https://extensions.gnome.org/extension/19/user-themes/
 [license]:https://img.shields.io/badge/license-GPLv3+-green.svg

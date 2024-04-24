@@ -9,14 +9,15 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 import {Field, System} from './const.js';
 import {getModeThemeDirs, getThemeDirs, extant} from './theme.js';
-import {xnor, noop, fopen, fread, fwrite, mkdir, id, hook, has} from './util.js';
-import {Fulu, ExtensionBase, Destroyable, symbiose, omit, connect, disconnect, bindNight, debug} from './fubar.js';
+import {noop, fopen, fread, fwrite, mkdir, hook, has} from './util.js';
+import {Setting, Extension, Mortal, Source, Light, degrade, connect, disconnect, debug} from './fubar.js';
 
 const Items = ['GTK', 'ICONS', 'COLOR', 'CURSOR'];
 const Conf = `${GLib.get_user_config_dir()}/gnome-shell`;
 const Sheet = {LIGHT: `${Conf}/gnome-shell-light.css`, DARK: `${Conf}/gnome-shell-dark.css`};
+const ThemeContext = St.ThemeContext.get_for_stage(global.stage);
 
-const sync = (s1, k1, s2, k2) => s1.get_string(k1) !== s2.get_string(k2) && s2.set_string(k2, s1.get_string(k1));
+const sync = (s1, k1, s2, k2) => (v => v !== s2.get_string(k2) && s2.set_string(k2, v))(s1.get_string(k1));
 const genBgXML = (lpic, dpic) => `<?xml version="1.0"?>
 <!DOCTYPE wallpapers SYSTEM "gnome-wp-list.dtd">
 <wallpapers>
@@ -31,136 +32,129 @@ const genBgXML = (lpic, dpic) => `<?xml version="1.0"?>
     </wallpaper>
 </wallpapers>`;
 
-class UserThemeX extends Destroyable {
+class UserThemeX extends Mortal {
     constructor(gset) {
         super();
-        this._buildWidgets(gset);
-        this._bindSettings();
+        this.$buildWidgets(gset);
+        this.$bindSettings();
+        this.$src.light.summon();
     }
 
-    _buildWidgets(gset) {
-        this.gset = gset;
-        this.gset_t = new Gio.Settings({schema: 'org.gnome.desktop.interface'});
-        this._sbt = symbiose(this, () => omit(this, 'style', 'shell'), {
-            watch: [x => x && x.cancel(),  x => x && hook({
-                changed: (...xs) => xs[3] === Gio.FileMonitorEvent.CHANGED && this._loadStyle(),
-            }, fopen(Conf).monitor(Gio.FileMonitorFlags.WATCH_MOVES, null))],
-        });
+    $buildWidgets(gset) {
+        this.$set = new Setting(null, gset, this);
+        this.$src = degrade({
+            light: new Light(x => this.$onLightSet(x)),
+            theme: new Source(() => this.$syncTheme()),
+            paper: new Source(() => this.$syncPaper(), x => x?.detach(this)),
+            style: new Source(() => this.$loadStyle(), () => this.$unloadStyle()),
+            shell: new Source(x => this.loadShellTheme(x), () => this.loadShellTheme()),
+            watch: new Source(() => hook({
+                changed: (...xs) => xs[3] === Gio.FileMonitorEvent.CHANGED && this.loadStyle(),
+            }, fopen(Conf).monitor(Gio.FileMonitorFlags.WATCH_MOVES, null)),  x => x?.cancel()),
+        }, this);
     }
 
-    _bindSettings() {
-        this._fulu_bg = new Fulu({
-            lpic: [System.LPIC, 'string'],
-            dpic: [System.DPIC, 'string'],
-        }, 'org.gnome.desktop.background', this, 'wallpaper');
-        this._fulu = new Fulu({
-            style: [Field.STYLE, 'boolean'],
-            shell: [System.SHELL, 'string'],
-            theme: [Field.THEME, 'boolean'],
-        }, this.gset, this).attach({
-            paper: [Field.PAPER, 'boolean'],
-        }, this, 'wallpaper');
-        bindNight(id, this, 'night');
+    $bindSettings() {
+        this.$set.attach({
+            style: [Field.STYLE, 'boolean', x => this.$src.style.toggle(x)],
+            shell: [System.SHELL, 'string', x => this.$src.shell.summon(x)],
+            theme: [Field.THEME, 'boolean', x => this.$src.theme.toggle(x)],
+            paper: [Field.PAPER, 'boolean', x => this.$src.paper.toggle(x)],
+        }, this);
     }
 
-    set night(night) {
-        if(this._night === night) return;
-        this._night = night;
-        if(this._style) this._loadStyle();
-        if(this._theme) this._syncTheme();
+    $onLightSet(night) {
+        if(this.night === night) return;
+        this.night = night;
+        if(this.style) this.loadStyle();
+        if(this.theme) this.syncTheme();
     }
 
-    set theme(theme) { // sync values: 5 sys <=> 10 user
-        if(xnor(this._theme, theme)) return;
-        if((this._theme = theme)) {
-            this._syncTheme();
-            let store = (a, b, c, d) => [`changed::${b}`, () => { sync(a, b, c, this._night ? `${d}-night` : d); }],
-                fetch = (a, b, c, d) => [`changed::${b}`, () => { if(!this._night) sync(a, b, c, d); },
-                    `changed::${b}-night`, () => { if(this._night) sync(a, `${b}-night`, c, d); }];
-            connect(this, [this.gset_t, ...Items.flatMap(x => store(this.gset_t, System[x], this.gset, Field[x]))],
-                [this.gset, ...Items.flatMap(x => fetch(this.gset, Field[x], this.gset_t, System[x]))
-                    .concat(fetch(this.gset, Field.SHELL, this.gset, System.SHELL))
-                    .concat(store(this.gset, System.SHELL, this.gset, Field.SHELL))]);
-        } else {
-            disconnect(this, this.gset, this.gset_t);
-        }
+    $syncPaper() {
+        let hub = new Setting({
+            lpic: [System.LPIC, 'string', x => { if(x !== this.lpic) this.savePaper({lpic: x}).catch(noop); }],
+            dpic: [System.DPIC, 'string', x => { if(x !== this.dpic) this.savePaper({dpic: x}).catch(noop); }],
+        }, 'org.gnome.desktop.background', this);
+        return hub;
     }
 
-    _syncTheme() {
-        if(!has(this, '_night')) return;
-        if(this._night) {
-            Items.forEach(x => sync(this.gset, `${Field[x]}-night`, this.gset_t, System[x]));
-            sync(this.gset, `${Field.SHELL}-night`, this.gset, System.SHELL);
-        } else {
-            Items.forEach(x => sync(this.gset, Field[x], this.gset_t, System[x]));
-            sync(this.gset, Field.SHELL, this.gset, System.SHELL);
-        }
-    }
-
-    set wallpaper([k, v]) {
-        this[k] = v;
-        this._writeBgXML().catch(noop);
-    }
-
-    async _writeBgXML() {
-        if(!(this.paper && this.dpic && this.lpic)) return;
+    async savePaper({dpic = this.dpic, lpic = this.lpic}) {
+        if(!dpic || !lpic) return;
         let dir = GLib.build_filenamev(GLib.get_user_data_dir(), 'gnome-background-properties');
         if(!extant(dir)) await mkdir(dir);
-        await fwrite(`${GLib.get_user_data_dir()}/gnome-background-properties/user-theme-x.xml`, genBgXML(this.lpic, this.dpic));
+        await fwrite(`${GLib.get_user_data_dir()}/gnome-background-properties/user-theme-x.xml`, genBgXML(lpic, dpic));
     }
 
-    set style(style) {
-        if(xnor(this._style, style)) return;
-        this._sbt.watch.revive(style);
-        if((this._style = style)) {
-            connect(this, [St.ThemeContext.get_for_stage(global.stage), 'changed', () => this._loadStyle(true)]);
-            this._loadStyle();
-        } else {
-            disconnect(this, St.ThemeContext.get_for_stage(global.stage));
-            this._unloadStyle();
-        }
+    $syncTheme() { // sync values: 5 sys <=> 10 user
+        let {gset} = this.$set,
+            hub = new Mortal(),
+            dset = new Gio.Settings({schema: 'org.gnome.desktop.interface'}),
+            store = (a, b, c, d) => [`changed::${b}`, () => { sync(a, b, c, this.night ? `${d}-night` : d); }],
+            fetch = (a, b, c, d) => [`changed::${b}`, () => { if(!this.night) sync(a, b, c, d); },
+                `changed::${b}-night`, () => { if(this.night) sync(a, `${b}-night`, c, d); }];
+        this.syncTheme = () => {
+            if(!has(this, 'night')) return;
+            if(this.night) {
+                Items.forEach(x => sync(gset, `${Field[x]}-night`, dset, System[x]));
+                sync(gset, `${Field.SHELL}-night`, gset, System.SHELL);
+            } else {
+                Items.forEach(x => sync(gset, Field[x], dset, System[x]));
+                sync(gset, Field.SHELL, gset, System.SHELL);
+            }
+        };
+        this.syncTheme();
+        connect(hub, dset, ...Items.flatMap(x => store(dset, System[x], gset, Field[x])),
+            gset, ...Items.flatMap(x => fetch(gset, Field[x], dset, System[x])),
+            ...fetch(gset, Field.SHELL, gset, System.SHELL),
+            ...store(gset, System.SHELL, gset, Field.SHELL));
+        return hub;
     }
 
-    async _loadStyle(bubble) {
-        if(!has(this, '_night')) return;
+    $loadStyle() {
+        this.$src.watch.toggle(true);
+        connect(this, ThemeContext, 'changed', () => this.loadStyle(true));
+        this.loadStyle();
+    }
+
+    async loadStyle(bubble) {
+        if(!has(this, 'night')) return;
         try {
             if(!extant(Conf)) await mkdir(Conf);
             let d_css = fopen(Sheet.DARK),
                 l_css = fopen(Sheet.LIGHT),
-                sheet = this._night && extant(Sheet.DARK) ? d_css : extant(Sheet.LIGHT) ? l_css : null;
+                sheet = this.night && extant(Sheet.DARK) ? d_css : extant(Sheet.LIGHT) ? l_css : null;
             if(!sheet) throw Error('$XDG_CONFIG_HOME/gnome-shell/gnome-shell-{light,dark}.css not found');
-            let css_md5 = GLib.compute_checksum_for_data(GLib.ChecksumType.MD5, (await fread(sheet)).at(0));
-            if(!bubble && this._css_md5 === css_md5) return;
-            this._css_md5 = css_md5;
-            let context = St.ThemeContext.get_for_stage(global.stage),
-                old_theme = context.get_theme(),
-                sheets = old_theme.get_custom_stylesheets();
-            if(!this._style || bubble && sheets[0]?.equal(sheet)) return;
+            let style_md5 = GLib.compute_checksum_for_data(GLib.ChecksumType.MD5, (await fread(sheet)).at(0));
+            if(!this.$src.watch?.active || !bubble && this.$style_md5 === style_md5) return;
+            this.$style_md5 = style_md5;
+            let old_theme = ThemeContext.get_theme();
+            let sheets = old_theme.get_custom_stylesheets();
+            if(bubble && sheets[0]?.equal(sheet)) return;
             let {application_stylesheet, default_stylesheet, theme_stylesheet} = old_theme;
             let theme = new St.Theme({application_stylesheet, default_stylesheet, theme_stylesheet});
             theme.load_stylesheet(sheet);
             sheets.forEach(x => !x.equal(l_css) && !x.equal(d_css) && theme.load_stylesheet(x));
-            context.set_theme(theme);
+            ThemeContext.set_theme(theme);
         } catch(e) {
             logError(e);
         }
     }
 
-    _unloadStyle() {
-        let theme = St.ThemeContext.get_for_stage(global.stage).get_theme();
+    $unloadStyle() {
+        this.$src.watch.toggle(false);
+        disconnect(this, ThemeContext);
+        let theme = ThemeContext.get_theme();
         Object.values(Sheet).forEach(x => theme.unload_stylesheet(fopen(x)));
-        this._css_md5 = null;
+        delete this.$style_md5;
     }
 
-    set shell(shell) {
-        if(this._shell === shell) return;
-        this._shell = shell;
-        let stylesheet = shell ? getThemeDirs().map(x => `${x}/${shell}/gnome-shell/gnome-shell.css`)
-            .concat(getModeThemeDirs().map(x => `${x}/${shell}.css`)).find(x => extant(x)) ?? null : null;
-        debug('Load user theme: ', stylesheet);
-        Main.setThemeStylesheet(stylesheet);
+    loadShellTheme(theme) {
+        let sheet = theme ? getThemeDirs().map(x => `${x}/${theme}/gnome-shell/gnome-shell.css`)
+            .concat(getModeThemeDirs().map(x => `${x}/${theme}.css`)).find(x => extant(x)) ?? null : null;
+        if(sheet) debug('Load user theme: ', theme);
+        Main.setThemeStylesheet(sheet);
         Main.loadTheme();
     }
 }
 
-export default class Extension extends ExtensionBase { $klass = UserThemeX; }
+export default class MyExtension extends Extension { $klass = UserThemeX; }
