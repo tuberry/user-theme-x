@@ -31,16 +31,23 @@ class StringDrop extends Gtk.DropDown {
             this.set_search_match_mode(Gtk.StringFilterMatchMode.SUBSTRING);
             this.set_expression(new Gtk.PropertyExpression(Gtk.StringObject, null, 'string'));
         }
-        this.set_list_factory(this.factory);
+        this.set_list_factory(hook({
+            setup: (_f, x) => x.set_child(new UI.IconLabel('object-select-symbolic', true)),
+            bind: (_f, {child, item}) => {
+                child.setContent(null, item.string);
+                UI.Broker.bind(this, 'selected_item', child.$icon, 'visible', (_b, data) => [true, data === item]);
+            },
+            unbind: (_f, {child}) => UI.Broker.unbind(this, child.$icon), // NOTE: https://gitlab.gnome.org/GNOME/gjs/-/issues/614
+        }, new Gtk.SignalListItemFactory()));
         this.set_factory(hook({
             setup: (_f, x) => x.set_child(new UI.IconLabel(icon_name)),
             bind: (_f, x) => x.get_child().setContent(null, x.item.string),
         }, new Gtk.SignalListItemFactory()));
-        this.bind_property_full('value', this, 'selected', BIND, (_b, data) => {
+        this.bind_property_full('value', this, 'selected', BIND, (_b, v) => {
             let ret = this.model.get_n_items();
-            do ret--; while(ret > -1 && data !== this.model.get_item(ret).string);
+            do ret--; while(ret > -1 && v !== this.model.get_item(ret).string);
             return [ret !== -1, ret];
-        }, (_b, data) => [data !== Gtk.INVALID_LIST_POSITION, this.model.get_item(data)?.string ?? '']);
+        }, (_b, v) => [v !== Gtk.INVALID_LIST_POSITION, this.model.get_item(v)?.string ?? '']);
     }
 }
 

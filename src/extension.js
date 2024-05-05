@@ -8,16 +8,17 @@ import GLib from 'gi://GLib';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 import {Field, System} from './const.js';
+import {noop, fopen, fread, fwrite, mkdir, has} from './util.js';
 import {getModeThemeDirs, getThemeDirs, extant} from './theme.js';
-import {noop, fopen, fread, fwrite, mkdir, hook, has} from './util.js';
-import {Setting, Extension, Mortal, Source, Light, degrade, connect, disconnect, debug} from './fubar.js';
+import {Setting, Extension, Mortal, Source, connect, debug} from './fubar.js';
 
-const Items = ['GTK', 'ICONS', 'COLOR', 'CURSOR'];
-const Conf = `${GLib.get_user_config_dir()}/gnome-shell`;
-const Sheet = {LIGHT: `${Conf}/gnome-shell-light.css`, DARK: `${Conf}/gnome-shell-dark.css`};
 const ThemeContext = St.ThemeContext.get_for_stage(global.stage);
 
-const sync = (s1, k1, s2, k2) => (v => v !== s2.get_string(k2) && s2.set_string(k2, v))(s1.get_string(k1));
+const Items = ['GTK', 'ICONS', 'COLOR', 'CURSOR'];
+const Config = `${GLib.get_user_config_dir()}/gnome-shell`;
+const Sheet = {LIGHT: `${Config}/gnome-shell-light.css`, DARK: `${Config}/gnome-shell-dark.css`};
+
+const syncStr = (s1, k1, s2, k2) => (v => v !== s2.get_string(k2) && s2.set_string(k2, v))(s1.get_string(k1));
 const genBgXML = (lpic, dpic) => `<?xml version="1.0"?>
 <!DOCTYPE wallpapers SYSTEM "gnome-wp-list.dtd">
 <wallpapers>
@@ -37,20 +38,21 @@ class UserThemeX extends Mortal {
         super();
         this.$buildWidgets(gset);
         this.$bindSettings();
-        this.$src.light.summon();
     }
 
     $buildWidgets(gset) {
         this.$set = new Setting(null, gset, this);
-        this.$src = degrade({
-            light: new Light(x => this.$onLightSet(x)),
+        this.$src = Source.fuse({
             theme: new Source(() => this.$syncTheme()),
-            paper: new Source(() => this.$syncPaper(), x => x?.detach(this)),
+            light: Source.newLight(x => this.$onLightSet(x), true),
             style: new Source(() => this.$loadStyle(), () => this.$unloadStyle()),
             shell: new Source(x => this.loadShellTheme(x), () => this.loadShellTheme()),
-            watch: new Source(() => hook({
-                changed: (...xs) => xs[3] === Gio.FileMonitorEvent.CHANGED && this.loadStyle(),
-            }, fopen(Conf).monitor(Gio.FileMonitorFlags.WATCH_MOVES, null)),  x => x?.cancel()),
+            stage: Source.newConnect(ThemeContext, 'changed', () => this.loadStyle(true)),
+            watch: Source.newMonitor(Config, (...xs) => xs[3] === Gio.FileMonitorEvent.CHANGED && this.loadStyle()),
+            paper: Source.newSetting({
+                lpic: [System.LPIC, 'string', x => { if(x !== this.lpic) this.savePaper({lpic: x}).catch(noop); }],
+                dpic: [System.DPIC, 'string', x => { if(x !== this.dpic) this.savePaper({dpic: x}).catch(noop); }],
+            }, 'org.gnome.desktop.background', this),
         }, this);
     }
 
@@ -70,14 +72,6 @@ class UserThemeX extends Mortal {
         if(this.theme) this.syncTheme();
     }
 
-    $syncPaper() {
-        let hub = new Setting({
-            lpic: [System.LPIC, 'string', x => { if(x !== this.lpic) this.savePaper({lpic: x}).catch(noop); }],
-            dpic: [System.DPIC, 'string', x => { if(x !== this.dpic) this.savePaper({dpic: x}).catch(noop); }],
-        }, 'org.gnome.desktop.background', this);
-        return hub;
-    }
-
     async savePaper({dpic = this.dpic, lpic = this.lpic}) {
         if(!dpic || !lpic) return;
         let dir = GLib.build_filenamev(GLib.get_user_data_dir(), 'gnome-background-properties');
@@ -89,17 +83,17 @@ class UserThemeX extends Mortal {
         let {gset} = this.$set,
             hub = new Mortal(),
             dset = new Gio.Settings({schema: 'org.gnome.desktop.interface'}),
-            store = (a, b, c, d) => [`changed::${b}`, () => { sync(a, b, c, this.night ? `${d}-night` : d); }],
-            fetch = (a, b, c, d) => [`changed::${b}`, () => { if(!this.night) sync(a, b, c, d); },
-                `changed::${b}-night`, () => { if(this.night) sync(a, `${b}-night`, c, d); }];
+            store = (a, b, c, d) => [`changed::${b}`, () => { syncStr(a, b, c, this.night ? `${d}-night` : d); }],
+            fetch = (a, b, c, d) => [`changed::${b}`, () => { if(!this.night) syncStr(a, b, c, d); },
+                `changed::${b}-night`, () => { if(this.night) syncStr(a, `${b}-night`, c, d); }];
         this.syncTheme = () => {
             if(!has(this, 'night')) return;
             if(this.night) {
-                Items.forEach(x => sync(gset, `${Field[x]}-night`, dset, System[x]));
-                sync(gset, `${Field.SHELL}-night`, gset, System.SHELL);
+                Items.forEach(x => syncStr(gset, `${Field[x]}-night`, dset, System[x]));
+                syncStr(gset, `${Field.SHELL}-night`, gset, System.SHELL);
             } else {
-                Items.forEach(x => sync(gset, Field[x], dset, System[x]));
-                sync(gset, Field.SHELL, gset, System.SHELL);
+                Items.forEach(x => syncStr(gset, Field[x], dset, System[x]));
+                syncStr(gset, Field.SHELL, gset, System.SHELL);
             }
         };
         this.syncTheme();
@@ -112,14 +106,13 @@ class UserThemeX extends Mortal {
 
     $loadStyle() {
         this.$src.watch.toggle(true);
-        connect(this, ThemeContext, 'changed', () => this.loadStyle(true));
-        this.loadStyle();
+        this.loadStyle().then(() => this.$src.stage.toggle(true));
     }
 
     async loadStyle(bubble) {
         if(!has(this, 'night')) return;
         try {
-            if(!extant(Conf)) await mkdir(Conf);
+            if(!extant(Config)) await mkdir(Config);
             let d_css = fopen(Sheet.DARK),
                 l_css = fopen(Sheet.LIGHT),
                 sheet = this.night && extant(Sheet.DARK) ? d_css : extant(Sheet.LIGHT) ? l_css : null;
@@ -142,7 +135,7 @@ class UserThemeX extends Mortal {
 
     $unloadStyle() {
         this.$src.watch.toggle(false);
-        disconnect(this, ThemeContext);
+        this.$src.stage.toggle(false);
         let theme = ThemeContext.get_theme();
         Object.values(Sheet).forEach(x => theme.unload_stylesheet(fopen(x)));
         delete this.$style_md5;
@@ -150,8 +143,9 @@ class UserThemeX extends Mortal {
 
     loadShellTheme(theme) {
         let sheet = theme ? getThemeDirs().map(x => `${x}/${theme}/gnome-shell/gnome-shell.css`)
-            .concat(getModeThemeDirs().map(x => `${x}/${theme}.css`)).find(x => extant(x)) ?? null : null;
-        if(sheet) debug('Load user theme: ', theme);
+            .concat(getModeThemeDirs().map(x => `${x}/${theme}.css`)).find(x => extant(x)) : undefined;
+        if(Main.getThemeStylesheet()?.get_path() === sheet) return;
+        if(theme) debug('Load user theme: ', theme);
         Main.setThemeStylesheet(sheet);
         Main.loadTheme();
     }

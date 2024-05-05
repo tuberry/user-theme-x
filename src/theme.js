@@ -40,7 +40,7 @@ export async function getAllThemes() {
     return [
         // Ref: https://gitlab.gnome.org/GNOME/gnome-tweaks/-/blob/master/gtweak/tweaks/tweak_group_appearance.py
         themes.map(([x, y]) => extant(`${x}/${y}/gtk-3.0/gtk.css`) ? [y] : []).concat(Gtk3),
-        themes.map(([x, y]) => extant(`${x}/${y}/gnome-shell/gnome-shell.css`) ? [y] : []).concat(modes, 'Default'),
+        themes.map(([x, y]) => extant(`${x}/${y}/gnome-shell/gnome-shell.css`) ? [y] : []).concat(modes, ''),
         icons.map(([x, y]) => extant(`${x}/${y}/icon-theme.cache`) ? [y] : []),
         icons.map(([x, y]) => extant(`${x}/${y}/cursors`) ? [y] : []),
     ].map(x => [...new Set(x.flat())].sort((a, b) => a.localeCompare(b))); // => [gtk, shell, icon, cursor]

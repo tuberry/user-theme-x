@@ -2,7 +2,7 @@
   <schema id="org.gnome.shell.extensions.user-theme-x" path="/org/gnome/shell/extensions/user-theme-x/">
     <key name="name" type="s">
       <default>""</default>
-      <summary>Theme name</summary>
+      <summary>shell theme name</summary>
       <description>The name of the shell theme</description>
     </key>
     <key name="x-wallpaper" type="b">
@@ -21,12 +21,12 @@
       <description>Auto switch gtk, shell, icon, cursor theme when Night Light is active and inactive</description>
     </key>
     <key name="x-shell" type="s">
-      <default>"Default"</default>
+      <default>""</default>
       <summary>shell theme</summary>
       <description>The shell theme when Night Light is inactive</description>
     </key>
     <key name="x-shell-night" type="s">
-      <default>"Default"</default>
+      <default>""</default>
       <summary>shell night theme</summary>
       <description>The shell theme when Night Light is active</description>
     </key>
