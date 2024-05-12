@@ -47,7 +47,7 @@ class UserThemeX extends Mortal {
             light: Source.newLight(x => this.$onLightSet(x), true),
             style: new Source(() => this.$loadStyle(), () => this.$unloadStyle()),
             shell: new Source(x => this.loadShellTheme(x), () => this.loadShellTheme()),
-            stage: Source.newConnect(ThemeContext, 'changed', () => this.loadStyle(true)),
+            stage: Source.newHandler(ThemeContext, 'changed', () => this.loadStyle(true)),
             watch: Source.newMonitor(Config, (...xs) => xs[3] === Gio.FileMonitorEvent.CHANGED && this.loadStyle()),
             paper: Source.newSetting({
                 lpic: [System.LPIC, 'string', x => { if(x !== this.lpic) this.savePaper({lpic: x}).catch(noop); }],

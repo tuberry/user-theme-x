@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-shell-extension-user-theme-x 25\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-01 18:47+0800\n"
+"POT-Creation-Date: 2024-05-12 14:38+0800\n"
 "PO-Revision-Date: 2021-08-18 14:32+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -37,60 +37,60 @@ msgstr "清除"
 msgid "Mismatched filetype"
 msgstr "文件类型不匹配"
 
-#: src/ui.js:626
+#: src/ui.js:625
 msgid "Click or press ENTER to commit changes"
 msgstr "单击或按回车提交更改"
 
-#: src/prefs.js:94 src/prefs.js:141
+#: src/prefs.js:88 src/prefs.js:135
 msgid "Day"
 msgstr "白天"
 
-#: src/prefs.js:94 src/prefs.js:141
+#: src/prefs.js:88 src/prefs.js:135
 msgid "Night"
 msgstr "夜晚"
 
-#: src/prefs.js:138
+#: src/prefs.js:132
 msgid "Wallpaper"
 msgstr "壁纸"
 
-#: src/prefs.js:138
+#: src/prefs.js:132
 #, javascript-format
 msgid "Save as <i>%s</i>"
 msgstr "另存为<i>%s</i>"
 
-#: src/prefs.js:139
+#: src/prefs.js:133
 msgid "Themes"
 msgstr "主题"
 
-#: src/prefs.js:139
+#: src/prefs.js:133
 msgid "Switch according to the Night Light status"
 msgstr "随夜灯状态切换"
 
-#: src/prefs.js:150
+#: src/prefs.js:144
 msgid "Style"
 msgstr "样式"
 
-#: src/prefs.js:150
+#: src/prefs.js:144
 msgid "Gtk3"
 msgstr "Gtk3"
 
-#: src/prefs.js:150
+#: src/prefs.js:144
 msgid "Shell"
 msgstr "Shell"
 
-#: src/prefs.js:150
+#: src/prefs.js:144
 msgid "Icons"
 msgstr "图标"
 
-#: src/prefs.js:150
+#: src/prefs.js:144
 msgid "Cursor"
 msgstr "光标"
 
-#: src/prefs.js:152
+#: src/prefs.js:146
 msgid "Stylesheet"
 msgstr "样式表"
 
-#: src/prefs.js:152
+#: src/prefs.js:146
 #, javascript-format
 msgid "Load <i>%s</i>"
 msgstr "加载<i>%s</i>"

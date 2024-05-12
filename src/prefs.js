@@ -12,7 +12,7 @@ import GdkPixbuf from 'gi://GdkPixbuf';
 import * as UI from './ui.js';
 import * as Theme from './theme.js';
 import {Field, System} from './const.js';
-import {noop, hook, BIND} from './util.js';
+import {BIND, noop, hook, seq} from './util.js';
 
 const {_, gprop, vprop} = UI;
 
@@ -80,14 +80,8 @@ class Wallpaper extends Adw.PreferencesRow {
         this.set_child(new UI.Box([light, area, dark]));
     }
 
-    $genDialog() {
-        let dialog = new Gtk.FileDialog({modal: true, default_filter: new Gtk.FileFilter()});
-        dialog.default_filter.add_pixbuf_formats();
-        return dialog;
-    }
-
     get dlg() {
-        return (this.$dialog ??= this.$genDialog());
+        return (this.$dialog ??= seq(x => x.default_filter.add_pixbuf_formats(), new Gtk.FileDialog({modal: true, default_filter: new Gtk.FileFilter()})));
     }
 
     $onClick(prop) {
