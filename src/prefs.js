@@ -24,8 +24,8 @@ class StringDrop extends Gtk.DropDown {
         GObject.registerClass(vprop('string', ''), this);
     }
 
-    constructor(strv, icon_name, tooltip_text) {
-        super({model: Gtk.StringList.new(strv), valign: Gtk.Align.CENTER, tooltip_text});
+    constructor(strv, iconName, tooltipText) {
+        super({model: Gtk.StringList.new(strv), valign: Gtk.Align.CENTER, tooltipText});
         if(strv.length > 7) {
             this.set_enable_search(true);
             this.set_search_match_mode(Gtk.StringFilterMatchMode.SUBSTRING);
@@ -40,7 +40,7 @@ class StringDrop extends Gtk.DropDown {
             unbind: (_f, {child}) => UI.Broker.unbind(this, child.$icon), // NOTE: https://gitlab.gnome.org/GNOME/gjs/-/issues/614
         }, new Gtk.SignalListItemFactory()));
         this.set_factory(hook({
-            setup: (_f, x) => x.set_child(new UI.IconLabel(icon_name)),
+            setup: (_f, x) => x.set_child(new UI.IconLabel(iconName)),
             bind: (_f, x) => x.get_child().setContent(null, x.item.string),
         }, new Gtk.SignalListItemFactory()));
         this.bind_property_full('value', this, 'selected', BIND, (_b, v) => {
@@ -61,19 +61,19 @@ class Wallpaper extends Adw.PreferencesRow {
         }, this);
     }
 
-    constructor(width_request, height_request) {
+    constructor(widthRequest, heightRequest) {
         super();
-        let area = new Gtk.DrawingArea({width_request, height_request}),
+        let area = new Gtk.DrawingArea({widthRequest, heightRequest}),
             gset = new Gio.Settings({schema: 'org.gnome.desktop.background'}),
             [light, dark] = [['light', Icon.SUN, System.LPIC], ['dark', Icon.MOON, System.DPIC]]
-                .map(([prop, icon_name, key]) => {
+                .map(([prop, iconName, key]) => {
                     gset.bind(key, this, prop, Gio.SettingsBindFlags.DEFAULT);
                     this.connect(`notify::${prop}`, () => area.queue_draw());
                     return hook({
                         clicked: () => this.$onClick(prop).then(x => { this[prop] = x.get_path(); }).catch(noop),
                     },  new Gtk.Button({
-                        css_classes: ['suggested-action'], height_request,
-                        child: new Gtk.Image({icon_name, icon_size: Gtk.IconSize.LARGE}),
+                        css_classes: ['suggested-action'], heightRequest,
+                        child: new Gtk.Image({iconName, iconSize: Gtk.IconSize.LARGE}),
                     }));
                 });
         area.set_draw_func(this.$drawThumbnail.bind(this));
@@ -81,7 +81,7 @@ class Wallpaper extends Adw.PreferencesRow {
     }
 
     get dlg() {
-        return (this.$dialog ??= seq(x => x.default_filter.add_pixbuf_formats(), new Gtk.FileDialog({modal: true, default_filter: new Gtk.FileFilter()})));
+        return (this.$dialog ??= seq(x => x.defaultFilter.add_pixbuf_formats(), new Gtk.FileDialog({modal: true, defaultFilter: new Gtk.FileFilter()})));
     }
 
     $onClick(prop) {
@@ -126,7 +126,7 @@ class UserThemeXPrefs extends Adw.PreferencesGroup {
 
     async $buildWidgets(gset) {
         let themes = await Theme.getAllThemes();
-        let paper = `<span><a href="file://${GLib.get_user_data_dir()}/gnome-background-properties/user-theme-x.xml">$XDG_DATA_HOME/gnome-background-properties/user-theme-x.xml</a></span>`;
+        let paper = `<a href="file://${GLib.get_user_data_dir()}/gnome-background-properties/user-theme-x.xml">$XDG_DATA_HOME/gnome-background-properties/user-theme-x.xml</a>`;
         this.$blk = UI.block({
             STYLE: new UI.Switch(),
             PAPER: new UI.FoldRow(_('Wallpaper'), _('Save as <i>%s</i>').format(paper)),
@@ -142,9 +142,9 @@ class UserThemeXPrefs extends Adw.PreferencesGroup {
     $buildUI() {
         this.$blk.PAPER.add_row(new Wallpaper(480, 270));
         [_('Style'), _('Gtk3'), _('Shell'), _('Icons'), _('Cursor')].forEach((x, i) => this.$blk.THEME.add_row(new UI.PrefRow([x], ...this.$wdg[i])));
-        let style = `<span><a href="file://${GLib.get_user_config_dir()}/gnome-shell/">$XDG_CONFIG_HOME/gnome-shell</a></span>/gnome-shell{-light,-dark}.css`;
+        let style = `<a href="file://${GLib.get_user_config_dir()}/gnome-shell/">$XDG_CONFIG_HOME/gnome-shell</a>/gnome-shell{-light,-dark}.css`;
         this.add(new UI.PrefRow([_('Stylesheet'), _('Load <i>%s</i>').format(style)], this.$blk.STYLE));
-        ['THEME', 'PAPER'].forEach(x => { this.add(this.$blk[x]); this.$blk[x].enable_expansion && this.$blk[x].set_expanded(true); });
+        ['THEME', 'PAPER'].forEach(x => { this.add(this.$blk[x]); this.$blk[x].enableExpansion && this.$blk[x].set_expanded(true); });
     }
 }
 
