@@ -4,6 +4,7 @@ import GLib from 'gi://GLib';
 
 import {readdir, noop} from './util.js';
 
+const isDefault = x => x === '' || x === 'Adwaita'; // shell || others
 const Gtk3 = ['Adwaita', 'HighContrast', 'HighContrastInverse'];
 
 function getDataDirs(type) {
@@ -43,5 +44,5 @@ export async function getAllThemes() {
         themes.map(([x, y]) => extant(`${x}/${y}/gnome-shell/gnome-shell.css`) ? [y] : []).concat(modes, ''),
         icons.map(([x, y]) => extant(`${x}/${y}/index.theme`) ? [y] : []),
         icons.map(([x, y]) => extant(`${x}/${y}/cursors`) ? [y] : []),
-    ].map(x => [...new Set(x.flat())].sort((a, b) => a.localeCompare(b))); // => [gtk, shell, icon, cursor]
+    ].map(x => [...new Set(x.flat())].sort((a, b) => isDefault(b) - isDefault(a) || a.localeCompare(b))); // => [gtk, shell, icon, cursor]
 }

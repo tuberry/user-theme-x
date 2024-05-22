@@ -73,8 +73,8 @@ class UserThemeX extends Mortal {
     }
 
     async savePaper({darkPic = this.darkPic, lightPic = this.lightPic}) {
-        if(!darkPic || !lightPic) return;
-        let dir = GLib.build_filenamev(GLib.get_user_data_dir(), 'gnome-background-properties');
+        if(!this.darkPic || !this.lightPic) return;
+        let dir = `${GLib.get_user_data_dir()}/gnome-background-properties`;
         if(!extant(dir)) await mkdir(dir);
         await fwrite(`${GLib.get_user_data_dir()}/gnome-background-properties/user-theme-x.xml`, genBgXML(lightPic, darkPic));
     }

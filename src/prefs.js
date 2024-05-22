@@ -14,12 +14,12 @@ import * as Theme from './theme.js';
 import {Field, System} from './const.js';
 import {BIND, noop, hook, seq} from './util.js';
 
-const {_, gprop, vprop} = UI;
+const {_, _GTK, gprop, vprop} = UI;
 
 const Color = ['default', 'prefer-dark', 'prefer-light'];
 const Icon = {SUN: 'weather-clear-symbolic', MOON: 'weather-clear-night-symbolic'};
 
-class StringDrop extends Gtk.DropDown {
+class ThemeDrop extends Gtk.DropDown {
     static {
         GObject.registerClass(vprop('string', ''), this);
     }
@@ -31,17 +31,18 @@ class StringDrop extends Gtk.DropDown {
             this.set_search_match_mode(Gtk.StringFilterMatchMode.SUBSTRING);
             this.set_expression(new Gtk.PropertyExpression(Gtk.StringObject, null, 'string'));
         }
+        let showDefault = x => this.model.get_item(0) === x ? `${x.string} <i>(${_GTK('Default')})</i>` : x.string;
         this.set_list_factory(hook({
-            setup: (_f, x) => x.set_child(new UI.IconLabel('object-select-symbolic', true)),
+            setup: (_f, x) => x.set_child(new UI.IconLabel('object-select-symbolic', true, {useMarkup: true})),
             bind: (_f, {child, item}) => {
-                child.setContent(null, item.string);
-                UI.Broker.bind(this, 'selected_item', child.$icon, 'visible', (_b, data) => [true, data === item]);
+                child.setContent(null, showDefault(item));
+                UI.Broker.tie(this, 'selected-item', child.$icon, 'visible', (_b, data) => [true, data === item]);
             },
-            unbind: (_f, {child}) => UI.Broker.unbind(this, child.$icon), // NOTE: https://gitlab.gnome.org/GNOME/gjs/-/issues/614
+            unbind: (_f, {child}) => UI.Broker.untie(this, child.$icon), // ISSUE: https://gitlab.gnome.org/GNOME/gjs/-/issues/614
         }, new Gtk.SignalListItemFactory()));
         this.set_factory(hook({
-            setup: (_f, x) => x.set_child(new UI.IconLabel(iconName)),
-            bind: (_f, x) => x.get_child().setContent(null, x.item.string),
+            setup: (_f, x) => x.set_child(new UI.IconLabel(iconName, false, {useMarkup: true})),
+            bind: (_f, x) => x.get_child().setContent(null, showDefault(x.item)),
         }, new Gtk.SignalListItemFactory()));
         this.bind_property_full('value', this, 'selected', BIND, (_b, v) => {
             let ret = this.model.get_n_items();
@@ -70,7 +71,7 @@ class Wallpaper extends Adw.PreferencesRow {
                     gset.bind(key, this, prop, Gio.SettingsBindFlags.DEFAULT);
                     this.connect(`notify::${prop}`, () => area.queue_draw());
                     return hook({
-                        clicked: () => this.$onClick(prop).then(x => { this[prop] = x.get_path(); }).catch(noop),
+                        clicked: () => this.$onClick(prop).then(x => { this[prop] = `file://${x.get_path()}`; }).catch(noop),
                     },  new Gtk.Button({
                         css_classes: ['suggested-action'], heightRequest,
                         child: new Gtk.Image({iconName, iconSize: Gtk.IconSize.LARGE}),
@@ -132,7 +133,7 @@ class UserThemeXPrefs extends Adw.PreferencesGroup {
             PAPER: new UI.FoldRow(_('Wallpaper'), _('Save as <i>%s</i>').format(paper)),
             THEME: new UI.FoldRow(_('Themes'), _('Switch according to the Night Light status')),
         }, gset);
-        this.$wdg = [Color, ...themes].map(x => [[Icon.SUN, _('Day')], [Icon.MOON, _('Night')]].map(y => new StringDrop(x, ...y)));
+        this.$wdg = [Color, ...themes].map(x => [[Icon.SUN, _('Day')], [Icon.MOON, _('Night')]].map(y => new ThemeDrop(x, ...y)));
         ['COLOR', 'GTK', 'SHELL', 'ICONS', 'CURSOR'].forEach((x, i) => {
             gset.bind(Field[x], this.$wdg[i][0], 'value', Gio.SettingsBindFlags.DEFAULT);
             gset.bind(`${Field[x]}-night`, this.$wdg[i][1], 'value', Gio.SettingsBindFlags.DEFAULT);
