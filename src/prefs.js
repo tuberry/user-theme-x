@@ -19,6 +19,8 @@ const {_, _GTK, gprop, vprop} = UI;
 const Color = ['default', 'prefer-dark', 'prefer-light'];
 const Icon = {SUN: 'weather-clear-symbolic', MOON: 'weather-clear-night-symbolic'};
 
+const title = x => x[0].toUpperCase() + x.slice(1); // title case
+
 class ThemeDrop extends Gtk.DropDown {
     static {
         GObject.registerClass(vprop('string', ''), this);
@@ -31,18 +33,18 @@ class ThemeDrop extends Gtk.DropDown {
             this.set_search_match_mode(Gtk.StringFilterMatchMode.SUBSTRING);
             this.set_expression(new Gtk.PropertyExpression(Gtk.StringObject, null, 'string'));
         }
-        let showDefault = x => this.model.get_item(0) === x ? `${x.string} <i>(${_GTK('Default')})</i>` : x.string;
+        let showTheme = x => title(this.model.get_item(0) === x ? `${x.string} <i>(${_GTK('Default')})</i>` : x.string);
         this.set_list_factory(hook({
             setup: (_f, x) => x.set_child(new UI.IconLabel('object-select-symbolic', true, {useMarkup: true})),
             bind: (_f, {child, item}) => {
-                child.setContent(null, showDefault(item));
+                child.setContent(null, showTheme(item));
                 UI.Broker.tie(this, 'selected-item', child.$icon, 'visible', (_b, data) => [true, data === item]);
             },
             unbind: (_f, {child}) => UI.Broker.untie(this, child.$icon), // ISSUE: https://gitlab.gnome.org/GNOME/gjs/-/issues/614
         }, new Gtk.SignalListItemFactory()));
         this.set_factory(hook({
             setup: (_f, x) => x.set_child(new UI.IconLabel(iconName, false, {useMarkup: true})),
-            bind: (_f, x) => x.get_child().setContent(null, showDefault(x.item)),
+            bind: (_f, x) => x.get_child().setContent(null, showTheme(x.item)),
         }, new Gtk.SignalListItemFactory()));
         this.bind_property_full('value', this, 'selected', BIND, (_b, v) => {
             let ret = this.model.get_n_items();
@@ -73,7 +75,7 @@ class Wallpaper extends Adw.PreferencesRow {
                     return hook({
                         clicked: () => this.$onClick(prop).then(x => { this[prop] = `file://${x.get_path()}`; }).catch(noop),
                     },  new Gtk.Button({
-                        css_classes: ['suggested-action'], heightRequest,
+                        cssClasses: ['suggested-action'], heightRequest,
                         child: new Gtk.Image({iconName, iconSize: Gtk.IconSize.LARGE}),
                     }));
                 });

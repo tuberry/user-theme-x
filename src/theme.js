@@ -44,5 +44,6 @@ export async function getAllThemes() {
         themes.map(([x, y]) => extant(`${x}/${y}/gnome-shell/gnome-shell.css`) ? [y] : []).concat(modes, ''),
         icons.map(([x, y]) => extant(`${x}/${y}/index.theme`) ? [y] : []),
         icons.map(([x, y]) => extant(`${x}/${y}/cursors`) ? [y] : []),
-    ].map(x => [...new Set(x.flat())].sort((a, b) => isDefault(b) - isDefault(a) || a.localeCompare(b))); // => [gtk, shell, icon, cursor]
+    ].map(x => [...new Set(x.flat())].filter(y => y.toLowerCase() !== 'default' || isDefault(y))
+          .sort((a, b) => isDefault(b) - isDefault(a) || a.localeCompare(b))); // => [gtk, shell, icon, cursor]
 }

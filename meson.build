@@ -1,7 +1,7 @@
 project(
   'gnome-shell-extension-user-theme-x',
   license: 'LGPL-3.0-or-later',
-  version: '46.1',
+  version: '46.2',
 )
 
 _name = meson.project_name().replace('gnome-shell-extension-', '')
