@@ -74,12 +74,12 @@ class Wallpaper extends Adw.PreferencesRow {
                     this.connect(`notify::${prop}`, () => area.queue_draw());
                     return hook({
                         clicked: () => this.$onClick(prop).then(x => { this[prop] = `file://${x.get_path()}`; }).catch(noop),
-                    },  new Gtk.Button({
+                    }, new Gtk.Button({
                         cssClasses: ['suggested-action'], heightRequest,
                         child: new Gtk.Image({iconName, iconSize: Gtk.IconSize.LARGE}),
                     }));
                 });
-        area.set_draw_func(this.$drawThumbnail.bind(this));
+        area.set_draw_func((...xs) => this.$drawThumbnail(...xs));
         this.set_child(new UI.Box([light, area, dark]));
     }
 

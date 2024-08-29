@@ -1,9 +1,8 @@
 # user-theme-x
 
 Customizable user-theme with user stylesheet and night themes auto-switch based on the Night Light.
-> Do not go gentle into that Dark side. <br>
+> Do not go gentle into that Dark side.\
 [![license]](/LICENSE.md)
-</br>
 
 ## Installation
 
@@ -17,7 +16,7 @@ meson setup build && meson install -C build
 # meson setup build -Dtarget=system && meson install -C build # system-wide, default --prefix=/usr/local
 ```
 
-For older versions (< 44), it's recommended to install via:
+For older versions, it's recommended to install via:
 
 ### E.G.O
 
@@ -25,7 +24,7 @@ For older versions (< 44), it's recommended to install via:
 
 ## Features
 
-![utxpref](https://user-images.githubusercontent.com/17917040/159209648-46c3acae-852b-44a7-87e9-50e59925d18a.png)
+![utxpref](https://github.com/user-attachments/assets/2b96bcf1-22de-4bbe-ac68-012baa6c12c1)
 
 ### Stylesheet
 

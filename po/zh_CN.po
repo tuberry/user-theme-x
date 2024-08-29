@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-shell-extension-user-theme-x 25\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-21 22:34+0800\n"
+"POT-Creation-Date: 2024-08-29 02:27+0800\n"
 "PO-Revision-Date: 2021-08-18 14:32+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -17,80 +17,80 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/ui.js:339
+#: src/ui.js:329
 msgid "All"
 msgstr "全部"
 
-#: src/ui.js:339
+#: src/ui.js:329
 msgid "Normal"
 msgstr "常规"
 
-#: src/ui.js:339
+#: src/ui.js:329
 msgid "Symbolic"
 msgstr "符号"
 
-#: src/ui.js:378
+#: src/ui.js:368
 msgid "Clear"
 msgstr "清除"
 
-#: src/ui.js:476
+#: src/ui.js:466
 msgid "Mismatched filetype"
 msgstr "文件类型不匹配"
 
-#: src/ui.js:612
-msgid "Click or press ENTER to commit changes"
-msgstr "单击或按回车提交更改"
+#: src/ui.js:599
+msgid "Click or press ENTER to apply changes"
+msgstr "单击或按回车应用更改"
 
-#: src/prefs.js:89 src/prefs.js:136
+#: src/prefs.js:91 src/prefs.js:138
 msgid "Day"
 msgstr "白天"
 
-#: src/prefs.js:89 src/prefs.js:136
+#: src/prefs.js:91 src/prefs.js:138
 msgid "Night"
 msgstr "夜晚"
 
-#: src/prefs.js:133
+#: src/prefs.js:135
 msgid "Wallpaper"
 msgstr "壁纸"
 
-#: src/prefs.js:133
+#: src/prefs.js:135
 #, javascript-format
 msgid "Save as <i>%s</i>"
 msgstr "另存为<i>%s</i>"
 
-#: src/prefs.js:134
+#: src/prefs.js:136
 msgid "Themes"
 msgstr "主题"
 
-#: src/prefs.js:134
+#: src/prefs.js:136
 msgid "Switch according to the Night Light status"
 msgstr "随夜灯状态切换"
 
-#: src/prefs.js:145
+#: src/prefs.js:147
 msgid "Style"
 msgstr "样式"
 
-#: src/prefs.js:145
+#: src/prefs.js:147
 msgid "Gtk3"
 msgstr "Gtk3"
 
-#: src/prefs.js:145
+#: src/prefs.js:147
 msgid "Shell"
 msgstr "Shell"
 
-#: src/prefs.js:145
+#: src/prefs.js:147
 msgid "Icons"
 msgstr "图标"
 
-#: src/prefs.js:145
+#: src/prefs.js:147
 msgid "Cursor"
 msgstr "光标"
 
-#: src/prefs.js:147
+#: src/prefs.js:149
 msgid "Stylesheet"
 msgstr "样式表"
 
-#: src/prefs.js:147
+#: src/prefs.js:149
 #, javascript-format
 msgid "Load <i>%s</i>"
 msgstr "加载<i>%s</i>"
