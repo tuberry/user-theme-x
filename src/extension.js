@@ -10,9 +10,7 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import {Field, System} from './const.js';
 import {noop, fopen, fread, fwrite, mkdir, has} from './util.js';
 import {getModeThemeDirs, getThemeDirs, extant} from './theme.js';
-import {Setting, Extension, Mortal, Source, connect, debug} from './fubar.js';
-
-const ThemeContext = St.ThemeContext.get_for_stage(global.stage);
+import {Setting, Extension, Mortal, Source, connect, debug, stageTheme} from './fubar.js';
 
 const Items = ['GTK', 'ICONS', 'COLOR', 'CURSOR'];
 const Config = `${GLib.get_user_config_dir()}/gnome-shell`;
@@ -47,7 +45,7 @@ class UserThemeX extends Mortal {
             light: Source.newLight(x => this.$onLightSet(x), true),
             style: new Source(() => this.$loadStyle(), () => this.$unloadStyle()),
             shell: new Source(x => this.loadShellTheme(x), () => this.loadShellTheme()),
-            stage: Source.newHandler(ThemeContext, 'changed', () => this.loadStyle(true)),
+            stage: Source.newHandler(stageTheme(), 'changed', () => this.loadStyle(true)),
             watch: Source.newMonitor(Config, (...xs) => xs[3] === Gio.FileMonitorEvent.CHANGED && this.loadStyle()),
             paper: Source.newSetting({
                 darkPic: [System.DPIC, 'string', x => { if(x !== this.darkPic) this.savePaper({darkPic: x}).catch(noop); }],
@@ -120,14 +118,15 @@ class UserThemeX extends Mortal {
             let styleMd5 = GLib.compute_checksum_for_data(GLib.ChecksumType.MD5, (await fread(sheet)).at(0));
             if(!this.$src.watch?.active || !bubble && this.$styleMd5 === styleMd5) return;
             this.$styleMd5 = styleMd5;
-            let oldTheme = ThemeContext.get_theme();
-            let sheets = oldTheme.get_custom_stylesheets();
+            let themeContext = stageTheme(),
+                oldTheme = themeContext.get_theme(),
+                sheets = oldTheme.get_custom_stylesheets();
             if(bubble && sheets[0]?.equal(sheet)) return;
             let {application_stylesheet, default_stylesheet, theme_stylesheet} = oldTheme;
             let theme = new St.Theme({application_stylesheet, default_stylesheet, theme_stylesheet});
             theme.load_stylesheet(sheet);
             sheets.forEach(x => !x.equal(lightCss) && !x.equal(darkCss) && theme.load_stylesheet(x));
-            ThemeContext.set_theme(theme);
+            themeContext.set_theme(theme);
         } catch(e) {
             logError(e);
         }
@@ -136,7 +135,7 @@ class UserThemeX extends Mortal {
     $unloadStyle() {
         this.$src.watch.toggle(false);
         this.$src.stage.toggle(false);
-        let theme = ThemeContext.get_theme();
+        let theme = stageTheme().get_theme();
         Object.values(Sheet).forEach(x => theme.unload_stylesheet(fopen(x)));
         delete this.$styleMd5;
     }
