@@ -129,12 +129,11 @@ class UserThemeXPrefs extends Adw.PreferencesGroup {
 
     async $buildWidgets(gset) {
         let themes = await Theme.getAllThemes();
-        let paper = `<a href="file://${GLib.get_user_data_dir()}/gnome-background-properties/user-theme-x.xml">$XDG_DATA_HOME/gnome-background-properties/user-theme-x.xml</a>`;
         this.$blk = UI.block({
             STYLE: new UI.Switch(),
-            PAPER: new UI.FoldRow(_('_Wallpaper'), _('Save as <i>%s</i>').format(paper)),
-            THEME: new UI.FoldRow(_('_Themes'), _('Switch according to the Night Light status')),
-        }, gset);
+            THEME: new UI.FoldRow(_('_Themes'), _('Switch according to the Night Light status'), {expanded: true}),
+            PAPER: new Adw.ExpanderRow({useUnderline: true, title: _('_Wallpaper'), subtitle: _('Switch according to the system Light/Dark style')}),
+        }, gset, {PAPER: 'expanded'});
         this.$wdg = [Color, ...themes].map(x => [[Icon.SUN, _('Day')], [Icon.MOON, _('Night')]].map(y => new ThemeDrop(x, ...y)));
         ['COLOR', 'GTK', 'SHELL', 'ICONS', 'CURSOR'].forEach((x, i) => {
             gset.bind(Field[x], this.$wdg[i][0], 'value', Gio.SettingsBindFlags.DEFAULT);
@@ -146,8 +145,7 @@ class UserThemeXPrefs extends Adw.PreferencesGroup {
         this.$blk.PAPER.add_row(new Wallpaper(480, 270));
         [_('St_yle'), _('_Gtk3'), _('S_hell'), _('_Icons'), _('_Cursor')].forEach((x, i) => this.$blk.THEME.add_row(new UI.PrefRow([x], ...this.$wdg[i])));
         let style = `<a href="file://${GLib.get_user_config_dir()}/gnome-shell/">$XDG_CONFIG_HOME/gnome-shell</a>/gnome-shell{-light,-dark}.css`;
-        this.add(new UI.PrefRow([_('_Stylesheet'), _('Load <i>%s</i>').format(style)], this.$blk.STYLE));
-        ['THEME', 'PAPER'].forEach(x => { this.add(this.$blk[x]); this.$blk[x].enableExpansion && this.$blk[x].set_expanded(true); });
+        [new UI.PrefRow([_('_Stylesheet'), _('Load <i>%s</i>').format(style)], this.$blk.STYLE), this.$blk.THEME, this.$blk.PAPER].forEach(x => this.add(x));
     }
 }
 

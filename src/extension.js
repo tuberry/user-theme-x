@@ -8,7 +8,7 @@ import GLib from 'gi://GLib';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 import {Field, System} from './const.js';
-import {noop, fopen, fread, fwrite, mkdir, has} from './util.js';
+import {fopen, fread, mkdir, has} from './util.js';
 import {getModeThemeDirs, getThemeDirs, extant} from './theme.js';
 import {Setting, Extension, Mortal, Source, connect, debug, stageTheme} from './fubar.js';
 
@@ -17,19 +17,6 @@ const Config = `${GLib.get_user_config_dir()}/gnome-shell`;
 const Sheet = {LIGHT: `${Config}/gnome-shell-light.css`, DARK: `${Config}/gnome-shell-dark.css`};
 
 const syncStr = (s1, k1, s2, k2) => (v => v !== s2.get_string(k2) && s2.set_string(k2, v))(s1.get_string(k1));
-const genBgXML = (lightPic, darkPic) => `<?xml version="1.0"?>
-<!DOCTYPE wallpapers SYSTEM "gnome-wp-list.dtd">
-<wallpapers>
-    <wallpaper deleted="false">
-        <name>user-theme-x</name>
-        <filename>${lightPic}</filename>
-        <filename-dark>${darkPic}</filename-dark>
-        <options>zoom</options>
-        <shade_type>solid</shade_type>
-        <pcolor>#ffffff</pcolor>
-        <scolor>#000000</scolor>
-    </wallpaper>
-</wallpapers>`;
 
 class UserThemeX extends Mortal {
     constructor(gset) {
@@ -47,10 +34,6 @@ class UserThemeX extends Mortal {
             shell: new Source(x => this.loadShellTheme(x), () => this.loadShellTheme()),
             stage: Source.newHandler(stageTheme(), 'changed', () => this.loadStyle(true)),
             watch: Source.newMonitor(Config, (...xs) => xs[3] === Gio.FileMonitorEvent.CHANGED && this.loadStyle()),
-            paper: Source.newSetting({
-                darkPic: [System.DPIC, 'string', x => { if(x !== this.darkPic) this.savePaper({darkPic: x}).catch(noop); }],
-                lightPic: [System.LPIC, 'string', x => { if(x !== this.lightPic) this.savePaper({lightPic: x}).catch(noop); }],
-            }, 'org.gnome.desktop.background', this),
         }, this);
     }
 
@@ -59,7 +42,6 @@ class UserThemeX extends Mortal {
             style: [Field.STYLE, 'boolean', x => this.$src.style.toggle(x)],
             shell: [System.SHELL, 'string', x => this.$src.shell.summon(x)],
             theme: [Field.THEME, 'boolean', x => this.$src.theme.toggle(x)],
-            paper: [Field.PAPER, 'boolean', x => this.$src.paper.toggle(x)],
         }, this);
     }
 
@@ -68,13 +50,6 @@ class UserThemeX extends Mortal {
         this.night = night;
         if(this.style) this.loadStyle();
         if(this.theme) this.syncTheme();
-    }
-
-    async savePaper({darkPic = this.darkPic, lightPic = this.lightPic}) {
-        if(!this.darkPic || !this.lightPic) return;
-        let dir = `${GLib.get_user_data_dir()}/gnome-background-properties`;
-        if(!extant(dir)) await mkdir(dir);
-        await fwrite(`${GLib.get_user_data_dir()}/gnome-background-properties/user-theme-x.xml`, genBgXML(lightPic, darkPic));
     }
 
     $syncTheme() { // sync values: 5 sys <=> 10 user

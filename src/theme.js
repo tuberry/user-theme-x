@@ -1,5 +1,6 @@
 // SPDX-FileCopyrightText: tuberry
 // SPDX-License-Identifier: GPL-3.0-or-later
+
 import GLib from 'gi://GLib';
 
 import {readdir, noop} from './util.js';
