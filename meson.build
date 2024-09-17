@@ -14,8 +14,8 @@ metadata = {
     'url': 'https://github.com/tuberry' / _name,
     'schemas': 'org.gnome.shell.extensions.' + _name,
     'version': (_version != 0) ? _version : run_command('cli/get-version.sh', check: true, env: ['EGO=3019' / 'user-themes-x']).stdout().strip(),
-    'description': 'Customizable user-theme with user stylesheet and dark theme auto-switch based on the Night Light'
-      + '\\n\\nFor support, please report any issues via the homepage link below.',
+    'description': 'User theme with user stylesheet and day/night theme auto-switch based on the Night Light'
+      + '\\n\\nFor support, please report issues via the Homepage link below rather than the comments section below it'
 }
 
 fs = import('fs')

@@ -1,6 +1,6 @@
 # user-theme-x
 
-Customizable user-theme with user stylesheet and night themes auto-switch based on the Night Light.
+User theme with user stylesheet and day/night themes auto-switch based on the Night Light.
 > Do not go gentle into that Dark side.\
 [![license]](/LICENSE.md)
 
@@ -51,16 +51,11 @@ For example, [floating panel](https://www.reddit.com/r/gnome/comments/mfj1mw/i_n
 
 ## Notes
 
-* The extension is forked from [user-theme].
 * If there is something wrong, try to disable the user stylesheet.
 
 ## Contributions
 
-Any contribution is welcome.
-
-### Ideas
-
-For any question or idea, feel free to open an issue or PR in the repo.
+Feel free to open an issue or PR in the repo for any question or idea.
 
 ### Translations
 
@@ -79,5 +74,4 @@ npm install @girs/gnome-shell --save-dev
 ```
 
 [EGO]:https://extensions.gnome.org/extension/3019/user-themes-x/
-[user-theme]:https://extensions.gnome.org/extension/19/user-themes/
 [license]:https://img.shields.io/badge/license-GPLv3+-green.svg

@@ -3,7 +3,7 @@
 
 import GLib from 'gi://GLib';
 
-import {readdir, noop} from './util.js';
+import * as Util from './util.js';
 
 const isDefault = x => x === '' || x === 'Adwaita'; // shell || others
 const Gtk3 = ['Adwaita', 'HighContrast', 'HighContrastInverse'];
@@ -16,25 +16,14 @@ function getDataDirs(type) {
     ];
 }
 
-export const extant = x => !GLib.access(x, 0); // F_OK == 0
+const extant = x => !GLib.access(x, 0); // F_OK == 0
+const getModeThemeDirs = () => GLib.get_system_data_dirs().map(dir => `${dir}/gnome-shell/theme`);
+const getThemes = async x => (await Promise.all(getDataDirs(x).map(async d => await Util.readdir(d, y => [d, y.get_name()]).catch(Util.noop) ?? []))).flat();
+const getModeThemes = async () => (await Promise.all(getModeThemeDirs().map(async d => await Util.readdir(d, x => x.get_name()).catch(Util.noop) ?? []))).flat()
+    .flatMap(x => x.endsWith('.css') ? [x.slice(0, -4)] : []);
 
-export function getThemeDirs() {
-    return getDataDirs('themes');
-}
-
-export function getModeThemeDirs() {
-    return GLib.get_system_data_dirs().map(dir => `${dir}/gnome-shell/theme`);
-}
-
-async function getModeThemes() {
-    let files = await Promise.all(getModeThemeDirs().map(async d => await readdir(d, x => x.get_name()).catch(noop) ?? []));
-    return files.flat().flatMap(x => x.endsWith('.css') ? [x.slice(0, -4)] : []);
-}
-
-async function getThemes(type) {
-    return (await Promise.all(getDataDirs(type).map(async d => await readdir(d, x => [d, x.get_name()]).catch(noop) ?? []))).flat();
-}
-
+export const getShellThemePath = theme => getDataDirs('themes').map(x => `${x}/${theme}/gnome-shell/gnome-shell.css`)
+           .concat(getModeThemeDirs().map(x => `${x}/${theme}.css`)).find(x => extant(x));
 export async function getAllThemes() {
     let modes = await getModeThemes(),
         icons = await getThemes('icons'),

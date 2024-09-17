@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-shell-extension-user-theme-x 25\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-09-06 15:13+0800\n"
+"POT-Creation-Date: 2021-08-18 14:32+0800\n"
 "PO-Revision-Date: 2021-08-18 14:32+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -17,82 +17,101 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/ui.js:329
+#: src/ui.js:343
 msgid "All"
 msgstr "全部"
 
-#: src/ui.js:329
+#: src/ui.js:343
 msgid "Normal"
 msgstr "常规"
 
-#: src/ui.js:329
+#: src/ui.js:343
 msgid "Symbolic"
 msgstr "符号"
 
-#: src/ui.js:368
+#: src/ui.js:382
 msgid "Clear"
 msgstr "清除"
 
-#: src/ui.js:466
+#: src/ui.js:480
 msgid "Mismatched filetype"
 msgstr "文件类型不匹配"
 
-#: src/ui.js:600
+#: src/ui.js:615
 msgid "Click or press ENTER to apply changes"
 msgstr "单击或按回车应用更改"
 
-#: src/prefs.js:91 src/prefs.js:137
+#: src/prefs.js:112 src/prefs.js:134 src/prefs.js:176
 msgid "Day"
 msgstr "白天"
 
-#: src/prefs.js:91 src/prefs.js:137
+#: src/prefs.js:112 src/prefs.js:134 src/prefs.js:176
 msgid "Night"
 msgstr "夜晚"
 
-#: src/prefs.js:134
-msgid "_Themes"
-msgstr "主题(_T)"
+#: src/prefs.js:169
+msgid "Theme"
+msgstr "主题"
 
-#: src/prefs.js:134
+#: src/prefs.js:169
 msgid "Switch according to the Night Light status"
 msgstr "随夜灯状态切换"
 
-#: src/prefs.js:135
-msgid "_Wallpaper"
-msgstr "壁纸(_W)"
-
-#: src/prefs.js:135
-msgid "Switch according to the system Light/Dark style"
-msgstr "随系统明暗样式切换"
-
-#: src/prefs.js:146
-msgid "St_yle"
-msgstr "样式(_Y)"
-
-#: src/prefs.js:146
-msgid "_Gtk3"
-msgstr "_Gtk3"
-
-#: src/prefs.js:146
-msgid "S_hell"
-msgstr "S_hell"
-
-#: src/prefs.js:146
-msgid "_Icons"
-msgstr "图标(_I)"
-
-#: src/prefs.js:146
-msgid "_Cursor"
-msgstr "光标(_C)"
-
-#: src/prefs.js:148
+#: src/prefs.js:178
 msgid "_Stylesheet"
 msgstr "样式表(_S)"
 
-#: src/prefs.js:148
+#: src/prefs.js:179
+msgid "S_tyle"
+msgstr "样式(_T)"
+
+#: src/prefs.js:180
+msgid "_Icon"
+msgstr "图标(_I)"
+
+#: src/prefs.js:181
+msgid "_Cursor"
+msgstr "光标(_C)"
+
+#: src/prefs.js:182
+msgid "_Legacy app"
+msgstr "旧式应用(_L)"
+
+#: src/prefs.js:183
+msgid "S_hell"
+msgstr "壳层(_H)"
+
+#: src/prefs.js:183
+msgid ""
+"Never use with <a href=\"https://extensions.gnome.org/extension/19/user-"
+"themes/\">user-theme</a> enabled"
+msgstr ""
+"切忌与 <a href=\"https://extensions.gnome.org/extension/19/user-themes/"
+"\">user-theme</a> 同用"
+
+#: src/prefs.js:184
+msgid "_Accent color"
+msgstr "强调色(_A)"
+
+#: src/prefs.js:195
+msgid "Wallpaper"
+msgstr "壁纸"
+
+#: src/prefs.js:198
+msgid "Switch according to the system Light/Dark style"
+msgstr "随系统明暗样式切换"
+
+#: src/prefs.js:202
 #, javascript-format
-msgid "Load <i>%s</i>"
-msgstr "加载<i>%s</i>"
+msgid "Reset all “%s” settings to default?"
+msgstr "将所有“%s”设置重置为默认值?"
+
+#, javascript-format
+#~ msgid "Load <i>%s</i>"
+#~ msgstr "加载<i>%s</i>"
+
+#~ msgid "_Gtk3"
+#~ msgstr "_Gtk3"
 
 #, javascript-format
 #~ msgid "Save as <i>%s</i>"

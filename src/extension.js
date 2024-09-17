@@ -3,126 +3,130 @@
 
 import St from 'gi://St';
 import Gio from 'gi://Gio';
-import GLib from 'gi://GLib';
 
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
-import {Field, System} from './const.js';
-import {fopen, fread, mkdir, has} from './util.js';
-import {getModeThemeDirs, getThemeDirs, extant} from './theme.js';
-import {Setting, Extension, Mortal, Source, connect, debug, stageTheme} from './fubar.js';
+import * as Util from './util.js';
+import * as Fubar from './fubar.js';
+import {getShellThemePath} from './theme.js';
+import {Field, LIGHT, DARK} from './const.js';
 
-const Items = ['GTK', 'ICONS', 'COLOR', 'CURSOR'];
-const Config = `${GLib.get_user_config_dir()}/gnome-shell`;
-const Sheet = {LIGHT: `${Config}/gnome-shell-light.css`, DARK: `${Config}/gnome-shell-dark.css`};
+const Theme = {
+    GTK: 'gtk-theme',
+    ICON: 'icon-theme',
+    COLOR: 'accent-color',
+    STYLE: 'color-scheme',
+    CURSOR: 'cursor-theme',
+};
 
-const syncStr = (s1, k1, s2, k2) => (v => v !== s2.get_string(k2) && s2.set_string(k2, v))(s1.get_string(k1));
-
-class UserThemeX extends Mortal {
+class UserThemeX extends Fubar.Mortal {
     constructor(gset) {
         super();
-        this.$buildWidgets(gset);
-        this.$bindSettings();
+        this.#bindSettings(gset);
+        this.#buildSources();
     }
 
-    $buildWidgets(gset) {
-        this.$set = new Setting(null, gset, this);
-        this.$src = Source.fuse({
-            theme: new Source(() => this.$syncTheme()),
-            light: Source.newLight(x => this.$onLightSet(x), true),
-            style: new Source(() => this.$loadStyle(), () => this.$unloadStyle()),
-            shell: new Source(x => this.loadShellTheme(x), () => this.loadShellTheme()),
-            stage: Source.newHandler(stageTheme(), 'changed', () => this.loadStyle(true)),
-            watch: Source.newMonitor(Config, (...xs) => xs[3] === Gio.FileMonitorEvent.CHANGED && this.loadStyle()),
-        }, this);
+    #bindSettings(gset) {
+        this.$set = new Fubar.Setting(gset, {
+            shell: [Field.SHELL, 'boolean', null, x => this.$src.shell.toggle(x)],
+            sheet: [Field.SHEET, 'boolean', null, x => this.$src.sheet.toggle(x)],
+        }, this).attach(Util.omap(
+            Theme, ([k]) => [[k, [Field[k], 'boolean']]]
+        ), this, () => { this.$theme = Object.keys(Theme).filter(x => this[x]); }, () => this.$src.theme.switch(this.theme));
     }
 
-    $bindSettings() {
-        this.$set.attach({
-            style: [Field.STYLE, 'boolean', x => this.$src.style.toggle(x)],
-            shell: [System.SHELL, 'string', x => this.$src.shell.summon(x)],
-            theme: [Field.THEME, 'boolean', x => this.$src.theme.toggle(x)],
-        }, this);
+    #buildSources() {
+        let theme = Fubar.Source.new(() => this.#genThemeSyncer(), this.theme),
+            shell = Fubar.Source.new(() => this.#genShellSyncer(), this.shell),
+            sheet = Fubar.Source.new(() => this.#genSheetSyncer(), this.sheet),
+            light = Fubar.Source.newLight(x => this.#onLightOn(x), true);
+        this.$src = Fubar.Source.tie({theme, shell, sheet, light}, this);
     }
 
-    $onLightSet(night) {
+    get theme() {
+        return this.$theme.length > 0;
+    }
+
+    get active() {
+        return Util.has(this, 'night');
+    }
+
+    #onLightOn(night) { // NOTE: https://gitlab.gnome.org/GNOME/gnome-control-center/-/issues/2510
         if(this.night === night) return;
         this.night = night;
-        if(this.style) this.loadStyle();
-        if(this.theme) this.syncTheme();
+        ['sheet', 'theme', 'shell'].forEach(x => this.$src[x].hub?.sync());
     }
 
-    $syncTheme() { // sync values: 5 sys <=> 10 user
-        let {gset} = this.$set,
-            hub = new Mortal(),
-            dset = new Gio.Settings({schema: 'org.gnome.desktop.interface'}),
-            store = (a, b, c, d) => [`changed::${b}`, () => { syncStr(a, b, c, this.night ? `${d}-night` : d); }],
-            fetch = (a, b, c, d) => [`changed::${b}`, () => { if(!this.night) syncStr(a, b, c, d); },
-                `changed::${b}-night`, () => { if(this.night) syncStr(a, `${b}-night`, c, d); }];
-        this.syncTheme = () => {
-            if(!has(this, 'night')) return;
-            if(this.night) {
-                Items.forEach(x => syncStr(gset, `${Field[x]}-night`, dset, System[x]));
-                syncStr(gset, `${Field.SHELL}-night`, gset, System.SHELL);
-            } else {
-                Items.forEach(x => syncStr(gset, Field[x], dset, System[x]));
-                syncStr(gset, Field.SHELL, gset, System.SHELL);
+    #genSheetSyncer() {
+        let hub = new Fubar.Mortal();
+        let load = (path, bubble) => {
+            if(path) {
+                try {
+                    let sheet = Util.fopen(path),
+                        context = Fubar.getTheme(),
+                        theme = context.get_theme(),
+                        sheets = theme.get_custom_stylesheets();
+                    if(bubble && sheets[0]?.equal(sheet)) return;
+                    let {application_stylesheet, default_stylesheet, theme_stylesheet} = theme;
+                    theme = new St.Theme({application_stylesheet, default_stylesheet, theme_stylesheet});
+                    theme.load_stylesheet(sheet); // exception
+                    sheets.forEach(x => !sheet.equal(x) && !hub.sheet?.equal(x) && theme.load_stylesheet(x));
+                    if(!hub.sheet?.equal(sheet)) hub.$src.watch.revive(hub.sheet = sheet);
+                    hub.$src.theme.revive(theme);
+                    context.set_theme(theme);
+                } catch(e) {
+                    logError(e);
+                    load();
+                }
+            } else if(hub.sheet) {
+                Object.values(hub.$src).forEach(x => x.destroy());
+                Fubar.getTheme().get_theme().unload_stylesheet(hub.sheet);
+                delete hub.sheet;
             }
         };
-        this.syncTheme();
-        connect(hub, dset, ...Items.flatMap(x => store(dset, System[x], gset, Field[x])),
-            gset, ...Items.flatMap(x => fetch(gset, Field[x], dset, System[x])),
-            ...fetch(gset, Field.SHELL, gset, System.SHELL),
-            ...store(gset, System.SHELL, gset, Field.SHELL));
+        this.$set.attach({
+            dark: [`${Field.SHEET}${DARK}`, 'string', null, x => this.active && this.night && load(x)],
+            light: [`${Field.SHEET}${LIGHT}`, 'string', null, x => this.active && !this.night && load(x)],
+        }, hub);
+        let delay = Fubar.Source.newTimer(x => [() => hub.sheet && load(hub.sheet, x), 100]), // debounce
+            theme = Fubar.Source.new(x => Fubar.Source.newHandler(x, 'custom-stylesheets-changed', () => delay.revive(true), true)),
+            watch = Fubar.Source.new(x => Fubar.Source.newMonitor(x, (...xs) => { xs[3] === Gio.FileMonitorEvent.CHANGES_DONE_HINT && delay.revive(); }, true));
+        hub.$src = Fubar.Source.tie({theme, watch, delay}, hub);
+        hub.sync = Util.thunk(() => this.active && load(this.night ? hub.dark : hub.light));
+        hub.connect('destroy', () => load()); // clear
         return hub;
     }
 
-    $loadStyle() {
-        this.$src.watch.toggle(true);
-        this.loadStyle().then(() => this.$src.stage.toggle(true));
+    #genThemeSyncer() {
+        let hub = new Fubar.Mortal(),
+            gset = this.$set.hub,
+            dset = new Gio.Settings({schema: 'org.gnome.desktop.interface'}),
+            sync = (s0, k0, s1, k1) => (v => v !== s1.get_string(k1) && s1.set_string(k1, v))(s0.get_string(k0)),
+            store = x => [`changed::${Theme[x]}`, () => { sync(dset, Theme[x], gset, `${Field[x]}${this.night ? DARK : LIGHT}`); }],
+            fetch = x => [`changed::${Field[x]}${LIGHT}`, () => { if(!this.night) sync(gset, `${Field[x]}${LIGHT}`, dset, Theme[x]); },
+                `changed::${Field[x]}${DARK}`, () => { if(this.night) sync(gset, `${Field[x]}${DARK}`, dset, Theme[x]); }];
+        hub.sync = Util.thunk(() => this.active && this.$theme.forEach(x => sync(gset, `${Field[x]}${this.night ? DARK : LIGHT}`, dset, Theme[x])));
+        Fubar.connect(hub, dset, ...this.$theme.flatMap(x => store(x)), gset, ...this.$theme.flatMap(x => fetch(x)));
+        return hub;
     }
 
-    async loadStyle(bubble) {
-        if(!has(this, 'night')) return;
-        try {
-            if(!extant(Config)) await mkdir(Config);
-            let darkCss = fopen(Sheet.DARK),
-                lightCss = fopen(Sheet.LIGHT),
-                sheet = this.night && extant(Sheet.DARK) ? darkCss : extant(Sheet.LIGHT) ? lightCss : null;
-            if(!sheet) throw Error('$XDG_CONFIG_HOME/gnome-shell/gnome-shell-{light,dark}.css not found');
-            let styleMd5 = GLib.compute_checksum_for_data(GLib.ChecksumType.MD5, (await fread(sheet)).at(0));
-            if(!this.$src.watch?.active || !bubble && this.$styleMd5 === styleMd5) return;
-            this.$styleMd5 = styleMd5;
-            let themeContext = stageTheme(),
-                oldTheme = themeContext.get_theme(),
-                sheets = oldTheme.get_custom_stylesheets();
-            if(bubble && sheets[0]?.equal(sheet)) return;
-            let {application_stylesheet, default_stylesheet, theme_stylesheet} = oldTheme;
-            let theme = new St.Theme({application_stylesheet, default_stylesheet, theme_stylesheet});
-            theme.load_stylesheet(sheet);
-            sheets.forEach(x => !x.equal(lightCss) && !x.equal(darkCss) && theme.load_stylesheet(x));
-            themeContext.set_theme(theme);
-        } catch(e) {
-            logError(e);
-        }
-    }
-
-    $unloadStyle() {
-        this.$src.watch.toggle(false);
-        this.$src.stage.toggle(false);
-        let theme = stageTheme().get_theme();
-        Object.values(Sheet).forEach(x => theme.unload_stylesheet(fopen(x)));
-        delete this.$styleMd5;
-    }
-
-    loadShellTheme(theme) {
-        let sheet = theme ? getThemeDirs().map(x => `${x}/${theme}/gnome-shell/gnome-shell.css`)
-            .concat(getModeThemeDirs().map(x => `${x}/${theme}.css`)).find(x => extant(x)) : undefined;
-        if(Main.getThemeStylesheet()?.get_path() === sheet) return;
-        if(theme) debug('Load user theme: ', theme);
-        Main.setThemeStylesheet(sheet);
-        Main.loadTheme();
+    #genShellSyncer() {
+        let hub = new Fubar.Mortal();
+        let load = theme => {
+            let path = theme ? getShellThemePath(theme) : null;
+            if(Main.getThemeStylesheet()?.get_path() === path) return;
+            if(theme) Fubar.debug('Loading user theme: ', theme);
+            Main.setThemeStylesheet(path);
+            Main.loadTheme();
+        };
+        this.$set.attach({
+            dark: [`${Field.SHELL}${DARK}`, 'string', null, x => this.active && this.night && load(x)],
+            light: [`${Field.SHELL}${LIGHT}`, 'string', null, x => this.active && !this.night && load(x)],
+        }, hub);
+        hub.sync = Util.thunk(() => this.active && load(this.night ? hub.dark : hub.light));
+        hub.connect('destroy', () => load()); // clear
+        return hub;
     }
 }
 
-export default class MyExtension extends Extension { $klass = UserThemeX; }
+export default class Extension extends Fubar.Extension { $klass = UserThemeX; }
