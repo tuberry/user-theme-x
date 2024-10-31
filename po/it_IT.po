@@ -1,82 +1,97 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the User Theme X package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# This file is distributed under the same license as the PACKAGE package.
+# JIMMY SCIONTI <JIMMY.SCIONTI@GMAIL.COM>, 2024.
 #
+#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: User Theme X 21\n"
+"Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-02-10 05:38+0800\n"
-"PO-Revision-Date: 2021-05-03 17:54+0200\n"
-"Last-Translator: \n"
+"POT-Creation-Date: 2024-10-31 10:55+0100\n"
+"PO-Revision-Date: 2024-10-31 10:58+0100\n"
+"Last-Translator: Jimmy Scionti\n"
 "Language-Team: \n"
-"Language: it\n"
+"Language: it_IT\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.4.3\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.5\n"
 
-#: src/ui.js:32
-msgid "Clear"
-msgstr ""
-
-#: src/ui.js:266
-msgid "Click or press ENTER to commit changes"
-msgstr ""
-
-#: src/prefs.js:171 src/prefs.js:198
+#: prefs.js:91 prefs.js:138
 msgid "Day"
 msgstr "Giorno"
 
-#: src/prefs.js:171 src/prefs.js:198
+#: prefs.js:91 prefs.js:138
 msgid "Night"
 msgstr "Notte"
 
-#: src/prefs.js:199
+#: prefs.js:135
+msgid "Wallpaper"
+msgstr "Sfondo"
+
+#: prefs.js:135
+#, javascript-format
+msgid "Save as <i>%s</i>"
+msgstr "Salva come <i>%s</i>"
+
+#: prefs.js:136
 msgid "Themes"
 msgstr "Temi"
 
-#: src/prefs.js:199
-msgid "Switch according to the Night Light in the Settings"
-msgstr ""
+#: prefs.js:136
+msgid "Switch according to the Night Light status"
+msgstr "Cambia in base allo stato della Luce notturna"
 
-#: src/prefs.js:200
-msgid "Wallpaper"
-msgstr ""
-
-#: src/prefs.js:205
-msgid "Stylesheet"
-msgstr ""
-
-#: src/prefs.js:205
-#, fuzzy
-msgid "Load from “~/.config/gnome-shell/gnome-shell{,-dark}.css”"
-msgstr "Carica gli stylesheets “~/.config/gnome-shell/gnome-shell{,-dark}.css”"
-
-#: src/prefs.js:208
+#: prefs.js:147
 msgid "Style"
-msgstr ""
+msgstr "Stile"
 
-#: src/prefs.js:208
+#: prefs.js:147
 msgid "Gtk3"
-msgstr ""
+msgstr "Gtk3"
 
-#: src/prefs.js:208
+#: prefs.js:147
 msgid "Shell"
 msgstr "Shell"
 
-#: src/prefs.js:208
+#: prefs.js:147
 msgid "Icons"
 msgstr "Icone"
 
-#: src/prefs.js:208
+#: prefs.js:147
 msgid "Cursor"
 msgstr "Cursore"
 
-#~ msgid "Gtk"
-#~ msgstr "Gtk"
+#: prefs.js:149
+msgid "Stylesheet"
+msgstr "Foglio di Stile"
 
-#~ msgid "Default"
-#~ msgstr "Default"
+#: prefs.js:149
+#, javascript-format
+msgid "Load <i>%s</i>"
+msgstr "Carica <i>%s</i>"
+
+#: ui.js:329
+msgid "All"
+msgstr "Tutti"
+
+#: ui.js:329
+msgid "Normal"
+msgstr "Normale"
+
+#: ui.js:329
+msgid "Symbolic"
+msgstr "Simbolico"
+
+#: ui.js:368
+msgid "Clear"
+msgstr "Pulisci"
+
+#: ui.js:466
+msgid "Mismatched filetype"
+msgstr "Tipo di file non corrispondente"
+
+#: ui.js:599
+msgid "Click or press ENTER to apply changes"
+msgstr "Cliccare o premere INVIO per applicare le modifiche"
