@@ -2,96 +2,118 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 # JIMMY SCIONTI <JIMMY.SCIONTI@GMAIL.COM>, 2024.
+# Jimmy Scionti <>, 2024.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: \n"
+"Project-Id-Version: unnamed project\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-31 10:55+0100\n"
-"PO-Revision-Date: 2024-10-31 10:58+0100\n"
+"POT-Creation-Date: 2024-10-31 15:29+0100\n"
+"PO-Revision-Date: 2024-10-31 15:31+0100\n"
 "Last-Translator: Jimmy Scionti\n"
 "Language-Team: \n"
 "Language: it_IT\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 3.5\n"
+"X-Generator: Gtranslator 47.0\n"
 
-#: prefs.js:91 prefs.js:138
-msgid "Day"
-msgstr "Giorno"
-
-#: prefs.js:91 prefs.js:138
-msgid "Night"
-msgstr "Notte"
-
-#: prefs.js:135
-msgid "Wallpaper"
-msgstr "Sfondo"
-
-#: prefs.js:135
-#, javascript-format
-msgid "Save as <i>%s</i>"
-msgstr "Salva come <i>%s</i>"
-
-#: prefs.js:136
-msgid "Themes"
-msgstr "Temi"
-
-#: prefs.js:136
-msgid "Switch according to the Night Light status"
-msgstr "Cambia in base allo stato della Luce notturna"
-
-#: prefs.js:147
-msgid "Style"
-msgstr "Stile"
-
-#: prefs.js:147
-msgid "Gtk3"
-msgstr "Gtk3"
-
-#: prefs.js:147
-msgid "Shell"
-msgstr "Shell"
-
-#: prefs.js:147
-msgid "Icons"
-msgstr "Icone"
-
-#: prefs.js:147
-msgid "Cursor"
-msgstr "Cursore"
-
-#: prefs.js:149
-msgid "Stylesheet"
-msgstr "Foglio di Stile"
-
-#: prefs.js:149
-#, javascript-format
-msgid "Load <i>%s</i>"
-msgstr "Carica <i>%s</i>"
-
-#: ui.js:329
+#: src/ui.js:343
 msgid "All"
 msgstr "Tutti"
 
-#: ui.js:329
+#: src/ui.js:343
 msgid "Normal"
 msgstr "Normale"
 
-#: ui.js:329
+#: src/ui.js:343
 msgid "Symbolic"
 msgstr "Simbolico"
 
-#: ui.js:368
+#: src/ui.js:382
 msgid "Clear"
 msgstr "Pulisci"
 
-#: ui.js:466
+#: src/ui.js:480
 msgid "Mismatched filetype"
 msgstr "Tipo di file non corrispondente"
 
-#: ui.js:599
+#: src/ui.js:615
 msgid "Click or press ENTER to apply changes"
 msgstr "Cliccare o premere INVIO per applicare le modifiche"
+
+#: src/prefs.js:112 src/prefs.js:134 src/prefs.js:176
+msgid "Day"
+msgstr "Giorno"
+
+#: src/prefs.js:112 src/prefs.js:134 src/prefs.js:176
+msgid "Night"
+msgstr "Notte"
+
+#: src/prefs.js:169
+msgid "Theme"
+msgstr "Tema"
+
+#: src/prefs.js:169
+msgid "Switch according to the Night Light status"
+msgstr "Cambia in base allo stato della Luce notturna"
+
+#: src/prefs.js:178
+msgid "_Stylesheet"
+msgstr "Foglio di _Stile"
+
+#: src/prefs.js:179
+msgid "S_tyle"
+msgstr "S_tile"
+
+#: src/prefs.js:180
+msgid "_Icon"
+msgstr "_Icona"
+
+#: src/prefs.js:181
+msgid "_Cursor"
+msgstr "_Cursore"
+
+#: src/prefs.js:182
+msgid "_Legacy app"
+msgstr "App _Legacy\t"
+
+#: src/prefs.js:183
+msgid "S_hell"
+msgstr "S_hell"
+
+#: src/prefs.js:183
+msgid ""
+"Never use with <a href=\"https://extensions.gnome.org/extension/19/user-"
+"themes/\">user-theme</a> enabled"
+msgstr ""
+"Non usare con <a href=\"https://extensions.gnome.org/extension/19/user-"
+"themes/\">user-theme</a> abilitato"
+
+#: src/prefs.js:184
+msgid "_Accent color"
+msgstr "Colore _accento"
+
+#: src/prefs.js:195
+msgid "Wallpaper"
+msgstr "Sfondo"
+
+#: src/prefs.js:198
+msgid "Switch according to the system Light/Dark style"
+msgstr "Cambia in base allo stile Chiaro/Scuro del sistema"
+
+#: src/prefs.js:202
+#, javascript-format
+msgid "Reset all “%s” settings to default?"
+msgstr "Resettare tutte le \"%s\" impostazioni?"
+
+#, javascript-format
+#~ msgid "Save as <i>%s</i>"
+#~ msgstr "Salva come <i>%s</i>"
+
+#~ msgid "Gtk3"
+#~ msgstr "Gtk3"
+
+#, javascript-format
+#~ msgid "Load <i>%s</i>"
+#~ msgstr "Carica <i>%s</i>"
