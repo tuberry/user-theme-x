@@ -17,71 +17,52 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/ui.js:343
-msgid "All"
-msgstr "全部"
-
-#: src/ui.js:343
-msgid "Normal"
-msgstr "常规"
-
-#: src/ui.js:343
-msgid "Symbolic"
-msgstr "符号"
-
-#: src/ui.js:382
-msgid "Clear"
-msgstr "清除"
-
-#: src/ui.js:480
+#: src/ui.js:384
 msgid "Mismatched filetype"
 msgstr "文件类型不匹配"
 
-#: src/ui.js:615
+#: src/ui.js:516
 msgid "Click or press ENTER to apply changes"
 msgstr "单击或按回车应用更改"
 
-#: src/prefs.js:112 src/prefs.js:134 src/prefs.js:176
+#: src/prefs.js:156
 msgid "Day"
 msgstr "白天"
 
-#: src/prefs.js:112 src/prefs.js:134 src/prefs.js:176
+#: src/prefs.js:156
 msgid "Night"
 msgstr "夜晚"
 
-#: src/prefs.js:169
-msgid "Theme"
-msgstr "主题"
+#: src/prefs.js:159
+#, javascript-format
+msgid "Reset all “%s” settings to default?"
+msgstr "将所有“%s”设置重置为默认值?"
 
-#: src/prefs.js:169
-msgid "Switch according to the Night Light status"
-msgstr "随夜灯状态切换"
-
-#: src/prefs.js:178
+#: src/prefs.js:162
 msgid "_Stylesheet"
 msgstr "样式表(_S)"
 
-#: src/prefs.js:179
+#: src/prefs.js:163
 msgid "S_tyle"
 msgstr "样式(_T)"
 
-#: src/prefs.js:180
+#: src/prefs.js:164
 msgid "_Icon"
 msgstr "图标(_I)"
 
-#: src/prefs.js:181
+#: src/prefs.js:165
 msgid "_Cursor"
 msgstr "光标(_C)"
 
-#: src/prefs.js:182
+#: src/prefs.js:166
 msgid "_Legacy app"
 msgstr "旧式应用(_L)"
 
-#: src/prefs.js:183
+#: src/prefs.js:167
 msgid "S_hell"
 msgstr "壳层(_H)"
 
-#: src/prefs.js:183
+#: src/prefs.js:167
 msgid ""
 "Never use with <a href=\"https://extensions.gnome.org/extension/19/user-"
 "themes/\">user-theme</a> enabled"
@@ -89,22 +70,40 @@ msgstr ""
 "切忌与 <a href=\"https://extensions.gnome.org/extension/19/user-themes/"
 "\">user-theme</a> 同用"
 
-#: src/prefs.js:184
+#: src/prefs.js:168
 msgid "_Accent color"
 msgstr "强调色(_A)"
 
-#: src/prefs.js:195
+#: src/prefs.js:172
+msgid "Theme"
+msgstr "主题"
+
+#: src/prefs.js:172
+msgid "Switch according to the Night Light status"
+msgstr "随夜灯状态切换"
+
+#: src/prefs.js:173
 msgid "Wallpaper"
 msgstr "壁纸"
 
-#: src/prefs.js:198
+#: src/prefs.js:173
 msgid "Switch according to the system Light/Dark style"
 msgstr "随系统明暗样式切换"
 
-#: src/prefs.js:202
-#, javascript-format
-msgid "Reset all “%s” settings to default?"
-msgstr "将所有“%s”设置重置为默认值?"
+#~ msgid "All"
+#~ msgstr "全部"
+
+#~ msgid "Normal"
+#~ msgstr "常规"
+
+#~ msgid "Symbolic"
+#~ msgstr "符号"
+
+#~ msgid "Clear"
+#~ msgstr "清除"
+
+#~ msgid "Edit"
+#~ msgstr "编辑"
 
 #, javascript-format
 #~ msgid "Load <i>%s</i>"
