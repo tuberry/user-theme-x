@@ -4,7 +4,8 @@ SPDX-License-Identifier: CC-BY-SA-4.0
 -->
 # user-theme-x
 
-User theme with user stylesheet and day/night themes auto-switch based on the Night Light.
+GNOME Shell extension to switch day or night user theme/stylesheet when the enabled Night Light gets inactive or active.
+
 > Do not go gentle into that Dark side.\
 [![license]](/LICENSE.md)
 
@@ -32,10 +33,6 @@ It's quite the same as installing from:
 ### E.G.O
 
 [<img src="https://raw.githubusercontent.com/andyholmes/gnome-shell-extensions-badge/master/get-it-on-ego.svg?sanitize=true" alt="Get it on GNOME Extensions" height="100" align="middle">][EGO]
-
-## Features
-
-![utxpref](https://github.com/user-attachments/assets/2b96bcf1-22de-4bbe-ac68-012baa6c12c1)
 
 ## Contributions
 
