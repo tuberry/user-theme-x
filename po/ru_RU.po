@@ -9,9 +9,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-shell-extension-user-theme-x\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-11 01:14+0300\n"
-"PO-Revision-Date: 2025-08-02 00:36+0300\n"
-"Last-Translator: Fraxinus Acer <>\n"
+"POT-Creation-Date: 2025-08-10 23:26+0300\n"
+"PO-Revision-Date: 2025-08-13 01:35+0300\n"
+"Last-Translator: Fraxinus Acer\n"
 "Language-Team: Russian\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
@@ -19,77 +19,76 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
-"X-Generator: Gtranslator 48.0\n"
+"X-Generator: Poedit 3.6\n"
 
-#: src/ui.js:384
+#: src/ui.js:343
 msgid "Mismatched filetype"
 msgstr "Несоответствующий тип файла"
 
-#: src/ui.js:516
+#: src/ui.js:461
 msgid "Click or press ENTER to apply changes"
 msgstr "Нажмите ENTER или щёлкните, чтобы применить изменения"
 
-#: src/prefs.js:156
+#: src/prefs.js:150
 msgid "Day"
 msgstr "День"
 
-#: src/prefs.js:156
+#: src/prefs.js:150
 msgid "Night"
 msgstr "Ночь"
 
-#: src/prefs.js:159
+#: src/prefs.js:154
 #, javascript-format
 msgid "Reset all “%s” settings to default?"
 msgstr "Сбросить все настройки “%s” по умолчанию?"
 
-#: src/prefs.js:162
+#: src/prefs.js:156
 msgid "_Stylesheet"
-msgstr "Таблица стилей (_S)"
+msgstr "_Таблица стилей"
 
-#: src/prefs.js:163
+#: src/prefs.js:157
 msgid "S_tyle"
-msgstr "Стили (_T)"
+msgstr "_Стили"
 
-#: src/prefs.js:164
+#: src/prefs.js:158
 msgid "_Icon"
-msgstr "Значки (_I)"
+msgstr "_Значки"
+
+#: src/prefs.js:159
+msgid "_Cursor"
+msgstr "_Курсор"
+
+#: src/prefs.js:160
+msgid "_Legacy app"
+msgstr "Устаревшие _приложения"
+
+#: src/prefs.js:161
+msgid "S_hell"
+msgstr "_Оболочка"
+
+#: src/prefs.js:161
+#, javascript-format
+msgid "Never use with <a href=\"%s\">user-theme</a> enabled"
+msgstr ""
+"Никогда не используйте с включенными <a href=\"%s\">пользовательскими "
+"темами</a>"
+
+#: src/prefs.js:162
+msgid "_Accent color"
+msgstr "Акцентный _цвет"
 
 #: src/prefs.js:165
-msgid "_Cursor"
-msgstr "Кур_сор (C)"
-
-#: src/prefs.js:166
-msgid "_Legacy app"
-msgstr "Устаревшие приложения (_L)"
-
-#: src/prefs.js:167
-msgid "S_hell"
-msgstr "Оболочка (_H)"
-
-#: src/prefs.js:167
-msgid ""
-"Never use with <a href=\"https://extensions.gnome.org/extension/19/user-"
-"themes/\">user-theme</a> enabled"
-msgstr ""
-"Никогда не используйте с включенными <a href=\"https://extensions.gnome.org/"
-"extension/19/user-themes/\">пользовательскими темами</a>"
-
-#: src/prefs.js:168
-msgid "_Accent color"
-msgstr "Акцентный цвет (_A)"
-
-#: src/prefs.js:172
 msgid "Theme"
 msgstr "Тема"
 
-#: src/prefs.js:172
-msgid "Switch according to the Night Light status"
-msgstr "Переключать в зависимости от состояния Ночного света"
+#: src/prefs.js:165
+msgid "Switch according to the inactive/active status of enabled Night Light"
+msgstr "Переключать совместно с неактивным/активным статусом ночного света"
 
-#: src/prefs.js:173
+#: src/prefs.js:166
 msgid "Wallpaper"
 msgstr "Обои"
 
-#: src/prefs.js:173
-msgid "Switch according to the system Light/Dark style"
-msgstr "Переключать в соответствии с системным стилем Светлый/Тёмный"
+#: src/prefs.js:166
+msgid "Switch according to the Default/Dark Style of system Appearance"
+msgstr "Переключать совместно с системным стилем По умолчанию/Тёмный"
