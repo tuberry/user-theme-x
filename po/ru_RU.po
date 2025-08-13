@@ -1,0 +1,94 @@
+# Russian translations for gnome-shell-extension-user-theme-x package
+# Английские переводы для пакета gnome-shell-extension-user-theme-x.
+# Copyright (C) 2025 THE gnome-shell-extension-user-theme-x'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the gnome-shell-extension-user-theme-x package.
+# Automatically generated, 2025.
+# Fraxinus Acer <>, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: gnome-shell-extension-user-theme-x\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-08-10 23:26+0300\n"
+"PO-Revision-Date: 2025-08-13 01:35+0300\n"
+"Last-Translator: Fraxinus Acer\n"
+"Language-Team: Russian\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Generator: Poedit 3.6\n"
+
+#: src/ui.js:343
+msgid "Mismatched filetype"
+msgstr "Несоответствующий тип файла"
+
+#: src/ui.js:461
+msgid "Click or press ENTER to apply changes"
+msgstr "Нажмите ENTER или щёлкните, чтобы применить изменения"
+
+#: src/prefs.js:150
+msgid "Day"
+msgstr "День"
+
+#: src/prefs.js:150
+msgid "Night"
+msgstr "Ночь"
+
+#: src/prefs.js:154
+#, javascript-format
+msgid "Reset all “%s” settings to default?"
+msgstr "Сбросить все настройки “%s” по умолчанию?"
+
+#: src/prefs.js:156
+msgid "_Stylesheet"
+msgstr "_Таблица стилей"
+
+#: src/prefs.js:157
+msgid "S_tyle"
+msgstr "_Стили"
+
+#: src/prefs.js:158
+msgid "_Icon"
+msgstr "_Значки"
+
+#: src/prefs.js:159
+msgid "_Cursor"
+msgstr "_Курсор"
+
+#: src/prefs.js:160
+msgid "_Legacy app"
+msgstr "Устаревшие _приложения"
+
+#: src/prefs.js:161
+msgid "S_hell"
+msgstr "_Оболочка"
+
+#: src/prefs.js:161
+#, javascript-format
+msgid "Never use with <a href=\"%s\">user-theme</a> enabled"
+msgstr ""
+"Никогда не используйте с включенными <a href=\"%s\">пользовательскими "
+"темами</a>"
+
+#: src/prefs.js:162
+msgid "_Accent color"
+msgstr "Акцентный _цвет"
+
+#: src/prefs.js:165
+msgid "Theme"
+msgstr "Тема"
+
+#: src/prefs.js:165
+msgid "Switch according to the inactive/active status of enabled Night Light"
+msgstr "Переключать совместно с неактивным/активным статусом ночного света"
+
+#: src/prefs.js:166
+msgid "Wallpaper"
+msgstr "Обои"
+
+#: src/prefs.js:166
+msgid "Switch according to the Default/Dark Style of system Appearance"
+msgstr "Переключать совместно с системным стилем По умолчанию/Тёмный"
