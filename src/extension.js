@@ -118,15 +118,15 @@ class UserThemeX extends F.Mortal {
             let path = theme ? getShellThemePath(theme) : null;
             if(Main.getThemeStylesheet()?.get_path() === path) return;
             if(theme) F.debug('Loading user theme: ', theme);
-            Main[$].setThemeStylesheet(path).loadTheme();
+            Main.setThemeStylesheet(path);
+            Main.loadTheme();
         };
         this.$set.tie([
             [['dark', `${DARK}${K.SHELL}`], null, x => this.active && this.night && load(x)],
             [['light', `${LIGHT}${K.SHELL}`], null, x => this.active && !this.night && load(x)],
         ], ret);
-        ret.sync = (() => this.active && load(this.night ? ret.dark : ret.light))[$].call();
-        ret.connect('destroy', () => load()); // clear
-        return ret;
+        return ret[$].sync((() => this.active && load(this.night ? ret.dark : ret.light))[$].call())[$]
+            .connect('destroy', () => load()); // clear
     }
 }
 

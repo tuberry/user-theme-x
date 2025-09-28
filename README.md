@@ -2,12 +2,13 @@
 SPDX-FileCopyrightText: tuberry
 SPDX-License-Identifier: CC-BY-SA-4.0
 -->
+
 # user-theme-x
 
-GNOME Shell extension to switch day or night user theme/stylesheet when the enabled Night Light gets inactive or active.
+GNOME Shell extension to switch day/night user theme&stylesheet when the enabled Night Light gets inactive/active.
 
 > Do not go gentle into that Dark side.\
-[![license]](/LICENSE.md)
+> [![license]](/LICENSE.md)
 
 ## Installation
 
@@ -54,5 +55,5 @@ To install GJS TypeScript type [definitions](https://www.npmjs.com/package/@girs
 npm install @girs/gnome-shell --save-dev
 ```
 
-[EGO]:https://extensions.gnome.org/extension/3019/user-themes-x/
-[license]:https://img.shields.io/badge/license-GPLv3+-green.svg
+[EGO]: https://extensions.gnome.org/extension/3019/user-themes-x/
+[license]: https://img.shields.io/badge/license-GPLv3+-green.svg

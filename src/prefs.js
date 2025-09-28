@@ -48,8 +48,12 @@ class Sheet extends UI.File {
 
     constructor(icon, tooltipText) {
         super({filter: {mimeTypes: ['text/css']}, open: true}, {tooltipText}, icon)[$]
-            .set({setup: (_icon, text) => { super.setup(null, text); }});
-        this.$btn.child.$label.set({maxWidthChars: 10,  ellipsize: Pango.EllipsizeMode.MIDDLE});
+            .set({setup: (icon_, text) => { this.$icon = icon_; super.setup(null, text); }});
+        this.$btn.child.$label.set({maxWidthChars: 10, ellipsize: Pango.EllipsizeMode.MIDDLE});
+    }
+
+    $genDrag() {
+        return super.$genDrag().with(0, UI.Icon.paintable(this.$icon));
     }
 }
 
