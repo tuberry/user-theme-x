@@ -12,7 +12,7 @@ import * as F from './fubar.js';
 import {getShellThemePath} from './theme.js';
 import {Key as K, LIGHT, DARK} from './const.js';
 
-const {$, $_} = T;
+const {$, $$, $_} = T;
 
 const Theme = {
     GTK: 'gtk-theme',
@@ -25,26 +25,22 @@ const Theme = {
 const Themes = Object.keys(Theme);
 
 class UserThemeX extends F.Mortal {
-    constructor(gset) {
-        super()[$].$bindSettings(gset)[$].$buildSources();
-    }
-
     $bindSettings(gset) {
-        this.$set = new F.Setting(gset, [
+        this.$set = new F.Setting(gset, this, [
             [K.SHELL, null, x => this.$src.shell.toggle(x)],
             [K.SHEET, null, x => this.$src.sheet.toggle(x)],
-        ], this).tie(Themes.map(x => [[x, K[x]]]), this, () => {
+        ], Themes.map(x => [[x, K[x]]]), () => {
             this.$theme = Themes.filter(x => this[x]);
         }, () => this.$src.theme.switch(this.theme));
     }
 
     $buildSources() {
-        let theme = F.Source.new(() => this.#genThemeSyncer(), this.theme),
-            shell = F.Source.new(() => this.#genShellSyncer(), this[K.SHELL]),
-            sheet = F.Source.new(() => this.#genSheetSyncer(), this[K.SHEET]),
-            light = F.Source.new(() => new F.DBusProxy('org.gnome.SettingsDaemon.Color', '/org/gnome/SettingsDaemon/Color', x => this.#onLightOn(x),
-                ['g-properties-changed', (x, p) => { if(p.lookup_value('NightLightActive', null)) this.#onLightOn(x); }]), true);
-        this.$src = F.Source.tie({theme, shell, sheet, light}, this);
+        let theme = F.Source.new(() => this.$genThemeSyncer(), this.theme),
+            shell = F.Source.new(() => this.$genShellSyncer(), this[K.SHELL]),
+            sheet = F.Source.new(() => this.$genSheetSyncer(), this[K.SHEET]),
+            light = F.Source.newDBusProxy('org.gnome.SettingsDaemon.Color', '/org/gnome/SettingsDaemon/Color', x => this.$onLightOn(x),
+                ['g-properties-changed', (x, p) => { if(p.lookup_value('NightLightActive', null)) this.$onLightOn(x); }]);
+        this.$src = F.Source.tie(this, {theme, shell, sheet}, light);
     }
 
     get theme() {
@@ -55,78 +51,71 @@ class UserThemeX extends F.Mortal {
         return Object.hasOwn(this, 'night');
     }
 
-    #onLightOn({NightLightActive: night}) { // NOTE: https://gitlab.gnome.org/GNOME/gnome-control-center/-/issues/2510
+    $onLightOn({NightLightActive: night}) { // NOTE: https://gitlab.gnome.org/GNOME/gnome-control-center/-/issues/2060
         if(this.night === night) return;
         this.night = night;
         ['sheet', 'theme', 'shell'].forEach(x => this.$src[x].hub?.sync());
     }
 
-    #genSheetSyncer() {
+    $genSheetSyncer() {
         let ret = new F.Mortal();
-        let load = (path, bubble = true) => {
-            if(path) {
+        this.$set.tie(ret, [
+            [['dark', `${DARK}${K.SHEET}`], null, x => this.night && ret.$src.load.summon(x)],
+            [['light', `${LIGHT}${K.SHEET}`], null, x => this.night || ret.$src.load.summon(x)],
+        ]);
+        let load = new F.Source((path, bubble) => {
+                if(!this.active) return;
                 try {
                     let sheet = T.fopen(path),
                         context = F.theme(),
                         theme = context.get_theme(),
                         sheets = theme.get_custom_stylesheets();
-                    if(bubble && sheets[0]?.equal(sheet)) return;
-                    let {application_stylesheet, default_stylesheet, theme_stylesheet} = theme;
-                    theme = new St.Theme({application_stylesheet, default_stylesheet, theme_stylesheet})[$].load_stylesheet(sheet); // exception
-                    sheets.forEach(x => !sheet.equal(x) && !ret.sheet?.equal(x) && theme.load_stylesheet(x));
-                    if(!ret.sheet?.equal(sheet)) ret.$src.watch.revive(ret.sheet = sheet);
-                    ret.$src.theme.revive(theme);
-                    context.set_theme(theme);
-                } catch(e) {
-                    logError(e);
-                    load();
+                    if(!(bubble && sheets[0]?.equal(sheet))) {
+                        let {application_stylesheet, default_stylesheet, theme_stylesheet} = theme;
+                        theme = new St.Theme({application_stylesheet, default_stylesheet, theme_stylesheet})[$].load_stylesheet(sheet);
+                        sheets.forEach(x => sheet.equal(x) || load.hub?.equal(x) || theme.load_stylesheet(x));
+                        context.set_theme(theme);
+                        if(!load.hub?.equal(sheet)) ret.$src.watch.revive(sheet);
+                        ret.$src.theme.revive(theme);
+                    }
+                    return sheet;
+                } catch{
+                    Object.values(ret.$src).forEach(x => x.dispel());
                 }
-            } else if(ret.sheet) {
-                Object.values(ret.$src).forEach(x => x.dispel());
-                F.theme().get_theme().unload_stylesheet(ret.sheet);
-                delete ret.sheet;
-            }
-        };
-        this.$set.tie([
-            [['dark', `${DARK}${K.SHEET}`], null, x => this.active && this.night && load(x)],
-            [['light', `${LIGHT}${K.SHEET}`], null, x => this.active && !this.night && load(x)],
-        ], ret);
-        let delay = F.Source.newTimer(x => [() => ret.sheet && load(ret.sheet, x), 100]), // debounce
-            theme = F.Source.new(x => F.Source.newHandler(x, 'custom-stylesheets-changed', () => delay.revive(), true)),
+            }, x => x && F.theme().get_theme().unload_stylesheet(x)),
+            delay = F.Source.newTimer(x => [() => load.summon(load.hub, x), 100]), // debounce
+            theme = F.Source.new(x => F.Source.newHandler(x, 'custom-stylesheets-changed', () => delay.revive())),
             watch = F.Source.new(x => F.Source.newMonitor(x, (...xs) => delay[$_].revive(xs[3] === Gio.FileMonitorEvent.CHANGES_DONE_HINT, false), true));
-        return ret[$].$src(F.Source.tie({theme, watch, delay}, ret))[$]
-            .sync((() => this.active && load(this.night ? ret.dark : ret.light))[$].call())[$]
-            .connect('destroy', () => load()); // clear
+        return ret[$].$src(F.Source.tie(ret, {theme, watch, delay, load}))[$]
+            .sync((() => load.summon(this.night ? ret.dark : ret.light))[$].call());
     }
 
-    #genThemeSyncer() {
+    $genThemeSyncer() {
         let ret = new F.Mortal(),
             gset = this.$set.hub,
             dset = new Gio.Settings({schema: 'org.gnome.desktop.interface'}),
-            sync = (s0, k0, s1, k1) => void (v => v !== s1.get_string(k1) && s1.set_string(k1, v))(s0.get_string(k0)),
+            sync = (s0, k0, s1, k1) => { this.active && (v => v !== s1.get_string(k1) && s1.set_string(k1, v))(s0.get_string(k0)); },
             store = x => [`changed::${Theme[x]}`, () => sync(dset, Theme[x], gset, `${this.night ? DARK : LIGHT}${K[x]}`)],
             fetch = x => [`changed::${LIGHT}${K[x]}`, () => { if(!this.night) sync(gset, `${LIGHT}${K[x]}`, dset, Theme[x]); },
                 `changed::${DARK}${K[x]}`, () => { if(this.night) sync(gset, `${DARK}${K[x]}`, dset, Theme[x]); }];
-        ret.sync = (() => this.active && this.$theme.forEach(x => sync(gset, `${this.night ? DARK : LIGHT}${K[x]}`, dset, Theme[x])))[$].call();
-        F.connect(ret, dset, ...this.$theme.flatMap(x => store(x)), gset, ...this.$theme.flatMap(x => fetch(x)));
-        return ret;
+        F.Source.tie(ret, F.Source.newHandler(dset, ...this.$theme.flatMap(store), gset, ...this.$theme.flatMap(fetch)));
+        return ret[$].sync((() => this.$theme.forEach(x => sync(gset, `${this.night ? DARK : LIGHT}${K[x]}`, dset, Theme[x])))[$].call());
     }
 
-    #genShellSyncer() {
-        let ret = new F.Mortal();
-        let load = theme => {
-            let path = theme ? getShellThemePath(theme) : null;
-            if(Main.getThemeStylesheet()?.get_path() === path) return;
-            if(theme) F.debug('Loading user theme: ', theme);
-            Main.setThemeStylesheet(path);
-            Main.loadTheme();
-        };
-        this.$set.tie([
-            [['dark', `${DARK}${K.SHELL}`], null, x => this.active && this.night && load(x)],
-            [['light', `${LIGHT}${K.SHELL}`], null, x => this.active && !this.night && load(x)],
-        ], ret);
-        return ret[$].sync((() => this.active && load(this.night ? ret.dark : ret.light))[$].call())[$]
-            .connect('destroy', () => load()); // clear
+    $genShellSyncer() {
+        let ret = new F.Mortal(),
+            load = theme => {
+                let path = theme ? getShellThemePath(theme) ?? null : null;
+                if(Main.getThemeStylesheet()?.get_path() === path) return;
+                Main.setThemeStylesheet(path);
+                Main.loadTheme();
+            },
+            src = F.Source.tie(ret, new F.Source(x => this.active && x[$$](load), x => x && load()));
+        this.$set.tie(ret, [
+            [['dark', `${DARK}${K.SHELL}`], null, x => this.night && src.summon(x)],
+            [['light', `${LIGHT}${K.SHELL}`], null, x => this.night || src.summon(x)],
+        ]);
+        return ret[$].sync((() => src.summon(this.night ? ret.dark : ret.light))[$].call());
     }
 }
 

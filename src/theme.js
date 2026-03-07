@@ -23,7 +23,7 @@ export async function getAllThemes() {
         [gtk, shell, icon, cursor] = [ // Ref: https://gitlab.gnome.org/GNOME/gnome-tweaks/-/blob/master/gtweak/tweaks/tweak_group_appearance.py
             themes.map(([x, y]) => T.exist(`${x}/${y}/gtk-3.0/gtk.css`) ? [y] : [])[$].push('Adwaita', 'HighContrast', 'HighContrastInverse'),
             themes.map(([x, y]) => T.exist(`${x}/${y}/gnome-shell/gnome-shell.css`) ? [y] : [])[$].push(...modes, ''),
-            icons.map(([x, y]) => T.exist(`${x}/${y}/index.theme`) ? [y] : []),
+            icons.map(([x, y]) => T.exist(`${x}/${y}/index.theme`) && y !== 'hicolor' ? [y] : []),
             icons.map(([x, y]) => T.exist(`${x}/${y}/cursors`) ? [y] : []),
         ].map(x => [...new Set(x.flat())].filter(y => y.toLowerCase() !== 'default').sort((a, b) => a.localeCompare(b)));
     return {gtk, shell, icon, cursor};
