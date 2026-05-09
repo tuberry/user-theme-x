@@ -2,11 +2,13 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 import Adw from 'gi://Adw';
-import Gio from 'gi://Gio';
-import Gtk from 'gi://Gtk';
 import Gdk from 'gi://Gdk';
+import Gio from 'gi://Gio';
+import Gly from 'gi://Gly';
+import Gsk from 'gi://Gsk';
+import Gtk from 'gi://Gtk';
 import Pango from 'gi://Pango';
-import GdkPixbuf from 'gi://GdkPixbuf';
+import GlyGtk4 from 'gi://GlyGtk4';
 
 import * as UI from './ui.js';
 import * as T from './util.js';
@@ -64,7 +66,7 @@ class ThemeDrop extends Gtk.DropDown {
     constructor(data, icon, tip) {
         super({valign: Gtk.Align.CENTER, tooltipText: tip});
         let [strv, tran] = Array.isArray(data) ? [data, x => T.esc(T.upcase(x, T.id))] : [Object.keys(data), x => T.esc(data[x])];
-        let setup = (x, {string: y}) => x.setup(y === this[UI.dftv], y, tran);
+        let setup = (x, {string: y}) => x.setup(y === this[UI.dflt], y, tran);
         UI.once(() => this.$buildWidgets(strv, data === Color, setup, icon), this);
     }
 
@@ -92,25 +94,37 @@ class ThemeDrop extends Gtk.DropDown {
     }
 }
 
+class Thumbnail extends Gtk.Widget {
+    static {
+        T.enrol(this, null, {Signals: {snapshot: {param_types: [Gtk.Snapshot.$gtype]}}});
+    }
+
+    vfunc_snapshot(snapshot) {
+        this.emit('snapshot', snapshot);
+    }
+}
+
 class Wallpaper extends UI.Box {
     static {
         T.enrol(this, {[DARK]: '', [LIGHT]: ''});
     }
 
-    constructor(tip, height = 270) {
+    constructor(tip, width = 480) {
         super();
-        let width = height * 16 / 9,
-            uri = [[LIGHT, 'picture-uri'], [DARK, 'picture-uri-dark']],
+        let height = width * 9 / 16,
+            uris = [[LIGHT, 'picture-uri'], [DARK, 'picture-uri-dark']],
             gset = new Gio.Settings({schema: 'org.gnome.desktop.background'}),
-            area = new Gtk.DrawingArea({widthRequest: width, heightRequest: height})[$].set_draw_func((...xs) => this.$draw(...xs));
-        this[$].$resetv(() => uri.forEach(([, k]) => gset.reset(k)))[$s]
-            .append(uri.map(([key, field]) => {
+            area = new Thumbnail()[$].set({widthRequest: width, heightRequest: height})[$]
+                .connect('snapshot', (...xs) => this.$draw(...xs))[$].add_controller(new Gtk.GestureClick()[$]
+                .connect('pressed', (c_, n_, x, y) => this.$onClick(x * area.get_height() > y * area.get_width() ? DARK : LIGHT)));
+        this[$].$tip(tip)[$].$resetv(() => uris.forEach(([, k]) => gset.reset(k)))[$s]
+            .append(uris.map(([key, field]) => {
                 gset.bind(field, this, key, Gio.SettingsBindFlags.DEFAULT);
                 this.connect(`notify::${key}`, () => area.queue_draw());
                 return new Gtk.Button({
                     cssClasses: ['suggested-action'], heightRequest: height, tooltipText: tip[key],
                     child: new Gtk.Image({iconName: Icon[key], iconSize: Gtk.IconSize.LARGE}),
-                })[$].connect('clicked', () => this.$onClick(tip[key]).then(x => { this[key] = x.get_uri(); }).catch(T.nop));
+                })[$].connect('clicked', () => this.$onClick(key));
             })[$].splice(1, 0, area));
     }
 
@@ -118,29 +132,27 @@ class Wallpaper extends UI.Box {
         return (this.$dialog ??= new Gtk.FileDialog({modal: true, defaultFilter: new Gtk.FileFilter()[$].add_pixbuf_formats()}));
     }
 
-    $onClick(title) {
-        return this.dlg[$].set_title(title).open(this.get_root(), null);
+    $onClick(key) {
+        return this.dlg[$].set_title(this.$tip[key]).open(this.get_root(), null).then(x => { this[key] = x.get_uri(); }).catch(T.nop);
     }
 
-    $draw(_a, cr, w, h) {
-        [DARK, LIGHT].forEach(key => {
-            cr.save();
+    $draw(area, ss) {
+        let [, rect] = area.compute_bounds(area),
+            {width: w, height: h} = rect.size,
+            pb = new Gsk.PathBuilder();
+        [DARK, LIGHT].forEach(uri => {
+            pb.move_to(0, 0);
+            pb.line_to(w, h);
+            pb.line_to(...uri === DARK ? [w, 0] : [0, h]);
+            ss.push_fill(pb.to_path(), Gsk.FillRule.WINDING);
             try {
-                Gdk.cairo_set_source_pixbuf(cr, GdkPixbuf.Pixbuf.new_from_file_at_scale(T.fopen(this[key]).get_path(), w, h, false), 0, 0);
-            } catch(e) {
-                logError(e);
-                key === LIGHT ? cr.setSourceRGBA(0.9, 0.9, 0.9, 1) : cr.setSourceRGBA(0.2, 0.2, 0.2, 1);
-            } finally {
-                cr.moveTo(0, 0);
-                cr.lineTo(w, h);
-                key === LIGHT ? cr.lineTo(0, h) : cr.lineTo(w, 0);
-                cr.clip();
-                cr.paint();
+                let frame = Gly.Loader.new(T.fopen(this[uri])).load().next_frame(); // unsandboxed -> https://docs.gtk.org/gdk4/ctor.Texture.new_from_file.html
+                ss.append_scaled_texture(GlyGtk4.frame_get_texture(frame), Gsk.ScalingFilter.TRILINEAR, rect);
+            } catch{
+                ss.append_color(new Gdk.RGBA()[$].parse(uri === DARK ? '#222' : '#ddd'), rect);
             }
-            cr.restore();
+            ss.pop();
         });
-
-        cr.$dispose();
     }
 }
 

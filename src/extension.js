@@ -86,8 +86,10 @@ class UserThemeX extends F.Mortal {
             delay = F.Source.newTimer(x => [() => load.summon(load.hub, x), 100]), // debounce
             theme = F.Source.new(x => F.Source.newHandler(x, 'custom-stylesheets-changed', () => delay.revive())),
             watch = F.Source.new(x => F.Source.newMonitor(x, (...xs) => delay[$_].revive(xs[3] === Gio.FileMonitorEvent.CHANGES_DONE_HINT, false), true));
-        return ret[$].$src(F.Source.tie(ret, {theme, watch, delay, load}))[$]
-            .sync((() => load.summon(this.night ? ret.dark : ret.light))[$].call());
+        return ret.set({
+            $src: F.Source.tie(ret, {theme, watch, delay, load}),
+            sync: (() => load.summon(this.night ? ret.dark : ret.light))[$].call(),
+        });
     }
 
     $genThemeSyncer() {
@@ -99,7 +101,7 @@ class UserThemeX extends F.Mortal {
             fetch = x => [`changed::${LIGHT}${K[x]}`, () => { if(!this.night) sync(gset, `${LIGHT}${K[x]}`, dset, Theme[x]); },
                 `changed::${DARK}${K[x]}`, () => { if(this.night) sync(gset, `${DARK}${K[x]}`, dset, Theme[x]); }];
         F.Source.tie(ret, F.Source.newHandler(dset, ...this.$theme.flatMap(store), gset, ...this.$theme.flatMap(fetch)));
-        return ret[$].sync((() => this.$theme.forEach(x => sync(gset, `${this.night ? DARK : LIGHT}${K[x]}`, dset, Theme[x])))[$].call());
+        return ret.set({sync: (() => this.$theme.forEach(x => sync(gset, `${this.night ? DARK : LIGHT}${K[x]}`, dset, Theme[x])))[$].call()});
     }
 
     $genShellSyncer() {
@@ -115,7 +117,7 @@ class UserThemeX extends F.Mortal {
             [['dark', `${DARK}${K.SHELL}`], null, x => this.night && src.summon(x)],
             [['light', `${LIGHT}${K.SHELL}`], null, x => this.night || src.summon(x)],
         ]);
-        return ret[$].sync((() => src.summon(this.night ? ret.dark : ret.light))[$].call());
+        return ret.set({sync: (() => src.summon(this.night ? ret.dark : ret.light))[$].call()});
     }
 }
 
