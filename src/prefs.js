@@ -117,7 +117,7 @@ class Wallpaper extends UI.Box {
             area = new Thumbnail()[$].set({widthRequest: width, heightRequest: height})[$]
                 .connect('snapshot', (...xs) => this.$draw(...xs))[$].add_controller(new Gtk.GestureClick()[$]
                 .connect('pressed', (c_, n_, x, y) => this.$onClick(x * area.get_height() > y * area.get_width() ? DARK : LIGHT)));
-        this[$].$tip(tip)[$].$resetv(() => uris.forEach(([, k]) => gset.reset(k)))[$s]
+        this[$].set({$tip: tip, $resetv: () => uris.forEach(([, k]) => gset.reset(k))})[$s]
             .append(uris.map(([key, field]) => {
                 gset.bind(field, this, key, Gio.SettingsBindFlags.DEFAULT);
                 this.connect(`notify::${key}`, () => area.queue_draw());
