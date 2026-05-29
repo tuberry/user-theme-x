@@ -12,7 +12,7 @@ import * as F from './fubar.js';
 import {getShellThemePath} from './theme.js';
 import {Key as K, LIGHT, DARK} from './const.js';
 
-const {$, $$, $_} = T;
+const {$, $_, $$} = T;
 
 const Theme = {
     GTK: 'gtk-theme',
@@ -85,7 +85,7 @@ class UserThemeX extends F.Mortal {
             }, x => x && F.theme().get_theme().unload_stylesheet(x)),
             delay = F.Source.newTimer(x => [() => load.summon(load.hub, x), 100]), // debounce
             theme = F.Source.new(x => F.Source.newHandler(x, 'custom-stylesheets-changed', () => delay.revive())),
-            watch = F.Source.new(x => F.Source.newMonitor(x, (...xs) => delay[$_].revive(xs[3] === Gio.FileMonitorEvent.CHANGES_DONE_HINT, false), true));
+            watch = F.Source.new(x => F.Source.newMonitor(x, (...xs) => delay[$$].revive(xs[3] === Gio.FileMonitorEvent.CHANGES_DONE_HINT && [[false]]), true));
         return ret.set({
             $src: F.Source.tie(ret, {theme, watch, delay, load}),
             sync: (() => load.summon(this.night ? ret.dark : ret.light))[$].call(),
@@ -112,7 +112,7 @@ class UserThemeX extends F.Mortal {
                 Main.setThemeStylesheet(path);
                 Main.loadTheme();
             },
-            src = F.Source.tie(ret, new F.Source(x => this.active && x[$$](load), x => x && load()));
+            src = F.Source.tie(ret, new F.Source(x => this.active && x[$_](load), x => x && load()));
         this.$set.tie(ret, [
             [['dark', `${DARK}${K.SHELL}`], null, x => this.night && src.summon(x)],
             [['light', `${LIGHT}${K.SHELL}`], null, x => this.night || src.summon(x)],

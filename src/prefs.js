@@ -17,9 +17,7 @@ import {Key as K, DARK, LIGHT} from './const.js';
 import * as Theme from './theme.js';
 
 const {_, _G} = UI;
-const {$, $_, $$, $s} = T;
-
-Gio._promisify(Adw.AlertDialog.prototype, 'choose');
+const {$, $_, $$} = T;
 
 const Icon = {[LIGHT]: 'weather-clear-symbolic', [DARK]: 'weather-clear-night-symbolic'};
 const Color = T.omap(Adw.AccentColor, ([k]) => (l => k !== l ? [[l, _G(T.upcase(l, T.id), 'libadwaita')]] : [])(k.toLowerCase()));
@@ -31,8 +29,8 @@ class ThemeLabel extends UI.Sign {
     }
 
     constructor(color, icon) {
-        super(icon ?? 'object-select-symbolic', !icon, {useMarkup: true})[$_]
-            .insert_child_after(color, color && (this.$color = new Gtk.Image()), icon ? this.$icon : null);
+        super(icon ?? 'object-select-symbolic', !icon, {useMarkup: true})[$$]
+            .insert_child_after(color && [[this.$color = new Gtk.Image(), icon ? this.$icon : null]]);
     }
 
     setup(dft, str, tran) {
@@ -77,12 +75,12 @@ class ThemeDrop extends Gtk.DropDown {
                 expression: new Gtk.PropertyExpression(Gtk.StringObject, null, 'string'),
             } : null)[$]
             .set_model(Gtk.StringList.new(strv))[$]
-            .set_list_factory(new Gtk.SignalListItemFactory()[$s].connect([
+            .set_list_factory(new Gtk.SignalListItemFactory()[$$].connect([
                 ['setup', (_f, x) => x.set_child(new ThemeLabel(color))],
                 ['bind', (_f, {child, item}) => setup(child, item[$].$bind(this.bind_property_full('selected-item',
                     child.$icon, 'visible', T.SYNC, (_b, v) => [true, v === item], null)))],
                 ['unbind', (_f, {item}) => item.$bind.unbind()],
-            ]))[$].set_factory(new Gtk.SignalListItemFactory()[$s].connect([
+            ]))[$].set_factory(new Gtk.SignalListItemFactory()[$$].connect([
                 ['setup', (_f, x) => x.set_child(new ThemeLabel(color, icon))],
                 ['bind', (_f, {child, item}) => setup(child, item)],
             ]))[$].bind_property_full(UI.getv, this, 'selected', T.BIND, (_b, v) => {
@@ -94,19 +92,10 @@ class ThemeDrop extends Gtk.DropDown {
     }
 }
 
-class Thumbnail extends Gtk.Widget {
-    static {
-        T.enrol(this, null, {Signals: {snapshot: {param_types: [Gtk.Snapshot.$gtype]}}});
-    }
-
-    vfunc_snapshot(snapshot) {
-        this.emit('snapshot', snapshot);
-    }
-}
-
 class Wallpaper extends UI.Box {
     static {
         T.enrol(this, {[DARK]: '', [LIGHT]: ''});
+        UI.laze(this.prototype, 'dlg', () => new Gtk.FileDialog({modal: true, defaultFilter: new Gtk.FileFilter()[$].add_pixbuf_formats()}));
     }
 
     constructor(tip, width = 480) {
@@ -114,10 +103,10 @@ class Wallpaper extends UI.Box {
         let height = width * 9 / 16,
             uris = [[LIGHT, 'picture-uri'], [DARK, 'picture-uri-dark']],
             gset = new Gio.Settings({schema: 'org.gnome.desktop.background'}),
-            area = new Thumbnail()[$].set({widthRequest: width, heightRequest: height})[$]
+            area = new UI.Canvas({widthRequest: width, heightRequest: height})[$]
                 .connect('snapshot', (...xs) => this.$draw(...xs))[$].add_controller(new Gtk.GestureClick()[$]
                 .connect('pressed', (c_, n_, x, y) => this.$onClick(x * area.get_height() > y * area.get_width() ? DARK : LIGHT)));
-        this[$].set({$tip: tip, $resetv: () => uris.forEach(([, k]) => gset.reset(k))})[$s]
+        this[$].set({$tip: tip, $resetv: () => uris.forEach(([, k]) => gset.reset(k))})[$$]
             .append(uris.map(([key, field]) => {
                 gset.bind(field, this, key, Gio.SettingsBindFlags.DEFAULT);
                 this.connect(`notify::${key}`, () => area.queue_draw());
@@ -128,18 +117,13 @@ class Wallpaper extends UI.Box {
             })[$].splice(1, 0, area));
     }
 
-    get dlg() {
-        return (this.$dialog ??= new Gtk.FileDialog({modal: true, defaultFilter: new Gtk.FileFilter()[$].add_pixbuf_formats()}));
-    }
-
     $onClick(key) {
         return this.dlg[$].set_title(this.$tip[key]).open(this.get_root(), null).then(x => { this[key] = x.get_uri(); }).catch(T.nop);
     }
 
-    $draw(area, ss) {
-        let [, rect] = area.compute_bounds(area),
-            {width: w, height: h} = rect.size,
-            pb = new Gsk.PathBuilder();
+    $draw(_a, ss, rect) {
+        let pb = new Gsk.PathBuilder();
+        let {width: w, height: h} = rect.size;
         [DARK, LIGHT].forEach(uri => {
             pb.move_to(0, 0);
             pb.line_to(w, h);
@@ -158,6 +142,7 @@ class Wallpaper extends UI.Box {
 
 class UserThemeXPrefs extends UI.Page {
     static {
+        Gio._promisify(Adw.AlertDialog.prototype, 'choose');
         T.enrol(this);
     }
 
@@ -176,16 +161,16 @@ class UserThemeXPrefs extends UI.Page {
             [K.SHELL,  shell,  [_('S_hell'), _('Never use with <a href="%s">user-theme</a> enabled').format('https://extensions.gnome.org/extension/19/user-themes/')]],
             [K.COLOR,  Color,  [_('_Accent color')]],
         ].flatMap(([key, meta, title]) => ['', LIGHT, DARK].map(x => [`${x}${key}`, x ? meta instanceof Function ? new meta(Icon[x], tip[x])
-            : new ThemeDrop(meta, Icon[x], tip[x]) : new UI.Check()])[$$](ws => theme.push(ws.map(w => w[1])[$].splice(1, 0, title)))).sort(([a], [b]) => b.length - a.length));
+            : new ThemeDrop(meta, Icon[x], tip[x]) : new UI.Check()])[$_](ws => theme.push(ws.map(w => w[1])[$].splice(1, 0, title)))).sort(([a], [b]) => b.length - a.length));
         this.$add([group(_('Theme'), _('Switch according to the inactive/active status of enabled Night Light'), () => Object.keys(this[T.hub]).forEach(x => gset.reset(x))), theme],
             [group(_('Wallpaper'), _('Switch according to the Default/Dark Style of system Appearance'), () => paper.$resetv()), [paper]]);
     }
 
     async $confirm(callback, heading) {
-        callback[$_].call(await new Adw.AlertDialog({heading})[$s]
+        callback[$$].call(await new Adw.AlertDialog({heading})[$$]
             .add_response([['cancel', _G('_Cancel')], ['ensure', _G('_OK')]])[$]
             .set_response_appearance('ensure', Adw.ResponseAppearance.DESTRUCTIVE)
-            .choose(this, null) === 'ensure');
+            .choose(this, null) === 'ensure' && [[]]);
     }
 }
 
