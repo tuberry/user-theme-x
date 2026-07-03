@@ -20,8 +20,8 @@ const {_, _G} = UI;
 const {$, $_, $$} = T;
 
 const Icon = {[LIGHT]: 'weather-clear-symbolic', [DARK]: 'weather-clear-night-symbolic'};
-const Color = T.omap(Adw.AccentColor, ([k]) => (l => k !== l ? [[l, _G(T.upcase(l, T.id), 'libadwaita')]] : [])(k.toLowerCase()));
-const Style = T.vmap({'default': 'No Preference', 'prefer-dark': 'Prefer Dark', 'prefer-light': 'Prefer Light'}, x => _G(x, 'libadwaita')); // from https://gitlab.gnome.org/GNOME/libadwaita/-/blob/main/src/adw-inspector-page.c
+const Style = {'default': 'No Preference', 'prefer-dark': 'Prefer Dark', 'prefer-light': 'Prefer Light'}; // from https://gitlab.gnome.org/GNOME/libadwaita/-/blob/main/src/adw-inspector-page.c
+const Color = T.omap(Adw.AccentColor, ([k]) => (l => k !== l ? [[l, T.upcase(l, T.id)]] : [])(k.toLowerCase()));
 
 class ThemeLabel extends UI.Sign {
     static {
@@ -61,11 +61,10 @@ class ThemeDrop extends Gtk.DropDown {
         UI.enrol(this, '');
     }
 
-    constructor(data, icon, tip) {
+    constructor(data, icon, tip, po) {
         super({valign: Gtk.Align.CENTER, tooltipText: tip});
-        let [strv, tran] = Array.isArray(data) ? [data, x => T.esc(T.upcase(x, T.id))] : [Object.keys(data), x => T.esc(data[x])];
-        let setup = (x, {string: y}) => x.setup(y === this[UI.dflt], y, tran);
-        UI.once(() => this.$buildWidgets(strv, data === Color, setup, icon), this);
+        let [strv, tran] = Array.isArray(data) ? [data, x => T.upcase(x, T.id)] : [Object.keys(data), x => po ? _G(data[x], po) : data[x]];
+        UI.once(() => this.$buildWidgets(strv, data === Color, (x, {string: y}) => x.setup(y === this[UI.dflt], y, s => T.esc(tran(s))), icon), this);
     }
 
     $buildWidgets(strv, color, setup, icon) {
@@ -76,6 +75,7 @@ class ThemeDrop extends Gtk.DropDown {
             } : null)[$]
             .set_model(Gtk.StringList.new(strv))[$]
             .set_list_factory(new Gtk.SignalListItemFactory()[$$].connect([
+
                 ['setup', (_f, x) => x.set_child(new ThemeLabel(color))],
                 ['bind', (_f, {child, item}) => setup(child, item[$].$bind(this.bind_property_full('selected-item',
                     child.$icon, 'visible', T.SYNC, (_b, v) => [true, v === item], null)))],
@@ -110,10 +110,9 @@ class Wallpaper extends UI.Box {
             .append(uris.map(([key, field]) => {
                 gset.bind(field, this, key, Gio.SettingsBindFlags.DEFAULT);
                 this.connect(`notify::${key}`, () => area.queue_draw());
-                return new Gtk.Button({
-                    cssClasses: ['suggested-action'], heightRequest: height, tooltipText: tip[key],
-                    child: new Gtk.Image({iconName: Icon[key], iconSize: Gtk.IconSize.LARGE}),
-                })[$].connect('clicked', () => this.$onClick(key));
+                return new Gtk.Button({heightRequest: height, tooltipText: tip[key]})[$]
+                    .set_child(new Gtk.Image({iconName: Icon[key], iconSize: Gtk.IconSize.LARGE}))[$]
+                    .add_css_class('suggested-action')[$].connect('clicked', () => this.$onClick(key));
             })[$].splice(1, 0, area));
     }
 
@@ -132,7 +131,7 @@ class Wallpaper extends UI.Box {
             try {
                 let frame = Gly.Loader.new(T.fopen(this[uri])).load().next_frame(); // unsandboxed -> https://docs.gtk.org/gdk4/ctor.Texture.new_from_file.html
                 ss.append_scaled_texture(GlyGtk4.frame_get_texture(frame), Gsk.ScalingFilter.TRILINEAR, rect);
-            } catch{
+            } catch {
                 ss.append_color(new Gdk.RGBA()[$].parse(uri === DARK ? '#222' : '#ddd'), rect);
             }
             ss.pop();
@@ -154,14 +153,14 @@ class UserThemeXPrefs extends UI.Page {
                 .connect('clicked', () => this.$confirm(reset, _('Reset all “%s” settings to default?').format(head)))];
         this.$tie([
             [K.SHEET,  Sheet,  [_('_Stylesheet')]],
-            [K.STYLE,  Style,  [_('S_tyle')]],
+            [K.STYLE,  Style,  [_('S_tyle')], 'libadwaita'],
             [K.ICON,   icon,   [_('_Icon')]],
             [K.CURSOR, cursor, [_('_Cursor')]],
             [K.GTK,    gtk,    [_('_Legacy app')]],
-            [K.SHELL,  shell,  [_('S_hell'), _('Never use with <a href="%s">user-theme</a> enabled').format('https://extensions.gnome.org/extension/19/user-themes/')]],
-            [K.COLOR,  Color,  [_('_Accent color')]],
-        ].flatMap(([key, meta, title]) => ['', LIGHT, DARK].map(x => [`${x}${key}`, x ? meta instanceof Function ? new meta(Icon[x], tip[x])
-            : new ThemeDrop(meta, Icon[x], tip[x]) : new UI.Check()])[$_](ws => theme.push(ws.map(w => w[1])[$].splice(1, 0, title)))).sort(([a], [b]) => b.length - a.length));
+            [K.SHELL,  shell,  [_('S_hell'), _('Conflict with <a href="%s">User Themes</a> extension').format('https://extensions.gnome.org/extension/19/user-themes/')]],
+            [K.COLOR,  Color,  [_('_Accent color')], 'libadwaita'],
+        ].flatMap(([key, meta, title, po]) => ['', LIGHT, DARK].map(x => [`${x}${key}`, x ? typeof meta === 'function' ? new meta(Icon[x], tip[x])
+            : new ThemeDrop(meta, Icon[x], tip[x], po) : new UI.Check()])[$_](ws => theme.push(ws.map(w => w[1])[$].splice(1, 0, title)))).sort(([a], [b]) => b.length - a.length));
         this.$add([group(_('Theme'), _('Switch according to the inactive/active status of enabled Night Light'), () => Object.keys(this[T.hub]).forEach(x => gset.reset(x))), theme],
             [group(_('Wallpaper'), _('Switch according to the Default/Dark Style of system Appearance'), () => paper.$resetv()), [paper]]);
     }

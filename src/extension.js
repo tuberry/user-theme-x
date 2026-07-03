@@ -26,7 +26,7 @@ const Themes = Object.keys(Theme);
 
 class UserThemeX extends F.Mortal {
     $bindSettings(gset) {
-        this.$set = new F.Setting(gset, this, [
+        this.$set = new F.Setting(gset).tie(this, [
             [K.SHELL, null, x => this.$src.shell.toggle(x)],
             [K.SHEET, null, x => this.$src.sheet.toggle(x)],
         ], Themes.map(x => [[x, K[x]]]), () => {
@@ -35,24 +35,20 @@ class UserThemeX extends F.Mortal {
     }
 
     $buildSources() {
-        let theme = F.Source.new(() => this.$genThemeSyncer(), this.theme),
-            shell = F.Source.new(() => this.$genShellSyncer(), this[K.SHELL]),
-            sheet = F.Source.new(() => this.$genSheetSyncer(), this[K.SHEET]),
-            light = F.Source.newDBusProxy('org.gnome.SettingsDaemon.Color', '/org/gnome/SettingsDaemon/Color', x => this.$onLightOn(x),
+        let theme = new F.Source(() => this.$genThemeSyncer(), this.theme),
+            shell = new F.Source(() => this.$genShellSyncer(), this[K.SHELL]),
+            sheet = new F.Source(() => this.$genSheetSyncer(), this[K.SHEET]),
+            light = new F.Source.Proxy('org.gnome.SettingsDaemon.Color', '/org/gnome/SettingsDaemon/Color', x => this.$onLightOn(x),
                 ['g-properties-changed', (x, p) => { if(p.lookup_value('NightLightActive', null)) this.$onLightOn(x); }]);
         this.$src = F.Source.tie(this, {theme, shell, sheet}, light);
     }
 
-    get theme() {
-        return this.$theme.length > 0;
-    }
+    get theme() { return this.$theme.length > 0; }
 
-    get active() {
-        return Object.hasOwn(this, 'night');
-    }
+    get active() { return Object.hasOwn(this, 'night'); }
 
     $onLightOn({NightLightActive: night}) { // NOTE: https://gitlab.gnome.org/GNOME/gnome-control-center/-/issues/2060
-        if(this.night === night) return;
+        if(this.night === night || night === null) return;
         this.night = night;
         ['sheet', 'theme', 'shell'].forEach(x => this.$src[x].hub?.sync());
     }
@@ -79,13 +75,13 @@ class UserThemeX extends F.Mortal {
                         ret.$src.theme.revive(theme);
                     }
                     return sheet;
-                } catch{
+                } catch {
                     Object.values(ret.$src).forEach(x => x.dispel());
                 }
             }, x => x && F.theme().get_theme().unload_stylesheet(x)),
-            delay = F.Source.newTimer(x => [() => load.summon(load.hub, x), 100]), // debounce
-            theme = F.Source.new(x => F.Source.newHandler(x, 'custom-stylesheets-changed', () => delay.revive())),
-            watch = F.Source.new(x => F.Source.newMonitor(x, (...xs) => delay[$$].revive(xs[3] === Gio.FileMonitorEvent.CHANGES_DONE_HINT && [[false]]), true));
+            delay = new F.Source.Timer(x => [() => load.summon(load.hub, x), 100]), // debounce
+            theme = new F.Source(x => new F.Source.Handler(x, 'custom-stylesheets-changed', () => delay.revive())),
+            watch = new F.Source(x => new F.Source.Monitor(x, (...xs) => delay[$$].revive(xs[3] === Gio.FileMonitorEvent.CHANGES_DONE_HINT && [[false]]), true));
         return ret.set({
             $src: F.Source.tie(ret, {theme, watch, delay, load}),
             sync: (() => load.summon(this.night ? ret.dark : ret.light))[$].call(),
@@ -100,7 +96,7 @@ class UserThemeX extends F.Mortal {
             store = x => [`changed::${Theme[x]}`, () => sync(dset, Theme[x], gset, `${this.night ? DARK : LIGHT}${K[x]}`)],
             fetch = x => [`changed::${LIGHT}${K[x]}`, () => { if(!this.night) sync(gset, `${LIGHT}${K[x]}`, dset, Theme[x]); },
                 `changed::${DARK}${K[x]}`, () => { if(this.night) sync(gset, `${DARK}${K[x]}`, dset, Theme[x]); }];
-        F.Source.tie(ret, F.Source.newHandler(dset, ...this.$theme.flatMap(store), gset, ...this.$theme.flatMap(fetch)));
+        F.Source.tie(ret, new F.Source.Handler(dset, ...this.$theme.flatMap(store), gset, ...this.$theme.flatMap(fetch)));
         return ret.set({sync: (() => this.$theme.forEach(x => sync(gset, `${this.night ? DARK : LIGHT}${K[x]}`, dset, Theme[x])))[$].call()});
     }
 

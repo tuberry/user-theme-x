@@ -17,75 +17,79 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/ui.js:379
+#: src/ui.js:375
 msgid "Mismatched filetype"
 msgstr "文件类型不匹配"
 
-#: src/ui.js:559
+#: src/ui.js:564
 msgid "Click or press ENTER to apply changes"
 msgstr "单击或按回车应用更改"
 
-#: src/prefs.js:150
+#: src/prefs.js:149
 msgid "Day"
 msgstr "白天"
 
-#: src/prefs.js:150
+#: src/prefs.js:149
 msgid "Night"
 msgstr "夜晚"
 
-#: src/prefs.js:154
+#: src/prefs.js:153
 #, javascript-format
 msgid "Reset all “%s” settings to default?"
 msgstr "将所有“%s”设置重置为默认值?"
 
-#: src/prefs.js:156
+#: src/prefs.js:155
 msgid "_Stylesheet"
 msgstr "样式表(_S)"
 
-#: src/prefs.js:157
+#: src/prefs.js:156
 msgid "S_tyle"
 msgstr "样式(_T)"
 
-#: src/prefs.js:158
+#: src/prefs.js:157
 msgid "_Icon"
 msgstr "图标(_I)"
 
-#: src/prefs.js:159
+#: src/prefs.js:158
 msgid "_Cursor"
 msgstr "光标(_C)"
 
-#: src/prefs.js:160
+#: src/prefs.js:159
 msgid "_Legacy app"
 msgstr "旧式应用(_L)"
 
-#: src/prefs.js:161
+#: src/prefs.js:160
 msgid "S_hell"
 msgstr "壳层(_H)"
 
-#: src/prefs.js:161
+#: src/prefs.js:160
 #, javascript-format
-msgid "Never use with <a href=\"%s\">user-theme</a> enabled"
-msgstr "切忌与 <a href=\"%s\">user-theme</a> 同用"
+msgid "Conflict with <a href=\"%s\">User Themes</a> extension"
+msgstr "与 <a href=\"%s\">User Themes</a> 扩展冲突"
 
-#: src/prefs.js:162
+#: src/prefs.js:161
 msgid "_Accent color"
 msgstr "强调色(_A)"
 
-#: src/prefs.js:165
+#: src/prefs.js:164
 msgid "Theme"
 msgstr "主题"
 
-#: src/prefs.js:165
+#: src/prefs.js:164
 msgid "Switch according to the inactive/active status of enabled Night Light"
 msgstr "随夜灯启用后的未活动/活动状态切换"
 
-#: src/prefs.js:166
+#: src/prefs.js:165
 msgid "Wallpaper"
 msgstr "壁纸"
 
-#: src/prefs.js:166
+#: src/prefs.js:165
 msgid "Switch according to the Default/Dark Style of system Appearance"
 msgstr "随系统外观的默认/暗色样式切换"
+
+#, javascript-format
+#~ msgid "Never use with <a href=\"%s\">user-theme</a> enabled"
+#~ msgstr "切忌与 <a href=\"%s\">user-theme</a> 同用"
 
 #~ msgid "All"
 #~ msgstr "全部"

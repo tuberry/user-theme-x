@@ -1,110 +1,110 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist gettext-domain="@gettext@">
-  <schema id="@rdnn@" path="@path@">
-    <key name="sheet" type="b">
-      <default>false</default>
-      <summary>enable user stylesheet autoswitch</summary>
-      <description>Enable user stylesheet autoswitch based on Night Light status</description>
-    </key>
-    <key name="light-sheet" type="s">
-      <default>""</default>
-      <summary>light user stylesheet</summary>
-      <description>The user stylesheet when Night Light is inactive</description>
-    </key>
-    <key name="dark-sheet" type="s">
-      <default>""</default>
-      <summary>dark user stylesheet</summary>
-      <description>The user stylesheet when Night Light is active</description>
-    </key>
-    <key name="shell" type="b">
-      <default>false</default>
-      <summary>enable shell theme autoswitch</summary>
-      <description>Enable shell theme autoswitch based on Night Light status</description>
-    </key>
-    <key name="light-shell" type="s">
-      <default>""</default>
-      <summary>light shell theme</summary>
-      <description>The shell theme when Night Light is inactive</description>
-    </key>
-    <key name="dark-shell" type="s">
-      <default>""</default>
-      <summary>dark shell theme</summary>
-      <description>The shell theme when Night Light is active</description>
-    </key>
-    <key name="gtk" type="b">
-      <default>false</default>
-      <summary>enable gtk theme autoswitch</summary>
-      <description>Enable gtk theme autoswitch based on Night Light status</description>
-    </key>
-    <key name="light-gtk" type="s">
-      <default>"Adwaita"</default>
-      <summary>light gtk theme</summary>
-      <description>The gtk theme when Night Light is inactive</description>
-    </key>
-    <key name="dark-gtk" type="s">
-      <default>"Adwaita"</default>
-      <summary>dark gtk theme</summary>
-      <description>The gtk theme when Night Light is active</description>
-    </key>
-    <key name="icon" type="b">
-      <default>false</default>
-      <summary>enable icon theme autoswitch</summary>
-      <description>Enable icon theme autoswitch based on Night Light status</description>
-    </key>
-    <key name="light-icon" type="s">
-      <default>"Adwaita"</default>
-      <summary>light icon theme</summary>
-      <description>The icon theme when Night Light is inactive</description>
-    </key>
-    <key name="dark-icon" type="s">
-      <default>"Adwaita"</default>
-      <summary>dark icon theme</summary>
-      <description>The icon theme when Night Light is active</description>
-    </key>
-    <key name="cursor" type="b">
-      <default>false</default>
-      <summary>enable cursor theme autoswitch</summary>
-      <description>Enable cursor theme autoswitch based on Night Light status</description>
-    </key>
-    <key name="light-cursor" type="s">
-      <default>"Adwaita"</default>
-      <summary>light cursor theme</summary>
-      <description>The cursor theme when Night Light is inactive</description>
-    </key>
-    <key name="dark-cursor" type="s">
-      <default>"Adwaita"</default>
-      <summary>dark cursor theme</summary>
-      <description>The cursor theme when Night Light is active</description>
-    </key>
-    <key name="style" type="b">
-      <default>false</default>
-      <summary>enable color scheme autoswitch</summary>
-      <description>Enable color scheme autoswitch based on Night Light status</description>
-    </key>
-    <key name="light-style" type="s">
-      <default>"default"</default>
-      <summary>light color scheme</summary>
-      <description>The color scheme when Night Light is inactive</description>
-    </key>
-    <key name="dark-style" type="s">
-      <default>"default"</default>
-      <summary>dark color scheme</summary>
-      <description>The color scheme when Night Light is active</description>
-    </key>
-    <key name="color" type="b">
-      <default>false</default>
-      <summary>enable accent color autoswitch</summary>
-      <description>Enable accent color autoswitch based on Night Light status</description>
-    </key>
-    <key name="light-color" type="s">
-      <default>"blue"</default>
-      <summary>light accent color</summary>
-      <description>The accent color when Night Light is inactive</description>
-    </key>
-    <key name="dark-color" type="s">
-      <default>"blue"</default>
-      <summary>dark accent color</summary>
-      <description>The accent color when Night Light is active</description>
-    </key>
-  </schema>
+    <schema id="@rdnn@" path="@path@">
+        <key name="sheet" type="b">
+            <default>false</default>
+            <summary>enable user stylesheet autoswitch</summary>
+            <description>Enable user stylesheet autoswitch based on Night Light status</description>
+        </key>
+        <key name="light-sheet" type="s">
+            <default>""</default>
+            <summary>light user stylesheet</summary>
+            <description>The user stylesheet when Night Light is inactive</description>
+        </key>
+        <key name="dark-sheet" type="s">
+            <default>""</default>
+            <summary>dark user stylesheet</summary>
+            <description>The user stylesheet when Night Light is active</description>
+        </key>
+        <key name="shell" type="b">
+            <default>false</default>
+            <summary>enable shell theme autoswitch</summary>
+            <description>Enable shell theme autoswitch based on Night Light status</description>
+        </key>
+        <key name="light-shell" type="s">
+            <default>""</default>
+            <summary>light shell theme</summary>
+            <description>The shell theme when Night Light is inactive</description>
+        </key>
+        <key name="dark-shell" type="s">
+            <default>""</default>
+            <summary>dark shell theme</summary>
+            <description>The shell theme when Night Light is active</description>
+        </key>
+        <key name="gtk" type="b">
+            <default>false</default>
+            <summary>enable gtk theme autoswitch</summary>
+            <description>Enable gtk theme autoswitch based on Night Light status</description>
+        </key>
+        <key name="light-gtk" type="s">
+            <default>"Adwaita"</default>
+            <summary>light gtk theme</summary>
+            <description>The gtk theme when Night Light is inactive</description>
+        </key>
+        <key name="dark-gtk" type="s">
+            <default>"Adwaita"</default>
+            <summary>dark gtk theme</summary>
+            <description>The gtk theme when Night Light is active</description>
+        </key>
+        <key name="icon" type="b">
+            <default>false</default>
+            <summary>enable icon theme autoswitch</summary>
+            <description>Enable icon theme autoswitch based on Night Light status</description>
+        </key>
+        <key name="light-icon" type="s">
+            <default>"Adwaita"</default>
+            <summary>light icon theme</summary>
+            <description>The icon theme when Night Light is inactive</description>
+        </key>
+        <key name="dark-icon" type="s">
+            <default>"Adwaita"</default>
+            <summary>dark icon theme</summary>
+            <description>The icon theme when Night Light is active</description>
+        </key>
+        <key name="cursor" type="b">
+            <default>false</default>
+            <summary>enable cursor theme autoswitch</summary>
+            <description>Enable cursor theme autoswitch based on Night Light status</description>
+        </key>
+        <key name="light-cursor" type="s">
+            <default>"Adwaita"</default>
+            <summary>light cursor theme</summary>
+            <description>The cursor theme when Night Light is inactive</description>
+        </key>
+        <key name="dark-cursor" type="s">
+            <default>"Adwaita"</default>
+            <summary>dark cursor theme</summary>
+            <description>The cursor theme when Night Light is active</description>
+        </key>
+        <key name="style" type="b">
+            <default>false</default>
+            <summary>enable color scheme autoswitch</summary>
+            <description>Enable color scheme autoswitch based on Night Light status</description>
+        </key>
+        <key name="light-style" type="s">
+            <default>"default"</default>
+            <summary>light color scheme</summary>
+            <description>The color scheme when Night Light is inactive</description>
+        </key>
+        <key name="dark-style" type="s">
+            <default>"default"</default>
+            <summary>dark color scheme</summary>
+            <description>The color scheme when Night Light is active</description>
+        </key>
+        <key name="color" type="b">
+            <default>false</default>
+            <summary>enable accent color autoswitch</summary>
+            <description>Enable accent color autoswitch based on Night Light status</description>
+        </key>
+        <key name="light-color" type="s">
+            <default>"blue"</default>
+            <summary>light accent color</summary>
+            <description>The accent color when Night Light is inactive</description>
+        </key>
+        <key name="dark-color" type="s">
+            <default>"blue"</default>
+            <summary>dark accent color</summary>
+            <description>The accent color when Night Light is active</description>
+        </key>
+    </schema>
 </schemalist>
