@@ -7,6 +7,7 @@ import Gio from 'gi://Gio';
 import Gly from 'gi://Gly';
 import Gsk from 'gi://Gsk';
 import Gtk from 'gi://Gtk';
+import GLib from 'gi://GLib';
 import Pango from 'gi://Pango';
 import GlyGtk4 from 'gi://GlyGtk4';
 
@@ -75,7 +76,6 @@ class ThemeDrop extends Gtk.DropDown {
             } : null)[$]
             .set_model(Gtk.StringList.new(strv))[$]
             .set_list_factory(new Gtk.SignalListItemFactory()[$$].connect([
-
                 ['setup', (_f, x) => x.set_child(new ThemeLabel(color))],
                 ['bind', (_f, {child, item}) => setup(child, item[$].$bind(this.bind_property_full('selected-item',
                     child.$icon, 'visible', T.SYNC, (_b, v) => [true, v === item], null)))],
@@ -95,7 +95,10 @@ class ThemeDrop extends Gtk.DropDown {
 class Wallpaper extends UI.Box {
     static {
         T.enrol(this, {[DARK]: '', [LIGHT]: ''});
-        UI.laze(this.prototype, 'dlg', () => new Gtk.FileDialog({modal: true, defaultFilter: new Gtk.FileFilter()[$].add_pixbuf_formats()}));
+        UI.laze(this.prototype, 'dlg', () => {
+            let name = GLib.dpgettext2('gtk40', 'accessibility', 'image');
+            return new Gtk.FileDialog({defaultFilter: new Gtk.FileFilter({name, mimeTypes: Gly.Loader.get_mime_types()}), modal: true});
+        });
     }
 
     constructor(tip, width = 480) {
@@ -117,7 +120,8 @@ class Wallpaper extends UI.Box {
     }
 
     $onClick(key) {
-        return this.dlg[$].set_title(this.$tip[key]).open(this.get_root(), null).then(x => { this[key] = x.get_uri(); }).catch(T.nop);
+        return this.dlg[$].set_initial_file(T.fopen(this[key]))[$].set_title(this.$tip[key])
+            .open(this.get_root(), null).then(x => { this[key] = x.get_uri(); }).catch(T.nop);
     }
 
     $draw(_a, ss, rect) {

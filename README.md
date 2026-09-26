@@ -19,7 +19,7 @@ The latest and supported version should only work on the [current stable version
 ```bash
 git clone https://github.com/tuberry/user-theme-x.git && cd user-theme-x
 just install || (meson setup build && meson compile -C build && meson install -C build)
-# meson setup build -Dtarget=system && meson install -C build # system-wide
+# meson setup build -Dtarget=system && meson compile -C build && meson install -C build # system-wide
 ```
 
 For older versions, it's recommended to install via:
@@ -37,9 +37,9 @@ It's quite the same as installing from:
 
 ## Contributions
 
-Feel free to open an issue in the repo for any questions or ideas, **particularly before making significant changes or introducing new features**.
+Feel free to open issues/discussions in the repo for any questions or ideas, **particularly before making significant changes or introducing new features**.
 
-Also, *just* so you know:
+Also, _just_ so you know:
 
 ```bash
 just --list
